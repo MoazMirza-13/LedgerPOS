@@ -11,9 +11,13 @@ export const metadata: Metadata = {
   description: 'Authentication forms built using the components.'
 };
 
-export default function SignInViewPage({ stars }: { stars: number }) {
+export default function SignInViewPage() {
   return (
-    <div className='relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0'>
+    <div
+      className='relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0'
+      data-new-gr-c-s-check-loaded='14.1209.0'
+      data-gr-ext-installed=''
+    >
       <Link
         href='/examples/authentication'
         className={cn(
@@ -73,7 +77,6 @@ export default function SignInViewPage({ stars }: { stars: number }) {
                 className='size-4 text-gray-500 transition-all duration-300 group-hover:text-yellow-300'
                 fill='currentColor'
               />
-              <span className='font-display font-medium'>{stars}</span>
             </div>
           </Link>
           <div className='flex flex-col space-y-2 text-center'>

@@ -1,5 +1,3 @@
-import { auth } from '@/lib/auth';
-import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
@@ -23,16 +21,17 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
   return (
     <html lang='en' className={`${lato.className}`} suppressHydrationWarning>
-      <body className={'overflow-hidden'}>
+      <body
+        className={'overflow-hidden'}
+        data-new-gr-c-s-check-loaded='14.1209.0'
+        data-gr-ext-installed=''
+      >
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
-          <Providers session={session}>
-            <Toaster />
-            {children}
-          </Providers>
+          <Toaster />
+          {children}
         </NuqsAdapter>
       </body>
     </html>

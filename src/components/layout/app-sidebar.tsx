@@ -40,7 +40,6 @@ import {
   GalleryVerticalEnd,
   LogOut
 } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
@@ -53,7 +52,7 @@ export const company = {
 };
 
 export default function AppSidebar() {
-  const { data: session } = useSession();
+  // const { data: session } = useSession(); // ? route protecting (auth check)
   const pathname = usePathname();
   const { state, isMobile } = useSidebar();
 
@@ -139,7 +138,7 @@ export default function AppSidebar() {
                   size='lg'
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
-                  <Avatar className='h-8 w-8 rounded-lg'>
+                  {/* <Avatar className='h-8 w-8 rounded-lg'>
                     <AvatarImage
                       src={session?.user?.image || ''}
                       alt={session?.user?.name || ''}
@@ -155,7 +154,7 @@ export default function AppSidebar() {
                     <span className='truncate text-xs'>
                       {session?.user?.email || ''}
                     </span>
-                  </div>
+                  </div> */}
                   <ChevronsUpDown className='ml-auto size-4' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -168,22 +167,22 @@ export default function AppSidebar() {
                 <DropdownMenuLabel className='p-0 font-normal'>
                   <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                     <Avatar className='h-8 w-8 rounded-lg'>
-                      <AvatarImage
+                      {/* <AvatarImage
                         src={session?.user?.image || ''}
                         alt={session?.user?.name || ''}
-                      />
+                      /> */}
                       <AvatarFallback className='rounded-lg'>
-                        {session?.user?.name?.slice(0, 2)?.toUpperCase() ||
-                          'CN'}
+                        {/* {session?.user?.name?.slice(0, 2)?.toUpperCase() ||
+                          'CN'} */}
                       </AvatarFallback>
                     </Avatar>
                     <div className='grid flex-1 text-left text-sm leading-tight'>
                       <span className='truncate font-semibold'>
-                        {session?.user?.name || ''}
+                        {/* {session?.user?.name || ''} */}
                       </span>
                       <span className='truncate text-xs'>
                         {' '}
-                        {session?.user?.email || ''}
+                        {/* {session?.user?.email || ''} */}
                       </span>
                     </div>
                   </div>
@@ -205,7 +204,12 @@ export default function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
+                <DropdownMenuItem
+                  onClick={
+                    () => {}
+                    //  signOut()
+                  }
+                >
                   <LogOut />
                   Log out
                 </DropdownMenuItem>
