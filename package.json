@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier -c -w .",
     "prepare": "husky",
-    "postinstall": "npm run prepare"
+    "postinstall": "pnpm run prepare"
   },
   "lint-staged": {
     "**/*.{js,jsx,tsx,ts,css,less,scss,sass}": [

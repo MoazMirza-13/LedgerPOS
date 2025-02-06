@@ -9,8 +9,8 @@ npx lint-staged ||
 )
 
 # Run the build process
-echo '🏗️ Building your project with npm run build...' 
-npm run build ||
+echo '🏗️ Building your project with pnpm run build...' 
+pnpm run build ||
 (
   echo '💥 Build failed! Even Usopp’s lies are less obvious!' 
   false
