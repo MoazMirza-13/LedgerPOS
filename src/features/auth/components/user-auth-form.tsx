@@ -13,30 +13,27 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import { createClient } from '@/utils/supabase/client'; // Changed to client-side supabase
+import { createClient } from '@/utils/supabase/client';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
   password: z
     .string()
-    .min(6, { message: 'Password must be at least 6 characters' })
+    .min(1, { message: 'Password must be at least 1 characters' })
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
 
 export default function UserAuthForm() {
   const router = useRouter();
-  // ? const searchParams = useSearchParams();
-  // ? const callbackUrl = searchParams.get('callbackUrl');
-  const [isPending, startTransition] = useTransition(); //?loading
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: 'demo@gmail.com',
+      email: '',
       password: ''
     }
   });
@@ -44,15 +41,16 @@ export default function UserAuthForm() {
   const handleSignIn = async (credentials: UserFormValue) => {
     const supabase = createClient();
 
-    const res = await supabase.auth.signInWithPassword(credentials);
-    console.log('🚀 ~ handleSignIn ~ res:', res);
+    const { error } = await supabase.auth.signInWithPassword(credentials);
 
-    // if (error) {
-    //   toast.error(error.message);
-    //   return;
-    // }
+    if (error) {
+      toast.error(error.message);
+      router.push('/');
+      return;
+    }
 
-    // router.push(callbackUrl || '/protected');
+    toast.success('Signed In Successfully!');
+    router.push('/dashboard/overview');
   };
 
   return (
@@ -72,7 +70,7 @@ export default function UserAuthForm() {
               <FormControl>
                 <Input
                   type='email'
-                  placeholder='Enter your email...'
+                  placeholder='Enter your email'
                   // ? loading
                   disabled={isPending}
                   {...field}
@@ -92,7 +90,7 @@ export default function UserAuthForm() {
               <FormControl>
                 <Input
                   type='password'
-                  placeholder='Enter your password...'
+                  placeholder='Enter your password'
                   disabled={isPending}
                   {...field}
                 />
@@ -101,7 +99,6 @@ export default function UserAuthForm() {
             </FormItem>
           )}
         />
-        {/* //?disabled={loading} */}
         <Button disabled={isPending} className='w-full' type='submit'>
           {isPending ? 'Signing in...' : 'Continue With Email'}
         </Button>
