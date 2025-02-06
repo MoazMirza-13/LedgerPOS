@@ -11,7 +11,8 @@
     "lint:strict": "eslint --max-warnings=0 src",
     "format": "prettier --write .",
     "format:check": "prettier -c -w .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "npm run prepare"
   },
   "lint-staged": {
     "**/*.{js,jsx,tsx,ts,css,less,scss,sass}": [

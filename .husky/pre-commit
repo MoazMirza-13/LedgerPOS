@@ -1,1 +1,19 @@
-npx lint-staged
+echo '🏴‍☠️ Pre-commit checklist: Set sail for the Grand Line!' 
+
+# Run lint-staged to catch those pesky errors
+echo '🔍 Scanning your staged files with npx lint-staged...' 
+npx lint-staged ||
+(
+  echo "😱 Yikes! Lint-staged found issues. Who're you ZORO? Go and this time, make it in the right direction!" 
+  false
+)
+
+# Run the build process
+echo '🏗️ Building your project with npm run build...' 
+npm run build ||
+(
+  echo '💥 Build failed! Even Usopp’s lies are less obvious!' 
+  false
+)
+
+echo '🎉 All clear! Your commit is about to be as legendary as Gol D. Roger’s treasure!' 
