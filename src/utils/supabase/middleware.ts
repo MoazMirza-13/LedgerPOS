@@ -38,12 +38,15 @@ export const updateSession = async (request: NextRequest) => {
     console.log('🚀 ~ updateSession ~ user:', user);
 
     // protected routes
-    if (request.nextUrl.pathname.startsWith('/notes') && user.error) {
+    if (
+      request.nextUrl.pathname.startsWith('/dashboard/overview') &&
+      user.error
+    ) {
       return NextResponse.redirect(new URL('/', request.url));
     }
 
     if (request.nextUrl.pathname === '/' && !user.error) {
-      return NextResponse.redirect(new URL('/notes', request.url));
+      return NextResponse.redirect(new URL('/dashboard/overview', request.url));
     }
 
     return response;
