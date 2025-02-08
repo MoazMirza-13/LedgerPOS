@@ -1,3 +1,4 @@
+import { description } from './../features/overview/components/bar-graph';
 import { NavItem } from 'types';
 
 export type Product = {
@@ -26,6 +27,14 @@ export const navItems: NavItem[] = [
     url: '/dashboard/product',
     icon: 'product',
     shortcut: ['p', 'p'],
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Categories',
+    url: '/dashboard/categories',
+    icon: 'product',
+    shortcut: ['c', 'c'],
     isActive: false,
     items: [] // No child items
   }
@@ -82,3 +91,10 @@ export const recentSalesData: SaleUser[] = [
     initials: 'SD'
   }
 ];
+
+export type Category = {
+  title: string;
+  created_at: string;
+  id: number;
+  description: string;
+};
