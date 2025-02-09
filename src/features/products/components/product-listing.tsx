@@ -1,12 +1,19 @@
 import { Product } from '@/constants/data';
-import { fakeProducts } from '@/constants/mock-api';
 import { searchParamsCache } from '@/lib/searchparams';
 import { DataTable as ProductTable } from '@/components/ui/table/data-table';
 import { columns } from './product-tables/columns';
+import { createClient } from '@/utils/supabase/server';
 
 type ProductListingPage = {};
 
 export default async function ProductListingPage({}: ProductListingPage) {
+  const supabase = await createClient();
+  // const { data, error } = await supabase.from('products').select('*');
+  const { data, error } = await supabase.from('products').select(`
+    *,
+    categories (title) 
+  `);
+
   // Showcasing the use of search params cache in nested RSCs
   const page = searchParamsCache.get('page');
   const search = searchParamsCache.get('q');
@@ -20,15 +27,14 @@ export default async function ProductListingPage({}: ProductListingPage) {
     ...(categories && { categories: categories })
   };
 
-  const data = await fakeProducts.getProducts(filters);
-  const totalProducts = data.total_products;
-  const products: Product[] = data.products;
+  // const data = await fakeProducts.getProducts(filters);
+  const products: Product[] = data ? data : [];
 
   return (
     <ProductTable
       columns={columns}
       data={products}
-      totalItems={totalProducts}
+      totalItems={products.length}
     />
   );
 }
