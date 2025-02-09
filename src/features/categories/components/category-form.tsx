@@ -46,10 +46,18 @@ export default function CategoryForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([{ title: values.title, description: values.description }])
-      .select();
+    if (!initialData) {
+      const { data, error } = await supabase
+        .from('categories')
+        .insert([{ title: values.title, description: values.description }])
+        .select();
+    } else {
+      const { data, error } = await supabase
+        .from('categories')
+        .update([{ title: values.title, description: values.description }])
+        .eq('id', initialData.id)
+        .select();
+    }
   }
 
   return (
@@ -94,7 +102,9 @@ export default function CategoryForm({
                 </FormItem>
               )}
             />
-            <Button type='submit'>Add Category</Button>
+            <Button type='submit'>
+              {initialData ? `Edit Category` : `Add Category`}
+            </Button>
           </form>
         </Form>
       </CardContent>
