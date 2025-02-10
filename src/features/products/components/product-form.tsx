@@ -20,7 +20,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Product } from '@/constants/mock-api';
+import { Category, Product } from '@/constants/data';
 import { createClient } from '@/utils/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -37,13 +37,13 @@ const ACCEPTED_IMAGE_TYPES = [
 const formSchema = z.object({
   image: z
     .any()
-    .refine((files) => files?.length == 1, 'Image is required.')
+    .optional()
     .refine(
-      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
+      (files) => !files || files?.[0]?.size <= MAX_FILE_SIZE,
       `Max file size is 5MB.`
     )
     .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+      (files) => !files || ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
       '.jpg, .jpeg, .png and .webp files are accepted.'
     ),
   name: z.string().min(2, {
@@ -58,14 +58,16 @@ const formSchema = z.object({
 
 export default function ProductForm({
   initialData,
-  pageTitle
+  pageTitle,
+  categories
 }: {
   initialData: Product | null;
   pageTitle: string;
+  categories: Category[] | null;
 }) {
   const defaultValues = {
-    name: initialData?.name || '',
-    category: initialData?.category || '',
+    name: initialData?.title || '',
+    category: initialData?.category_id || '',
     price: initialData?.price || 0,
     description: initialData?.description || ''
   };
@@ -88,7 +90,8 @@ export default function ProductForm({
             title: values.name,
             price: values.price,
             description: values.description,
-            img_url: imgPath
+            img_url: imgPath,
+            category_id: values.category
           }
         ])
         .select();
@@ -167,7 +170,7 @@ export default function ProductForm({
                     <FormLabel>Category</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(value)}
-                      value={field.value[field.value.length - 1]}
+                      value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -175,13 +178,14 @@ export default function ProductForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='beauty'>Beauty Products</SelectItem>
-                        <SelectItem value='electronics'>Electronics</SelectItem>
-                        <SelectItem value='clothing'>Clothing</SelectItem>
-                        <SelectItem value='home'>Home & Garden</SelectItem>
-                        <SelectItem value='sports'>
-                          Sports & Outdoors
-                        </SelectItem>
+                        {categories?.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            value={String(category.id)}
+                          >
+                            {category.title}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
