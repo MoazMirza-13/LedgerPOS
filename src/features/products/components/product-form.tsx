@@ -91,7 +91,7 @@ export default function ProductForm({
             price: values.price,
             description: values.description,
             img_url: imgPath,
-            category_id: values.category
+            category_id: values.category ? values.category : null
           }
         ])
         .select();

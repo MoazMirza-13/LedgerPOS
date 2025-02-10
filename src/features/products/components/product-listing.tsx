@@ -8,11 +8,18 @@ type ProductListingPage = {};
 
 export default async function ProductListingPage({}: ProductListingPage) {
   const supabase = await createClient();
-  // const { data, error } = await supabase.from('products').select('*');
   const { data, error } = await supabase.from('products').select(`
     *,
     categories (title) 
   `);
+
+  const productsWithImgs = data?.map((product) => ({
+    ...product,
+    img_url: product.img_url
+      ? supabase.storage.from('product_imgs').getPublicUrl(product.img_url).data
+          .publicUrl
+      : null // Fallback if no image
+  }));
 
   // Showcasing the use of search params cache in nested RSCs
   const page = searchParamsCache.get('page');
@@ -28,7 +35,7 @@ export default async function ProductListingPage({}: ProductListingPage) {
   };
 
   // const data = await fakeProducts.getProducts(filters);
-  const products: Product[] = data ? data : [];
+  const products: Product[] = productsWithImgs ? productsWithImgs : [];
 
   return (
     <ProductTable
