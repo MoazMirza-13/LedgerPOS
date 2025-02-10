@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Product } from '@/constants/mock-api';
+import { createClient } from '@/utils/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -49,8 +50,8 @@ const formSchema = z.object({
     message: 'Product name must be at least 2 characters.'
   }),
   category: z.string(),
-  price: z.number(),
-  description: z.string().min(10, {
+  price: z.coerce.number(),
+  description: z.string().min(2, {
     message: 'Description must be at least 10 characters.'
   })
 });
@@ -74,8 +75,38 @@ export default function ProductForm({
     values: defaultValues
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const supabase = createClient();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const imgPath = await uploadFile(values.image[0]);
+
+    if (imgPath) {
+      const { data, error } = await supabase
+        .from('products')
+        .insert([
+          {
+            title: values.name,
+            price: values.price,
+            description: values.description,
+            img_url: imgPath
+          }
+        ])
+        .select();
+    }
+  }
+
+  async function uploadFile(file: File) {
+    const imgFile = file; // Get the first uploaded file
+    const fileName = `${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from('product_imgs')
+      .upload(`ns_imgs/${fileName}`, imgFile);
+    if (error) {
+      console.log('🚀 ~ uploadFile ~ error:', error);
+    } else {
+      console.log('🚀 ~ uploadFile ~ data:', data);
+      return data.path;
+    }
   }
 
   return (
