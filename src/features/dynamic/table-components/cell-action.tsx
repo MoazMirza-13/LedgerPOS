@@ -8,17 +8,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Product } from '@/constants/data';
+import { Category, Product } from '@/constants/data';
 import { createClient } from '@/utils/supabase/client';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data: Product;
+  itemData: Category | Product;
+  itemType: string;
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+export const CellAction: React.FC<CellActionProps> = ({
+  itemData,
+  itemType
+}) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -26,9 +30,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const onConfirm = async () => {
     const supabase = createClient();
     const { error } = await supabase
-      .from('products')
+      .from(`${itemType}`)
       .delete()
-      .eq('id', data.id);
+      .eq('id', itemData.id);
     setOpen(false);
   };
 
@@ -51,7 +55,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/product/${data.id}`)}
+            onClick={() => router.push(`/dashboard/${itemType}/${itemData.id}`)}
           >
             <Edit className='mr-2 h-4 w-4' /> Update
           </DropdownMenuItem>

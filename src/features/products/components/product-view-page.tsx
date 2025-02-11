@@ -34,7 +34,7 @@ export default async function ProductViewPage({
 
     product = {
       ...fetchedProduct,
-      img_url: getProductImageUrl(fetchedProduct.img_url)
+      img_url: getProductImageUrl(fetchedProduct?.img_url)
     } as Product;
 
     if (!product) {

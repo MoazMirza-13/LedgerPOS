@@ -1,8 +1,8 @@
 'use client';
 import { Product } from '@/constants/data';
+import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
-import { CellAction } from './cell-action';
 
 export const columns: ColumnDef<Product>[] = [
   {
@@ -40,6 +40,8 @@ export const columns: ColumnDef<Product>[] = [
 
   {
     id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
+    cell: ({ row }) => (
+      <CellAction itemType={'products'} itemData={row.original} />
+    )
   }
 ];

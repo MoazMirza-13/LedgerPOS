@@ -1,7 +1,7 @@
 'use client';
 import { Category } from '@/constants/data';
+import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { ColumnDef } from '@tanstack/react-table';
-import { CellAction } from './cell-action';
 
 export const columns: ColumnDef<Category>[] = [
   {
@@ -15,6 +15,8 @@ export const columns: ColumnDef<Category>[] = [
 
   {
     id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
+    cell: ({ row }) => (
+      <CellAction itemType={'categories'} itemData={row.original} />
+    )
   }
 ];
