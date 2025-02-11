@@ -8,6 +8,7 @@ export type Product = {
   price: number;
   id: number;
   category_id: string;
+  img_url: string;
 };
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
