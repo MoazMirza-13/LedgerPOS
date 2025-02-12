@@ -1,7 +1,6 @@
 import { Product } from '@/constants/data';
+import TableClientSide from '@/features/dynamic/table-components/tableClient';
 import { searchParamsCache } from '@/lib/searchparams';
-import { DataTable as ProductTable } from '@/components/ui/table/data-table';
-import { columns } from './product-tables/columns';
 import { createClient } from '@/utils/supabase/server';
 
 type ProductListingPage = {};
@@ -38,10 +37,8 @@ export default async function ProductListingPage({}: ProductListingPage) {
   const products: Product[] = productsWithImgs ? productsWithImgs : [];
 
   return (
-    <ProductTable
-      columns={columns}
-      data={products}
-      totalItems={products.length}
-    />
+    <>
+      <TableClientSide type='products' data={products} />;
+    </>
   );
 }

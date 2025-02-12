@@ -1,8 +1,7 @@
 import { Category } from '@/constants/data';
 import { searchParamsCache } from '@/lib/searchparams';
-import { DataTable as CategoryTable } from '@/components/ui/table/data-table';
-import { columns } from './category-tables/columns';
 import { createClient } from '@/utils/supabase/server';
+import TableClientSide from '@/features/dynamic/table-components/tableClient';
 
 type CategoryListingPage = {};
 
@@ -27,10 +26,8 @@ export default async function CategoryListingPage({}: CategoryListingPage) {
   const categories_data: Category[] = data ? data : [];
 
   return (
-    <CategoryTable
-      columns={columns}
-      data={categories_data}
-      totalItems={categories_data.length}
-    />
+    <>
+      <TableClientSide type='categories' data={categories_data} />;
+    </>
   );
 }

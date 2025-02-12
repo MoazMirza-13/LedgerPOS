@@ -16,12 +16,12 @@ import { useState } from 'react';
 
 interface CellActionProps {
   itemData: Category | Product;
-  itemType: string;
+  itemTable: string;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({
   itemData,
-  itemType
+  itemTable
 }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -30,7 +30,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   const onConfirm = async () => {
     const supabase = createClient();
     const { error } = await supabase
-      .from(`${itemType}`)
+      .from(`${itemTable}`)
       .delete()
       .eq('id', itemData.id);
     setOpen(false);
@@ -55,7 +55,9 @@ export const CellAction: React.FC<CellActionProps> = ({
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/${itemType}/${itemData.id}`)}
+            onClick={() =>
+              router.push(`/dashboard/${itemTable}/${itemData.id}`)
+            }
           >
             <Edit className='mr-2 h-4 w-4' /> Update
           </DropdownMenuItem>
