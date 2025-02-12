@@ -1,6 +1,6 @@
 import FormCardSkeleton from '@/components/form-card-skeleton';
 import PageContainer from '@/components/layout/page-container';
-import CategoryViewPage from '@/features/categories/components/category-view-page';
+import ViewPage from '@/features/dynamic/viewPage';
 import { Suspense } from 'react';
 
 export const metadata = {
@@ -15,7 +15,7 @@ export default async function Page(props: PageProps) {
     <PageContainer scrollable>
       <div className='flex-1 space-y-4'>
         <Suspense fallback={<FormCardSkeleton />}>
-          <CategoryViewPage categoryId={params.categoriesId} />
+          <ViewPage type={'categories'} id={params.categoriesId} />
         </Suspense>
       </div>
     </PageContainer>
