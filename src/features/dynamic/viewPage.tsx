@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { Category, Product } from '@/constants/data';
-import CategoryForm from '@/features/categories/components/category-form';
+import { Brand, Category, Product } from '@/constants/data';
 import ProductForm from '@/features/products/components/product-form';
+import DynamicForm from './dynamic-form';
 
 type ViewPage = {
-  type: 'categories' | 'products';
+  type: 'categories' | 'products' | 'brands';
   id: string;
 };
 
@@ -13,14 +13,19 @@ export default async function ViewPage({ type, id }: ViewPage) {
   const supabase = await createClient();
 
   let data = null;
-  let pageTitle = `Create New ${type === 'categories' ? 'Category' : 'Product'}`;
+  let pageTitle = `Create New ${
+    type === 'categories'
+      ? 'Category'
+      : type === 'products'
+        ? 'Product'
+        : 'Brand'
+  }`;
   let showUploader = type === 'products';
   let categories = null;
 
   if (id !== 'new') {
-    const tableName = type === 'categories' ? 'categories' : 'products';
     const { data: fetchedData, error } = await supabase
-      .from(tableName)
+      .from(type)
       .select('*')
       .eq('id', id)
       .single();
@@ -43,7 +48,13 @@ export default async function ViewPage({ type, id }: ViewPage) {
       data = fetchedData as Category;
     }
 
-    pageTitle = `Edit ${type === 'categories' ? 'category' : 'product'}`;
+    pageTitle = `Edit ${
+      type === 'categories'
+        ? 'category'
+        : type === 'products'
+          ? 'product'
+          : 'brand'
+    }`;
   }
 
   if (type === 'products') {
@@ -53,8 +64,12 @@ export default async function ViewPage({ type, id }: ViewPage) {
     categories = fetchedCategories;
   }
 
-  return type === 'categories' ? (
-    <CategoryForm initialData={data as Category | null} pageTitle={pageTitle} />
+  return type === 'categories' || 'brands' ? (
+    <DynamicForm
+      type={type}
+      initialData={data as Category | Brand}
+      pageTitle={pageTitle}
+    />
   ) : (
     <ProductForm
       showUploader={showUploader}

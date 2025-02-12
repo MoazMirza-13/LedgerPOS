@@ -1,3 +1,4 @@
+// dynamic for categories and brands
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,32 +13,36 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Category } from '@/constants/data';
+import { Brand, Category } from '@/constants/data';
 import { createClient } from '@/utils/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Category name must be at least 2 characters.'
-  }),
-  description: z.string().min(1, {
-    message: 'Description must be at least 1 characters.'
-  })
-});
-
-export default function CategoryForm({
+export default function DynamicForm({
   initialData,
-  pageTitle
+  pageTitle,
+  type
 }: {
-  initialData: Category | null;
+  initialData: Category | Brand | null;
   pageTitle: string;
+  type: string;
 }) {
   const defaultValues = {
     title: initialData?.title || '',
     description: initialData?.description || ''
   };
+
+  const title = type === 'categories' ? 'Category' : 'Brand';
+
+  const formSchema = z.object({
+    title: z.string().min(2, {
+      message: `${title} name must be at least 2 characters.`
+    }),
+    description: z.string().min(1, {
+      message: 'Description must be at least 1 characters.'
+    })
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,12 +53,12 @@ export default function CategoryForm({
     const supabase = await createClient();
     if (!initialData) {
       const { data, error } = await supabase
-        .from('categories')
+        .from(type)
         .insert([{ title: values.title, description: values.description }])
         .select();
     } else {
       const { data, error } = await supabase
-        .from('categories')
+        .from(type)
         .update([{ title: values.title, description: values.description }])
         .eq('id', initialData.id)
         .select();
@@ -76,9 +81,9 @@ export default function CategoryForm({
                 name='title'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category Name</FormLabel>
+                    <FormLabel>{`${title} Name`}</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter category' {...field} />
+                      <Input placeholder={`Enter ${title}`} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -93,7 +98,7 @@ export default function CategoryForm({
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='Enter category description'
+                      placeholder={`Enter ${title.toLowerCase()} description`}
                       className='resize-none'
                       {...field}
                     />
@@ -103,7 +108,7 @@ export default function CategoryForm({
               )}
             />
             <Button type='submit'>
-              {initialData ? `Edit Category` : `Add Category`}
+              {initialData ? `Edit ${title}` : `Add ${title}`}
             </Button>
           </form>
         </Form>

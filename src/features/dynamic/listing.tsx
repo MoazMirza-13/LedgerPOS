@@ -1,20 +1,20 @@
-import { Category, Product } from '@/constants/data';
+import { Brand, Category, Product } from '@/constants/data';
 import { searchParamsCache } from '@/lib/searchparams';
 import { createClient } from '@/utils/supabase/server';
 import TableClientSide from '@/features/dynamic/table-components/tableClient';
 
 type ListingPage = {
-  type: 'categories' | 'products';
+  type: 'categories' | 'products' | 'brands';
 };
 
 export default async function ListingPage({ type }: ListingPage) {
   const supabase = await createClient();
   let data;
-  if (type === 'categories') {
-    const { data: categoriesData, error: categoriesError } = await supabase
-      .from('categories')
+  if (type === 'categories' || 'brands') {
+    const { data: fetchedData, error: serverError } = await supabase
+      .from(type)
       .select('*');
-    data = categoriesData;
+    data = fetchedData;
   } else if (type === 'products') {
     const { data: productsData, error: productsError } = await supabase.from(
       'products'
@@ -46,7 +46,7 @@ export default async function ListingPage({ type }: ListingPage) {
 
   // const data = await fakeProducts.getProducts(filters);
 
-  const items_data: Category[] | Product[] = data ? data : [];
+  const items_data: Category[] | Product[] | Brand[] = data ? data : [];
 
   return (
     <>

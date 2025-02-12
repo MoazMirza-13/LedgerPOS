@@ -2,15 +2,15 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { Category, Product } from '@/constants/data';
+import { Brand, Category, Product } from '@/constants/data';
 
-type itemTable = 'categories' | 'products';
-type Entity = Category | Product;
+type itemTable = 'categories' | 'products' | 'brands';
+type Entity = Category | Product | Brand;
 
 export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
   const baseColumns: ColumnDef<T>[] = [];
 
-  if (type === 'categories') {
+  if (type === 'categories' || 'brands') {
     baseColumns.push(
       { accessorKey: 'title', header: 'TITLE' },
       { accessorKey: 'description', header: 'DESCRIPTION' }

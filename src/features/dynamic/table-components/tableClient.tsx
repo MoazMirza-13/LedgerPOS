@@ -2,11 +2,11 @@
 
 import { DataTable } from '@/components/ui/table/data-table';
 import { columns } from '@/features/dynamic/table-components/columns';
-import { Category, Product } from '@/constants/data';
+import { Brand, Category, Product } from '@/constants/data';
 
 interface TableClientProps {
-  data: Product[] | Category[];
-  type: 'categories' | 'products';
+  data: Product[] | Category[] | Brand[];
+  type: 'categories' | 'products' | 'brands';
 }
 
 export default function TableClientSide({ data, type }: TableClientProps) {

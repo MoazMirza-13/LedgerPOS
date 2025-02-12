@@ -36,6 +36,14 @@ export const navItems: NavItem[] = [
     shortcut: ['c', 'c'],
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Brands',
+    url: '/dashboard/brands',
+    icon: 'product',
+    shortcut: ['b', 'b'],
+    isActive: false,
+    items: [] // No child items
   }
 ];
 
@@ -92,6 +100,14 @@ export const recentSalesData: SaleUser[] = [
 ];
 
 export type Category = {
+  title: string;
+  created_at: string;
+  id: number;
+  description: string;
+};
+
+// currently same, might change the schema later
+export type Brand = {
   title: string;
   created_at: string;
   id: number;
