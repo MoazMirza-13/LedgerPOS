@@ -9,7 +9,7 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
-import CategoryListingPage from '@/features/categories/components/category-listing';
+import ListingPage from '@/features/dynamic/listing';
 
 export const metadata = {
   title: 'Dashboard: Categories'
@@ -47,7 +47,7 @@ export default async function Page(props: pageProps) {
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
         >
-          <CategoryListingPage />
+          <ListingPage type={'categories'} />
         </Suspense>
       </div>
     </PageContainer>
