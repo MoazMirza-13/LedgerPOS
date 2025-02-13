@@ -89,8 +89,8 @@ export default function ProductForm({
     name: z.string().min(2, {
       message: 'Product name must be at least 2 characters.'
     }),
-    category: z.string(),
-    brand: z.string(),
+    category: z.string().nullable(),
+    brand: z.string().nullable(),
     price: z.coerce.number(),
     description: z.string().min(2, {
       message: 'Description must be at least 10 characters.'
@@ -243,7 +243,9 @@ export default function ProductForm({
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(value)}
+                      onValueChange={(value) =>
+                        field.onChange(value === 'null' ? null : value)
+                      }
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
@@ -252,6 +254,7 @@ export default function ProductForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value='null'>None</SelectItem>
                         {categories?.map((category) => (
                           <SelectItem
                             key={category.id}
@@ -291,7 +294,9 @@ export default function ProductForm({
                   <FormItem>
                     <FormLabel>Brand</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(value)}
+                      onValueChange={(value) =>
+                        field.onChange(value === 'null' ? null : value)
+                      }
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
@@ -300,6 +305,7 @@ export default function ProductForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value='null'>None</SelectItem>
                         {brands?.map((brand) => (
                           <SelectItem key={brand.id} value={String(brand.id)}>
                             {brand.title}
