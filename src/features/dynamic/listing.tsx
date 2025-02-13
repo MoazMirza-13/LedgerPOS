@@ -20,7 +20,8 @@ export default async function ListingPage({ type }: ListingPage) {
       'products'
     ).select(`
       *,
-      categories (title) 
+     categories (title),
+    brands (title)
     `);
     data = productsData?.map((product) => ({
       ...product,

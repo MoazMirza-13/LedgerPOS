@@ -22,6 +22,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
   }`;
   let showUploader = type === 'products';
   let categories = null;
+  let brands = null;
 
   if (id !== 'new') {
     const { data: fetchedData, error } = await supabase
@@ -62,6 +63,8 @@ export default async function ViewPage({ type, id }: ViewPage) {
       .from('categories')
       .select('*');
     categories = fetchedCategories;
+    const { data: fetchedBrands } = await supabase.from('brands').select('*');
+    brands = fetchedBrands;
   }
 
   return type === 'categories' || type === 'brands' ? (
@@ -74,6 +77,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
     <ProductForm
       showUploader={showUploader}
       categories={categories}
+      brands={brands}
       initialData={data as Product | null}
       pageTitle={pageTitle}
     />

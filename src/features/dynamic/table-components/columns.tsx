@@ -35,6 +35,7 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
       },
       { accessorKey: 'title', header: 'Title' },
       { accessorKey: 'categories.title', header: 'CATEGORY' },
+      { accessorKey: 'brands.title', header: 'BRAND' },
       { accessorKey: 'price', header: 'PRICE' },
       { accessorKey: 'description', header: 'DESCRIPTION' }
     );

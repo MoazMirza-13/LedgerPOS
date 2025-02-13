@@ -20,7 +20,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Category, Product } from '@/constants/data';
+import { Brand, Category, Product } from '@/constants/data';
 import { createClient } from '@/utils/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -39,16 +39,19 @@ export default function ProductForm({
   initialData,
   pageTitle,
   categories,
+  brands,
   showUploader
 }: {
   initialData: Product | null;
   pageTitle: string;
   categories: Category[] | null;
+  brands: Brand[] | null;
   showUploader: boolean;
 }) {
   const defaultValues = {
     name: initialData?.title || '',
     category: initialData?.category_id || '',
+    brand: initialData?.brand_id || '',
     price: initialData?.price || 0,
     description: initialData?.description || ''
   };
@@ -87,6 +90,7 @@ export default function ProductForm({
       message: 'Product name must be at least 2 characters.'
     }),
     category: z.string(),
+    brand: z.string(),
     price: z.coerce.number(),
     description: z.string().min(2, {
       message: 'Description must be at least 10 characters.'
@@ -118,6 +122,7 @@ export default function ProductForm({
             price: values.price,
             description: values.description,
             category_id: values.category ? values.category : null,
+            brand_id: values.brand ? values.brand : null,
             ...(imgPath && { img_url: imgPath })
           }
         ])
@@ -137,7 +142,8 @@ export default function ProductForm({
               price: values.price,
               description: values.description,
               img_url: imgPath,
-              category_id: values.category ? values.category : null
+              category_id: values.category ? values.category : null,
+              brand_id: values.brand ? values.brand : null
             }
           ])
           .select();
@@ -274,6 +280,33 @@ export default function ProductForm({
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='brand'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brand</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value)}
+                      value={field.value ? String(field.value) : ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select brands' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {brands?.map((brand) => (
+                          <SelectItem key={brand.id} value={String(brand.id)}>
+                            {brand.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

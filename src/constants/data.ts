@@ -9,6 +9,7 @@ export type Product = {
   id: number;
   category_id: string;
   img_url: string;
+  brand_id: string;
 };
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
@@ -106,7 +107,7 @@ export type Category = {
   description: string;
 };
 
-// currently same, might change the schema later
+// currently same, schema might get updated later
 export type Brand = {
   title: string;
   created_at: string;
