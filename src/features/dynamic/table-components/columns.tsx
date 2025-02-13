@@ -10,7 +10,7 @@ type Entity = Category | Product | Brand;
 export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
   const baseColumns: ColumnDef<T>[] = [];
 
-  if (type === 'categories' || 'brands') {
+  if (type === 'categories' || type === 'brands') {
     baseColumns.push(
       { accessorKey: 'title', header: 'TITLE' },
       { accessorKey: 'description', header: 'DESCRIPTION' }

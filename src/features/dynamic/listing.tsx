@@ -10,7 +10,7 @@ type ListingPage = {
 export default async function ListingPage({ type }: ListingPage) {
   const supabase = await createClient();
   let data;
-  if (type === 'categories' || 'brands') {
+  if (type === 'categories' || type === 'brands') {
     const { data: fetchedData, error: serverError } = await supabase
       .from(type)
       .select('*');
@@ -50,7 +50,7 @@ export default async function ListingPage({ type }: ListingPage) {
 
   return (
     <>
-      <TableClientSide type={type} data={items_data} />;
+      <TableClientSide type={type} data={items_data} />
     </>
   );
 }
