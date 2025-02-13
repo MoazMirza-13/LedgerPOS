@@ -64,7 +64,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
     categories = fetchedCategories;
   }
 
-  return type === 'categories' || 'brands' ? (
+  return type === 'categories' || type === 'brands' ? (
     <DynamicForm
       type={type}
       initialData={data as Category | Brand}
