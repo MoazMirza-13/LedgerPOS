@@ -4,6 +4,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Lato } from 'next/font/google';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
+import Providers from '@/components/layout/providers';
 
 export const metadata: Metadata = {
   title: 'Next Shadcn',
@@ -30,8 +31,10 @@ export default async function RootLayout({
       >
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
-          <Toaster />
-          {children}
+          <Providers>
+            <Toaster />
+            {children}
+          </Providers>
         </NuqsAdapter>
       </body>
     </html>
