@@ -26,6 +26,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { ProductSizes } from './product-sizes';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -53,7 +54,8 @@ export default function ProductForm({
     category: initialData?.category_id || '',
     brand: initialData?.brand_id || '',
     price: initialData?.price || 0,
-    description: initialData?.description || ''
+    description: initialData?.description || '',
+    productVariants: initialData?.variants || []
   };
 
   // Conditional image validation
@@ -94,7 +96,8 @@ export default function ProductForm({
     price: z.coerce.number(),
     description: z.string().min(2, {
       message: 'Description must be at least 10 characters.'
-    })
+    }),
+    productVariants: z.array(z.string()).optional()
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -123,7 +126,8 @@ export default function ProductForm({
             description: values.description,
             category_id: values.category ? values.category : null,
             brand_id: values.brand ? values.brand : null,
-            ...(imgPath && { img_url: imgPath })
+            ...(imgPath && { img_url: imgPath }),
+            variants: values.productVariants
           }
         ])
         .eq('id', initialData.id)
@@ -143,7 +147,8 @@ export default function ProductForm({
               description: values.description,
               img_url: imgPath,
               category_id: values.category ? values.category : null,
-              brand_id: values.brand ? values.brand : null
+              brand_id: values.brand ? values.brand : null,
+              variants: values.productVariants
             }
           ])
           .select();
@@ -313,6 +318,17 @@ export default function ProductForm({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='productVariants'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Sizes</FormLabel>
+                    <ProductSizes name={field.name} />
                     <FormMessage />
                   </FormItem>
                 )}

@@ -6,10 +6,11 @@ export type Product = {
   description: string;
   created_at: string;
   price: number;
-  id: number;
+  id: string;
   category_id: string;
   img_url: string;
   brand_id: string;
+  variants: string[];
 };
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
