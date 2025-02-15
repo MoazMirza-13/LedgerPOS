@@ -30,7 +30,9 @@ import {
   UserCircle2Icon,
   UserPen,
   UserX2Icon,
-  X
+  X,
+  ShoppingBasket,
+  BookOpenText
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -40,7 +42,9 @@ export const Icons = {
   logo: Command,
   login: LogIn,
   close: X,
-  product: LucideShoppingBag,
+  product: ShoppingBasket,
+  brand: LucideShoppingBag,
+  category: BookOpenText,
   spinner: Loader2,
   kanban: CircuitBoardIcon,
   chevronLeft: ChevronLeft,

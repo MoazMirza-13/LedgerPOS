@@ -1,17 +1,4 @@
-import { description } from './../features/overview/components/bar-graph';
 import { NavItem } from 'types';
-
-export type Product = {
-  title: string;
-  description: string;
-  created_at: string;
-  price: number;
-  id: string;
-  category_id: string;
-  img_url: string;
-  brand_id: string;
-  variants: string[];
-};
 
 //Info: The following data is used for the sidebar navigation and Cmd K bar.
 export const navItems: NavItem[] = [
@@ -34,7 +21,7 @@ export const navItems: NavItem[] = [
   {
     title: 'Categories',
     url: '/dashboard/categories',
-    icon: 'product',
+    icon: 'category',
     shortcut: ['c', 'c'],
     isActive: false,
     items: [] // No child items
@@ -42,7 +29,7 @@ export const navItems: NavItem[] = [
   {
     title: 'Brands',
     url: '/dashboard/brands',
-    icon: 'product',
+    icon: 'brand',
     shortcut: ['b', 'b'],
     isActive: false,
     items: [] // No child items
@@ -100,6 +87,18 @@ export const recentSalesData: SaleUser[] = [
     initials: 'SD'
   }
 ];
+
+export type Product = {
+  title: string;
+  description: string;
+  created_at: string;
+  price: number;
+  id: string;
+  category_id: string;
+  img_url: string;
+  brand_id: string;
+  variants: string[];
+};
 
 export type Category = {
   title: string;

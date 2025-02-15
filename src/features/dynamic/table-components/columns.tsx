@@ -27,8 +27,9 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
             <Image
               src={row.getValue('img_url')}
               alt='Product image'
+              priority
               fill
-              className='rounded-lg'
+              className='rounded-lg object-contain'
             />
           </div>
         )

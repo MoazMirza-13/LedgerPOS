@@ -36,12 +36,10 @@ export default function DynamicForm({
   const title = type === 'categories' ? 'Category' : 'Brand';
 
   const formSchema = z.object({
-    title: z.string().min(2, {
-      message: `${title} name must be at least 2 characters.`
+    title: z.string().min(1, {
+      message: `${title} name is required`
     }),
-    description: z.string().min(1, {
-      message: 'Description must be at least 1 characters.'
-    })
+    description: z.string().optional()
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

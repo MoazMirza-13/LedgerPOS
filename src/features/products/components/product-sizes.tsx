@@ -22,7 +22,13 @@ export function ProductSizes({ name }: ProductSizesProps) {
       render={({ field }) => {
         const addSize = () => {
           if (!newSize) return;
-          const size = newSize.trim().toUpperCase();
+          const trimmedSize = newSize.trim();
+          // Check if size contains 'ml' (case-insensitive)
+          const hasML = /ml/i.test(trimmedSize);
+          // Convert to lowercase if ML is present, otherwise uppercase
+          const size = hasML
+            ? trimmedSize.toLowerCase()
+            : trimmedSize.toUpperCase();
           if (!field.value.includes(size)) {
             field.onChange([...field.value, size]);
             setNewSize('');
@@ -46,7 +52,7 @@ export function ProductSizes({ name }: ProductSizesProps) {
           <div className='grid gap-4'>
             <div className='flex gap-2'>
               <Input
-                placeholder='Add size (e.g. XL, L, M)'
+                placeholder='Add variants'
                 value={newSize}
                 onChange={(e) => setNewSize(e.target.value)}
                 onKeyPress={handleKeyPress}

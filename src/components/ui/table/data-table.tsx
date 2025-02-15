@@ -29,6 +29,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { parseAsInteger, useQueryState } from 'nuqs';
 
 interface DataTableProps<TData, TValue> {
@@ -90,13 +91,18 @@ export function DataTable<TData, TValue>({
     manualFiltering: true
   });
 
+  const pathname = usePathname();
+  const productsRoute = pathname.includes('/products');
+
   return (
     <div className='flex flex-1 flex-col space-y-4'>
       <div className='relative flex flex-1'>
         <div className='absolute bottom-0 left-0 right-0 top-0 flex overflow-scroll rounded-md border md:overflow-auto'>
           <ScrollArea className='flex-1'>
             <Table className='relative'>
-              <TableHeader>
+              <TableHeader
+                className={`sticky top-0 z-10 bg-white dark:bg-black`}
+              >
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
@@ -119,8 +125,15 @@ export function DataTable<TData, TValue>({
                       key={row.id}
                       data-state={row.getIsSelected() && 'selected'}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                      {row.getVisibleCells().map((cell, index, cells) => (
+                        <TableCell
+                          key={cell.id}
+                          className={
+                            index === cells.length - 1 && !productsRoute
+                              ? 'pr-8 text-right'
+                              : ''
+                          }
+                        >
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()

@@ -7,8 +7,8 @@ import './globals.css';
 import Providers from '@/components/layout/providers';
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'NS | Admin Panel',
+  description: 'Admin panel for NS.'
 };
 
 const lato = Lato({

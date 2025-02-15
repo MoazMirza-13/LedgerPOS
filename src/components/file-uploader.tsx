@@ -1,6 +1,6 @@
 'use client';
 
-import { CrossIcon, UploadIcon } from 'lucide-react';
+import { X, UploadIcon } from 'lucide-react';
 import Image from 'next/image';
 import * as React from 'react';
 import Dropzone, {
@@ -8,7 +8,6 @@ import Dropzone, {
   type FileRejection
 } from 'react-dropzone';
 import { toast } from 'sonner';
-
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -236,7 +235,7 @@ export function FileUploader(props: FileUploaderProps) {
                     {maxFiles > 1
                       ? ` ${maxFiles === Infinity ? 'multiple' : maxFiles}
                       files (up to ${formatBytes(maxSize)} each)`
-                      : ` a file with ${formatBytes(maxSize)}`}
+                      : ` a file within ${formatBytes(maxSize)}`}
                   </p>
                 </div>
               </div>
@@ -302,7 +301,7 @@ function FileCard({ file, progress, onRemove }: FileCardProps) {
           className='size-7'
           onClick={onRemove}
         >
-          <CrossIcon className='size-4' aria-hidden='true' />
+          <X className='size-4' aria-hidden='true' />
           <span className='sr-only'>Remove file</span>
         </Button>
       </div>

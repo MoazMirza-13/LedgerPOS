@@ -88,15 +88,13 @@ export default function ProductForm({
 
   const formSchema = z.object({
     image: imageValidation,
-    name: z.string().min(2, {
-      message: 'Product name must be at least 2 characters.'
+    name: z.string().min(1, {
+      message: 'Product name is required'
     }),
     category: z.string().nullable(),
     brand: z.string().nullable(),
     price: z.coerce.number(),
-    description: z.string().min(2, {
-      message: 'Description must be at least 10 characters.'
-    }),
+    description: z.string().optional(),
     productVariants: z.array(z.string()).optional()
   });
 
@@ -188,7 +186,8 @@ export default function ProductForm({
               render={({ field }) => (
                 <div className='space-y-6'>
                   <FormItem className='w-full'>
-                    <FormLabel>Images</FormLabel>
+                    {/* currently single img, will add multiple functionality later */}
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
                       {!showUploaderState ? (
                         <div className='m-auto flex w-[24%] justify-between'>
@@ -211,7 +210,7 @@ export default function ProductForm({
                         <FileUploader
                           value={field.value}
                           onValueChange={field.onChange}
-                          maxFiles={4}
+                          maxFiles={1} // currently only 1 file, will do 4 files later
                           maxSize={4 * 1024 * 1024}
                           // disabled={loading}
                           // progresses={progresses}
@@ -283,7 +282,7 @@ export default function ProductForm({
                     <FormControl>
                       <Input
                         type='number'
-                        step='0.01'
+                        step='0'
                         placeholder='Enter price'
                         {...field}
                       />
@@ -327,7 +326,7 @@ export default function ProductForm({
                 name='productVariants'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Sizes</FormLabel>
+                    <FormLabel>Product Variants</FormLabel>
                     <ProductSizes name={field.name} />
                     <FormMessage />
                   </FormItem>

@@ -59,7 +59,7 @@ export const CellAction: React.FC<CellActionProps> = ({
               router.push(`/dashboard/${itemTable}/${itemData.id}`)
             }
           >
-            <Edit className='mr-2 h-4 w-4' /> Update
+            <Edit className='mr-2 h-4 w-4' /> Edit
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className='mr-2 h-4 w-4' /> Delete

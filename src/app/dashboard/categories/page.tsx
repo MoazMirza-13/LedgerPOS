@@ -31,10 +31,7 @@ export default async function Page(props: pageProps) {
     <PageContainer scrollable={false}>
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='flex items-start justify-between'>
-          <Heading
-            title='Categories'
-            description='Manage products (Server side table functionalities.)'
-          />
+          <Heading title='Categories' description='Manage categories' />
           <Link
             href='/dashboard/categories/new'
             className={cn(buttonVariants(), 'text-xs md:text-sm')}

@@ -13,7 +13,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
   const supabase = await createClient();
 
   let data = null;
-  let pageTitle = `Create New ${
+  let pageTitle = `Add New ${
     type === 'categories'
       ? 'Category'
       : type === 'products'
