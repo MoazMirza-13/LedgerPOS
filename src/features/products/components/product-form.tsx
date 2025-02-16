@@ -21,12 +21,14 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Brand, Category, Product } from '@/constants/data';
-import { createClient } from '@/utils/supabase/client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ProductSizes } from './product-sizes';
+import { productSubmit } from '@/utils/supaClient';
+import { LoaderCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -104,71 +106,17 @@ export default function ProductForm({
   });
 
   const [showUploaderState, setShowUploaderState] = useState(showUploader);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  const supabase = createClient();
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    let imgPath;
-
-    if (initialData) {
-      if (showUploaderState && values.image?.length) {
-        imgPath = await uploadFile(values?.image[0]);
+  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+    startTransition(async () => {
+      const error = await productSubmit(values, initialData, showUploaderState);
+      if (!error) {
+        router.push('/dashboard/products');
       }
-
-      const { data, error } = await supabase
-        .from('products')
-        .update([
-          {
-            title: values.name,
-            price: values.price,
-            description: values.description,
-            category_id: values.category ? values.category : null,
-            brand_id: values.brand ? values.brand : null,
-            ...(imgPath && { img_url: imgPath }),
-            variants: values.productVariants
-          }
-        ])
-        .eq('id', initialData.id)
-        .select();
-      console.log('🚀 ~ onSubmit if ~ error:', error);
-      console.log('🚀 ~ onSubmit if ~ data:', data);
-    } else {
-      // new
-      imgPath = await uploadFile(values.image[0]);
-      if (imgPath) {
-        const { data, error } = await supabase
-          .from('products')
-          .insert([
-            {
-              title: values.name,
-              price: values.price,
-              description: values.description,
-              img_url: imgPath,
-              category_id: values.category ? values.category : null,
-              brand_id: values.brand ? values.brand : null,
-              variants: values.productVariants
-            }
-          ])
-          .select();
-        console.log('🚀 ~ onSubmit else ~ error:', error);
-        console.log('🚀 ~ onSubmit else ~ data:', data);
-      }
-    }
-  }
-
-  async function uploadFile(file: File) {
-    const imgFile = file;
-    const fileName = `${Date.now()}_${file.name}`;
-    const { data, error } = await supabase.storage
-      .from('product_imgs')
-      .upload(`ns_imgs/${fileName}`, imgFile);
-    if (error) {
-      console.log('🚀 ~ uploadFile ~ error:', error);
-    } else {
-      console.log('🚀 ~ uploadFile ~ data:', data);
-      return data.path;
-    }
-  }
+    });
+  };
 
   return (
     <Card className='mx-auto w-full'>
@@ -179,7 +127,10 @@ export default function ProductForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+          <form
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            className='space-y-8'
+          >
             <FormField
               control={form.control}
               name='image'
@@ -350,8 +301,17 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
-            <Button type='submit'>
-              {initialData ? `Edit Product` : `Add Product`}
+            <Button type='submit' disabled={isPending}>
+              {isPending ? (
+                <div className='flex gap-2'>
+                  {initialData ? 'Editing' : 'Adding'}
+                  <LoaderCircle className='h-5 w-5 animate-spin' />
+                </div>
+              ) : initialData ? (
+                'Edit Product'
+              ) : (
+                'Add Product'
+              )}
             </Button>
           </form>
         </Form>

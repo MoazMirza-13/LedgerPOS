@@ -13,9 +13,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import * as z from 'zod';
-import { createClient } from '@/utils/supabase/client';
+import { signIn } from '@/utils/supaClient';
+import { LoaderCircle } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
@@ -25,9 +25,6 @@ const formSchema = z.object({
 type UserFormValue = z.infer<typeof formSchema>;
 
 export default function UserAuthForm() {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,19 +33,14 @@ export default function UserAuthForm() {
     }
   });
 
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
   const handleSignIn = async (credentials: UserFormValue) => {
-    const supabase = createClient();
-
-    const { error } = await supabase.auth.signInWithPassword(credentials);
-
-    if (error) {
-      toast.error(error.message);
-      router.push('/');
-      return;
+    const error = await signIn(credentials);
+    if (!error) {
+      router.push('/dashboard/overview');
     }
-
-    toast.success('Signed In Successfully!');
-    router.push('/dashboard/overview');
   };
 
   return (
@@ -98,7 +90,13 @@ export default function UserAuthForm() {
           )}
         />
         <Button disabled={isPending} className='w-full' type='submit'>
-          {isPending ? 'Signing in...' : 'Continue With Email'}
+          {isPending ? (
+            <div className='flex gap-2'>
+              Signing in <LoaderCircle className='h-5 w-5 animate-spin' />
+            </div>
+          ) : (
+            'Sign in'
+          )}
         </Button>
       </form>
     </Form>

@@ -14,7 +14,7 @@ export default async function ListingPage({ type }: ListingPage) {
     const { data: fetchedData, error: serverError } = await supabase
       .from(type)
       .select('*');
-    data = fetchedData;
+    data = fetchedData?.reverse();
   } else if (type === 'products') {
     const { data: productsData, error: productsError } = await supabase.from(
       'products'
@@ -23,13 +23,15 @@ export default async function ListingPage({ type }: ListingPage) {
      categories (title),
     brands (title)
     `);
-    data = productsData?.map((product) => ({
-      ...product,
-      img_url: product.img_url
-        ? supabase.storage.from('product_imgs').getPublicUrl(product.img_url)
-            .data.publicUrl
-        : null // Fallback if no image
-    }));
+    data = productsData
+      ?.map((product) => ({
+        ...product,
+        img_url: product.img_url
+          ? supabase.storage.from('product_imgs').getPublicUrl(product.img_url)
+              .data.publicUrl
+          : null // Fallback if no image
+      }))
+      .reverse();
   }
 
   //   // Showcasing the use of search params cache in nested RSCs

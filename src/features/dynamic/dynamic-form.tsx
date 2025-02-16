@@ -14,8 +14,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Brand, Category } from '@/constants/data';
-import { createClient } from '@/utils/supabase/client';
+import { categoryBrandSubmit } from '@/utils/supaClient';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { LoaderCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -47,21 +50,17 @@ export default function DynamicForm({
     values: defaultValues
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const supabase = await createClient();
-    if (!initialData) {
-      const { data, error } = await supabase
-        .from(type)
-        .insert([{ title: values.title, description: values.description }])
-        .select();
-    } else {
-      const { data, error } = await supabase
-        .from(type)
-        .update([{ title: values.title, description: values.description }])
-        .eq('id', initialData.id)
-        .select();
-    }
-  }
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    startTransition(async () => {
+      const error = await categoryBrandSubmit(values, initialData, type);
+      if (!error) {
+        router.push(`/dashboard/${type}`);
+      }
+    });
+  };
 
   return (
     <Card className='mx-auto w-full'>
@@ -72,7 +71,10 @@ export default function DynamicForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+          <form
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            className='space-y-8'
+          >
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
@@ -105,8 +107,17 @@ export default function DynamicForm({
                 </FormItem>
               )}
             />
-            <Button type='submit'>
-              {initialData ? `Edit ${title}` : `Add ${title}`}
+            <Button type='submit' disabled={isPending}>
+              {isPending ? (
+                <div className='flex gap-2'>
+                  {initialData ? `Editing ` : `Adding`}
+                  <LoaderCircle className='h-5 w-5 animate-spin' />
+                </div>
+              ) : initialData ? (
+                `Edit ${title}`
+              ) : (
+                `Add ${title}`
+              )}
             </Button>
           </form>
         </Form>

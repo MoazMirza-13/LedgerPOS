@@ -10,7 +10,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { signOut } from '@/utils/authUtils';
+import { signOut } from '@/utils/supaClient';
 
 type UserProps = {
   user: object | null;

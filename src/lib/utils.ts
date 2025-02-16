@@ -24,3 +24,13 @@ export function formatBytes(
       : (sizes[i] ?? 'Bytes')
   }`;
 }
+
+export const toastMsg = {
+  newProduct: 'New product has been added',
+  updateProduct: 'Product has been updated',
+  dynamicNew: (type: string) => `New ${type} has been added`,
+  dynamicUpdate: (type: string) => `${type} has been updated`,
+  error: 'Something went wrong',
+  imageUploadError: 'Image upload failed',
+  signIn: 'Signed In Successfully!'
+};
