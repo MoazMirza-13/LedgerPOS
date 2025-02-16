@@ -26,9 +26,11 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ProductSizes } from './product-sizes';
-import { productSubmit } from '@/utils/supaClient';
+import { productSubmit } from '@/lib/actions';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toastMsg } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -111,10 +113,13 @@ export default function ProductForm({
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
-      const error = await productSubmit(values, initialData, showUploaderState);
-      if (!error) {
-        router.push('/dashboard/products');
-      }
+      const res = await productSubmit(values, initialData, showUploaderState);
+      if (res?.successNew) toast.success(toastMsg.newProduct);
+      else if (res?.successUpdate) toast.success(toastMsg.updateProduct);
+      else if (res?.imgError) toast.error(toastMsg.imageUploadError);
+      else if (res?.error) toast.error(toastMsg.error);
+
+      if (!res?.error) router.push(`/dashboard/products`);
     });
   };
 

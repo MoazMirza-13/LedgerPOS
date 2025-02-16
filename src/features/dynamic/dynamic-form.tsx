@@ -14,12 +14,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Brand, Category } from '@/constants/data';
-import { categoryBrandSubmit } from '@/utils/supaClient';
+import { categoryBrandSubmit } from '@/lib/actions';
+import { toastMsg } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 export default function DynamicForm({
@@ -55,10 +57,15 @@ export default function DynamicForm({
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
-      const error = await categoryBrandSubmit(values, initialData, type);
-      if (!error) {
-        router.push(`/dashboard/${type}`);
-      }
+      const res = await categoryBrandSubmit(values, initialData, type);
+      const entity = type === 'categories' ? 'Category' : 'Brand';
+
+      if (res?.successNew) toast.success(toastMsg.dynamicNew(entity));
+      else if (res?.successUpdate)
+        toast.success(toastMsg.dynamicUpdate(entity));
+      else if (res?.error) toast.error(toastMsg.error);
+
+      if (!res?.error) router.push(`/dashboard/${type}`);
     });
   };
 
