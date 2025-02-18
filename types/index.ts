@@ -21,15 +21,37 @@ export interface NavItemWithOptionalChildren extends NavItem {
   items?: NavItemWithChildren[];
 }
 
-export interface FooterItem {
-  title: string;
-  items: {
-    title: string;
-    href: string;
-    external?: boolean;
-  }[];
-}
-
 export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;
+
+export type Product = {
+  title: string;
+  description: string;
+  created_at: string;
+  price: number;
+  id: string;
+  category_id: string;
+  img_url: string;
+  brand_id: string;
+  variants: string[];
+};
+
+export type Category = {
+  title: string;
+  created_at: string;
+  id: number;
+  description: string;
+};
+
+// currently same, schema might get updated later
+export type Brand = {
+  title: string;
+  created_at: string;
+  id: number;
+  description: string;
+};
+
+export type itemTable = 'categories' | 'products' | 'brands';
+
+export type itemData = Product | Category | Brand;

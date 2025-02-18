@@ -20,17 +20,17 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Brand, Category, Product } from '@/constants/data';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { ProductSizes } from './product-sizes';
+import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toastMsg } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Brand, Category, Product } from 'types';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -283,7 +283,7 @@ export default function ProductForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Variants</FormLabel>
-                    <ProductSizes name={field.name} />
+                    <ProductVariants name={field.name} />
                     <FormMessage />
                   </FormItem>
                 )}

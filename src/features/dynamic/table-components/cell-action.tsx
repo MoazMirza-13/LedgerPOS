@@ -8,16 +8,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Brand, Category, Product } from '@/constants/data';
 import { deleteContent } from '@/lib/actions';
 import { toastMsg } from '@/lib/utils';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { itemData } from 'types';
 
 interface CellActionProps {
-  itemData: Category | Product | Brand;
+  itemData: itemData;
   itemTable: string;
 }
 

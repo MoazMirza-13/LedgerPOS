@@ -3,7 +3,12 @@
 import { createClient } from '../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { Brand, Category, Product } from '@/constants/data';
+import { Brand, Category, itemData, Product } from 'types';
+
+export const getSupabaseClient = async () => {
+  // for util functions
+  return await createClient();
+};
 
 export async function signIn(credentials: { email: string; password: string }) {
   try {
@@ -156,10 +161,7 @@ export async function categoryBrandSubmit(
   }
 }
 
-export async function deleteContent(
-  itemTable: string,
-  itemData: Category | Brand | Product
-) {
+export async function deleteContent(itemTable: string, itemData: itemData) {
   try {
     const supabase = await createClient();
     const { error } = await supabase

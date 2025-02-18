@@ -36,6 +36,7 @@ export const navItems: NavItem[] = [
   }
 ];
 
+// demo for dashboard
 export interface SaleUser {
   id: number;
   name: string;
@@ -87,30 +88,3 @@ export const recentSalesData: SaleUser[] = [
     initials: 'SD'
   }
 ];
-
-export type Product = {
-  title: string;
-  description: string;
-  created_at: string;
-  price: number;
-  id: string;
-  category_id: string;
-  img_url: string;
-  brand_id: string;
-  variants: string[];
-};
-
-export type Category = {
-  title: string;
-  created_at: string;
-  id: number;
-  description: string;
-};
-
-// currently same, schema might get updated later
-export type Brand = {
-  title: string;
-  created_at: string;
-  id: number;
-  description: string;
-};

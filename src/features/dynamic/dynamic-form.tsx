@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Brand, Category } from '@/constants/data';
 import { categoryBrandSubmit } from '@/lib/actions';
 import { toastMsg } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Brand, Category } from 'types';
 import * as z from 'zod';
 
 export default function DynamicForm({

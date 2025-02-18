@@ -11,7 +11,7 @@ interface ProductSizesProps {
   name: string;
 }
 
-export function ProductSizes({ name }: ProductSizesProps) {
+export function ProductVariants({ name }: ProductSizesProps) {
   const { control } = useFormContext();
   const [newSize, setNewSize] = useState('');
 

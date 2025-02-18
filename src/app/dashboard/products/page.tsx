@@ -46,7 +46,7 @@ export default async function Page(props: pageProps) {
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
         >
-          <ListingPage type={'products'} />
+          <ListingPage type='products' />
         </Suspense>
       </div>
     </PageContainer>

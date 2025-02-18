@@ -2,10 +2,9 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { Brand, Category, Product } from '@/constants/data';
+import { itemData, itemTable } from 'types';
 
-type itemTable = 'categories' | 'products' | 'brands';
-type Entity = Category | Product | Brand;
+type Entity = itemData;
 
 export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
   const baseColumns: ColumnDef<T>[] = [];
