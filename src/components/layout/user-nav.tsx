@@ -12,18 +12,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/lib/actions';
 
-type UserProps = {
-  user: object | null;
-};
+interface UserNavProps {
+  user?: {
+    email?: string;
+    // Add other expected properties
+  };
+}
 
-export function UserNav({ user }: UserProps) {
+export function UserNav({ user }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             <AvatarFallback>
-              {(user as any)?.session?.user?.email?.[0]?.toUpperCase() ?? ''}
+              {user?.email?.[0]?.toUpperCase() ?? ''}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -32,10 +35,10 @@ export function UserNav({ user }: UserProps) {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {/* {session.user?.name} */}
+              {/* {user?.name} */}
             </p>
             <p className='text-xs leading-none text-muted-foreground'>
-              {(user as any)?.session?.user?.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>

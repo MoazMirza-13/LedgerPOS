@@ -32,5 +32,6 @@ export const toastMsg = {
   dynamicUpdate: (type: string) => `${type} has been updated`,
   error: 'Something went wrong',
   imageUploadError: 'Image upload failed',
-  signIn: 'Signed In Successfully!'
+  signIn: 'Signed In Successfully!',
+  deleteItem: 'Item has been deleted'
 };

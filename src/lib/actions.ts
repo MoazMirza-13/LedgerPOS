@@ -22,6 +22,18 @@ export async function signOut() {
   redirect('/');
 }
 
+export async function getUserSession() {
+  const supabase = await createClient();
+  const { data: user, error } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error('Error getting session:', error);
+    return null;
+  }
+
+  return user;
+}
+
 export async function imageUpload(file: File) {
   try {
     const supabase = await createClient();
@@ -141,5 +153,22 @@ export async function categoryBrandSubmit(
     }
   } catch (error: any) {
     return { error };
+  }
+}
+
+export async function deleteContent(
+  itemTable: string,
+  itemData: Category | Brand | Product
+) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from(itemTable)
+      .delete()
+      .eq('id', itemData.id);
+    if (!error) revalidatePath(`/dashboard/${itemTable}`);
+    if (error) throw error;
+  } catch (error: any) {
+    return error;
   }
 }

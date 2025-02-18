@@ -8,14 +8,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Category, Product } from '@/constants/data';
-import { createClient } from '@/utils/supabase/client';
+import { Brand, Category, Product } from '@/constants/data';
+import { deleteContent } from '@/lib/actions';
+import { toastMsg } from '@/lib/utils';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CellActionProps {
-  itemData: Category | Product;
+  itemData: Category | Product | Brand;
   itemTable: string;
 }
 
@@ -28,12 +30,13 @@ export const CellAction: React.FC<CellActionProps> = ({
   const router = useRouter();
 
   const onConfirm = async () => {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from(`${itemTable}`)
-      .delete()
-      .eq('id', itemData.id);
-    setOpen(false);
+    const error = await deleteContent(itemTable, itemData);
+    if (error) {
+      toast.error(toastMsg.error);
+    } else {
+      toast.success(toastMsg.deleteItem);
+      setOpen(false);
+    }
   };
 
   return (

@@ -5,10 +5,11 @@ import { Breadcrumbs } from '../breadcrumbs';
 import SearchInput from '../search-input';
 import { UserNav } from './user-nav';
 import ThemeToggle from './ThemeToggle/theme-toggle';
-import { getUserSession } from '@/utils/supaServer';
+import { getUserSession } from '@/lib/actions';
 
 export default async function Header() {
-  const user = await getUserSession();
+  const session = await getUserSession();
+  const user = session?.user;
 
   return (
     <header className='flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12'>
