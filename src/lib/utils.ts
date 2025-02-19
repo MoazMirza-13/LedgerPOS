@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getSupabaseClient } from './actions';
+import { validate as uuidValidate } from 'uuid';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,3 +45,7 @@ export const getImageUrl = async (img: string) => {
     : null;
   return imgUrl;
 };
+
+export function checkUUID(id: string): boolean {
+  return uuidValidate(id);
+}
