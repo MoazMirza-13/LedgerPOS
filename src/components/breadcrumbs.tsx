@@ -1,4 +1,6 @@
 'use client';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBreadcrumbs } from '@/hooks/use-breadcrumbs';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,35 +8,39 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
-import { useBreadcrumbs } from '@/hooks/use-breadcrumbs';
-import { Slash } from 'lucide-react';
+} from './ui/breadcrumb';
 import { Fragment } from 'react';
+import { Slash } from 'lucide-react';
 
 export function Breadcrumbs() {
-  const items = useBreadcrumbs();
-  if (items.length === 0) return null;
+  const { breadcrumbs, loading } = useBreadcrumbs();
 
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {items.map((item, index) => (
-          <Fragment key={item.title}>
-            {index !== items.length - 1 && (
-              <BreadcrumbItem className='hidden md:block'>
-                <BreadcrumbLink href={item.link}>{item.title}</BreadcrumbLink>
-              </BreadcrumbItem>
-            )}
-            {index < items.length - 1 && (
-              <BreadcrumbSeparator className='hidden md:block'>
-                <Slash />
-              </BreadcrumbSeparator>
-            )}
-            {index === items.length - 1 && (
-              <BreadcrumbPage>{item.title}</BreadcrumbPage>
-            )}
+        {loading ? (
+          <Fragment>
+            <Skeleton className='h-6 w-[250px] rounded-md bg-gray-200' />
           </Fragment>
-        ))}
+        ) : (
+          breadcrumbs?.map((item, index) => (
+            <Fragment key={item.title}>
+              {index !== breadcrumbs.length - 1 && (
+                <BreadcrumbItem className='hidden md:block'>
+                  <BreadcrumbLink href={item.link}>{item.title}</BreadcrumbLink>
+                </BreadcrumbItem>
+              )}
+              {index < breadcrumbs.length - 1 && (
+                <BreadcrumbSeparator className='hidden md:block'>
+                  <Slash />
+                </BreadcrumbSeparator>
+              )}
+              {index === breadcrumbs.length - 1 && (
+                <BreadcrumbPage>{item.title}</BreadcrumbPage>
+              )}
+            </Fragment>
+          ))
+        )}
       </BreadcrumbList>
     </Breadcrumb>
   );

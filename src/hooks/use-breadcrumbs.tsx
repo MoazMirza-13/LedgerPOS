@@ -1,15 +1,15 @@
 'use client';
-
+import { getDataById } from '@/lib/actions';
 import { checkUUID } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 
 type BreadcrumbItem = {
   title: string;
   link: string;
 };
 
-// This allows to add custom title as well
+// Predefined route mappings
 const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard': [{ title: 'Dashboard', link: '/dashboard' }],
   '/dashboard/product': [
@@ -24,43 +24,46 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
     { title: 'Dashboard', link: '/dashboard' },
     { title: 'Brands', link: '/dashboard/brands' }
   ]
-  // Add more custom mappings as needed
 };
 
 export function useBreadcrumbs() {
   const pathname = usePathname();
+  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const breadcrumbs = useMemo(() => {
-    // Check if we have a custom mapping for this exact path
-    if (routeMapping[pathname]) {
-      return routeMapping[pathname];
-    }
-
-    // If no exact match, fall back to generating breadcrumbs from the path
-    const segments = pathname.split('/').filter(Boolean);
-    return segments.map((segment, index) => {
-      const path = `/${segments.slice(0, index + 1).join('/')}`;
-      const link = path;
-
-      let title = '';
-      title = segment.charAt(0).toUpperCase() + segment.slice(1);
-      const checkId = checkUUID(title);
-
-      if (checkId) {
-        console.log('yes');
-        const types = ['brands', 'products', 'categories'];
-        const type = types.find((t) => pathname.includes(`/${t}/`)) || null;
-        console.log('🚀 ~ returnsegments.map ~ type:', type);
+  useEffect(() => {
+    const generateBreadcrumbs = async () => {
+      if (routeMapping[pathname]) {
+        setBreadcrumbs(routeMapping[pathname]);
+        setLoading(false);
+        return;
       }
 
-      console.log('🚀 ~  ~ title:', title);
-      console.log('🚀 ~  ~ link:', link);
-      return {
-        title,
-        link
-      };
-    });
+      const segments = pathname.split('/').filter(Boolean);
+      const types = ['brands', 'products', 'categories'];
+      const type = types.find((t) => pathname.includes(`/${t}/`)) || null;
+      const lastSegment = segments[segments.length - 1];
+      const checkId = checkUUID(lastSegment);
+
+      let updatedBreadcrumbs = segments.map((segment, index) => ({
+        title: segment.charAt(0).toUpperCase() + segment.slice(1),
+        link: `/${segments.slice(0, index + 1).join('/')}`
+      }));
+
+      if (checkId && type) {
+        const fetchedData = await getDataById(type, lastSegment);
+        if (fetchedData?.title) {
+          updatedBreadcrumbs[updatedBreadcrumbs.length - 1].title =
+            fetchedData.title;
+        }
+      }
+
+      setBreadcrumbs(updatedBreadcrumbs);
+      setLoading(false);
+    };
+
+    generateBreadcrumbs();
   }, [pathname]);
 
-  return breadcrumbs;
+  return { breadcrumbs, loading };
 }
