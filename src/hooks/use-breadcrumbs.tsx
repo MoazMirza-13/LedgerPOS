@@ -1,18 +1,17 @@
 'use client';
-import { getDataById } from '@/lib/actions';
+import { useItemQuery } from '@/lib/tanStack-action';
 import { checkUUID } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 type BreadcrumbItem = {
   title: string;
   link: string;
 };
 
-// Predefined route mappings
 const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard': [{ title: 'Dashboard', link: '/dashboard' }],
-  '/dashboard/product': [
+  '/dashboard/products': [
     { title: 'Dashboard', link: '/dashboard' },
     { title: 'Products', link: '/dashboard/products' }
   ],
@@ -28,42 +27,53 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
 
 export function useBreadcrumbs() {
   const pathname = usePathname();
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const segments = pathname.split('/').filter(Boolean);
 
-  useEffect(() => {
-    const generateBreadcrumbs = async () => {
-      if (routeMapping[pathname]) {
-        setBreadcrumbs(routeMapping[pathname]);
-        setLoading(false);
-        return;
-      }
+  // Memoized values to prevent unnecessary recalculations
+  const { type, id, isDynamicRoute } = useMemo(() => {
+    const types = ['brands', 'products', 'categories'];
+    const lastSegment = segments[segments.length - 1] || '';
+    const type = types.find((t) => pathname.includes(`/${t}/`)) || '';
+    const checkId = checkUUID(lastSegment);
 
-      const segments = pathname.split('/').filter(Boolean);
-      const types = ['brands', 'products', 'categories'];
-      const type = types.find((t) => pathname.includes(`/${t}/`)) || null;
-      const lastSegment = segments[segments.length - 1];
-      const checkId = checkUUID(lastSegment);
-
-      let updatedBreadcrumbs = segments.map((segment, index) => ({
-        title: segment.charAt(0).toUpperCase() + segment.slice(1),
-        link: `/${segments.slice(0, index + 1).join('/')}`
-      }));
-
-      if (checkId && type) {
-        const fetchedData = await getDataById(type, lastSegment);
-        if (fetchedData?.title) {
-          updatedBreadcrumbs[updatedBreadcrumbs.length - 1].title =
-            fetchedData.title;
-        }
-      }
-
-      setBreadcrumbs(updatedBreadcrumbs);
-      setLoading(false);
+    return {
+      type,
+      id: checkId ? lastSegment : '',
+      isDynamicRoute: checkId && !!type
     };
+  }, [pathname, segments]);
 
-    generateBreadcrumbs();
-  }, [pathname]);
+  // Only fetch data when we have a valid dynamic route
+  const { data: dynamicData, isLoading } = useItemQuery(type, id);
 
-  return { breadcrumbs, loading };
+  // Generate breadcrumbs with memoization
+  const breadcrumbs = useMemo(() => {
+    // Return predefined routes immediately
+    if (routeMapping[pathname]) return routeMapping[pathname];
+
+    return segments.map((segment, index) => {
+      const isLast = index === segments.length - 1;
+      const fullPath = `/${segments.slice(0, index + 1).join('/')}`;
+
+      // Handle dynamic segment replacement
+      if (isLast && isDynamicRoute) {
+        return {
+          title:
+            !isLoading && dynamicData?.title && !checkUUID(dynamicData.title)
+              ? dynamicData.title
+              : '',
+          link: fullPath
+        };
+      }
+
+      return {
+        title: segment.charAt(0).toUpperCase() + segment.slice(1),
+        link: fullPath
+      };
+    });
+  }, [pathname, segments, isDynamicRoute, dynamicData]);
+
+  return {
+    breadcrumbs
+  };
 }

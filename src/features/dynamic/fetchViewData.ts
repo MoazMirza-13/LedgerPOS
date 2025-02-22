@@ -1,10 +1,15 @@
 import { getDataById } from '@/lib/actions';
 import { getImageUrl } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
+import { QueryClient } from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
 import { Brand, Category, itemTable, Product } from 'types';
 
-export async function fetchViewData(type: itemTable, id: string) {
+export async function fetchViewData(
+  queryClient: QueryClient,
+  type: itemTable,
+  id: string
+) {
   try {
     const supabase = await createClient();
 
@@ -22,13 +27,19 @@ export async function fetchViewData(type: itemTable, id: string) {
 
     if (id !== 'new') {
       try {
-        const fetchedData = await getDataById(type, id);
+        await queryClient.prefetchQuery({
+          queryKey: [type, id],
+          queryFn: () => getDataById(type, id),
+          staleTime: Infinity // Never refetch automatically
+        });
 
-        if (type === 'products') {
+        const fetchedData = queryClient.getQueryData([type, id]);
+
+        if (type === 'products' && fetchedData) {
           data = {
             ...fetchedData,
-            img_url: await getImageUrl(fetchedData.img_url)
-          } as Product;
+            img_url: await getImageUrl((fetchedData as Product).img_url)
+          };
           showUploader = false;
         } else {
           data = fetchedData as Category | Brand;

@@ -24,15 +24,11 @@ export default async function RootLayout({
 }) {
   return (
     <html lang='en' className={`${lato.className}`} suppressHydrationWarning>
-      <body
-        className={'overflow-hidden'}
-        data-new-gr-c-s-check-loaded='14.1209.0'
-        data-gr-ext-installed=''
-      >
+      <body className={'overflow-hidden'} suppressHydrationWarning>
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <Providers>
-            <Toaster />
+            <Toaster expand={true} />
             {children}
           </Providers>
         </NuqsAdapter>

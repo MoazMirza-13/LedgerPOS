@@ -3,7 +3,6 @@
 import { createClient } from '../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { cache } from 'react';
 import { Brand, Category, itemData, Product } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -176,7 +175,7 @@ export async function deleteContent(itemTable: string, itemData: itemData) {
   }
 }
 
-export const getDataById = cache(async (type: string, id: string) => {
+export const getDataById = async (type: string, id: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from(type)
@@ -186,4 +185,4 @@ export const getDataById = cache(async (type: string, id: string) => {
 
   if (error) throw error;
   return data;
-});
+};
