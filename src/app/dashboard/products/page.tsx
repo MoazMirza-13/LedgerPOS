@@ -11,6 +11,8 @@ import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
 import ProductTableAction from '@/features/products/components/product-tables/product-table-action';
 import ListingPage from '@/features/dynamic/listing';
+import { fetchListingData } from '@/features/dynamic/fetchListingData';
+import { itemData } from 'types';
 
 export const metadata = {
   title: 'Dashboard: Products'
@@ -27,6 +29,9 @@ export default async function Page(props: pageProps) {
 
   // This key is used for invoke suspense if any of the search params changed (used for filters).
   const key = serialize({ ...searchParams });
+
+  const data = await fetchListingData('products');
+  const items_data: itemData[] = data ? data : [];
 
   return (
     <PageContainer scrollable={false}>
@@ -46,7 +51,7 @@ export default async function Page(props: pageProps) {
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
         >
-          <ListingPage type='products' />
+          <ListingPage type={'products'} data={items_data} />
         </Suspense>
       </div>
     </PageContainer>

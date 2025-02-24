@@ -21,18 +21,18 @@ export default function ProductTableAction() {
   return (
     <div className='flex flex-wrap items-center gap-4'>
       <DataTableSearch
-        searchKey='name'
+        searchKey='title'
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         setPage={setPage}
       />
-      <DataTableFilterBox
+      {/* <DataTableFilterBox
         filterKey='categories'
         title='Categories'
         options={CATEGORY_OPTIONS}
         setFilterValue={setCategoriesFilter}
         filterValue={categoriesFilter}
-      />
+      /> */}
       <DataTableResetFilter
         isFilterActive={isAnyFilterActive}
         onReset={resetFilters}

@@ -1,31 +1,36 @@
 import { searchParamsCache } from '@/lib/searchparams';
 import TableClientSide from '@/features/dynamic/table-components/tableClient';
-import { fetchListingData } from './fetchListingData';
 import { itemData, itemTable } from 'types';
 
-export default async function ListingPage({ type }: { type: itemTable }) {
-  const data = await fetchListingData(type);
+type ListingPageProps = {
+  type: itemTable;
+  data: itemData[];
+};
 
-  const items_data: itemData[] = data ? data : [];
+export default async function ListingPage({ type, data }: ListingPageProps) {
+  // Showcasing the use of search params cache in nested RSCs
+  const search = searchParamsCache.get('q');
 
-  //   // Showcasing the use of search params cache in nested RSCs
-  //   const page = searchParamsCache.get('page');
-  //   const search = searchParamsCache.get('q');
-  //   const pageLimit = searchParamsCache.get('limit');
-  //   const categories = searchParamsCache.get('categories');
+  const filteredData = search
+    ? data.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase())
+      )
+    : data;
 
-  //   const filters = {
-  //     page,
-  //     limit: pageLimit,
-  //     ...(search && { search }),
-  //     ...(categories && { categories: categories })
-  //   };
+  // const page = searchParamsCache.get('page');
+  // const categories = searchParamsCache.get('categories');
+  // const pageLimit = searchParamsCache.get('limit');
 
-  // const data = await fakeProducts.getProducts(filters);
+  const filters = {
+    // page,
+    // limit: pageLimit,
+    // ...(search && { search }) // ✅
+    // ...(categories && { categories: categories })
+  };
 
   return (
     <>
-      <TableClientSide type={type} data={items_data} />
+      <TableClientSide type={type} data={filteredData} />
     </>
   );
 }
