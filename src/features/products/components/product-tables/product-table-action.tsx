@@ -3,15 +3,23 @@
 import { DataTableFilterBox } from '@/components/ui/table/data-table-filter-box';
 import { DataTableResetFilter } from '@/components/ui/table/data-table-reset-filter';
 import { DataTableSearch } from '@/components/ui/table/data-table-search';
-import {
-  CATEGORY_OPTIONS,
-  useProductTableFilters
-} from './use-product-table-filters';
+import { useProductTableFilters } from './use-product-table-filters';
+import { Brand, Category } from 'types';
 
-export default function ProductTableAction() {
+type ProductTableActionProps = {
+  categories: Category[];
+  brands: Brand[];
+};
+
+export default function ProductTableAction({
+  categories,
+  brands
+}: ProductTableActionProps) {
   const {
     categoriesFilter,
     setCategoriesFilter,
+    brandsFilter,
+    setBrandsFilter,
     isAnyFilterActive,
     resetFilters,
     searchQuery,
@@ -26,13 +34,21 @@ export default function ProductTableAction() {
         setSearchQuery={setSearchQuery}
         setPage={setPage}
       />
-      {/* <DataTableFilterBox
+      <DataTableFilterBox
         filterKey='categories'
         title='Categories'
-        options={CATEGORY_OPTIONS}
+        options={categories}
         setFilterValue={setCategoriesFilter}
         filterValue={categoriesFilter}
-      /> */}
+      />
+      <DataTableFilterBox
+        filterKey='brands'
+        title='Brands'
+        options={brands}
+        setFilterValue={setBrandsFilter}
+        filterValue={brandsFilter}
+      />
+
       <DataTableResetFilter
         isFilterActive={isAnyFilterActive}
         onReset={resetFilters}

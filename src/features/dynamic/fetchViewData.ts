@@ -1,6 +1,5 @@
-import { getDataById } from '@/lib/actions';
+import { getCategoriesBrandsData, getDataById } from '@/lib/actions';
 import { getImageUrl } from '@/lib/utils';
-import { createClient } from '@/utils/supabase/server';
 import { QueryClient } from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
 import { Brand, Category, itemTable, Product } from 'types';
@@ -11,8 +10,6 @@ export async function fetchViewData(
   id: string
 ) {
   try {
-    const supabase = await createClient();
-
     let data = null;
     let categories = null;
     let brands = null;
@@ -52,11 +49,9 @@ export async function fetchViewData(
     }
 
     if (type === 'products') {
-      const { data: categoryBrandData, error } = await supabase
-        .from('combined_categories_brands')
-        .select('*');
+      const categoryBrandData = await getCategoriesBrandsData();
 
-      if (!error) {
+      if (categoryBrandData) {
         categories = categoryBrandData[0].categories;
         brands = categoryBrandData[0].brands;
       }

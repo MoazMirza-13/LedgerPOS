@@ -3,6 +3,7 @@
 import { createClient } from '../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 import { Brand, Category, itemData, Product } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -186,3 +187,13 @@ export const getDataById = async (type: string, id: string) => {
   if (error) throw error;
   return data;
 };
+
+export const getCategoriesBrandsData = cache(async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('combined_categories_brands')
+    .select('*');
+
+  if (error) throw error;
+  return data;
+});

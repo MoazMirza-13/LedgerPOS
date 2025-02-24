@@ -13,6 +13,7 @@ import ProductTableAction from '@/features/products/components/product-tables/pr
 import ListingPage from '@/features/dynamic/listing';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
 import { itemData } from 'types';
+import { getCategoriesBrandsData } from '@/lib/actions';
 
 export const metadata = {
   title: 'Dashboard: Products'
@@ -33,6 +34,10 @@ export default async function Page(props: pageProps) {
   const data = await fetchListingData('products');
   const items_data: itemData[] = data ? data : [];
 
+  const categoryBrandData = await getCategoriesBrandsData();
+  const categories = categoryBrandData ? categoryBrandData[0].categories : [];
+  const brands = categoryBrandData ? categoryBrandData[0].brands : [];
+
   return (
     <PageContainer scrollable={false}>
       <div className='flex flex-1 flex-col space-y-4'>
@@ -46,7 +51,7 @@ export default async function Page(props: pageProps) {
           </Link>
         </div>
         <Separator />
-        <ProductTableAction />
+        <ProductTableAction categories={categories} brands={brands} />
         <Suspense
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}

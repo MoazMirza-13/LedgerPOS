@@ -18,14 +18,13 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { PlusCircledIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { CheckIcon } from 'lucide-react';
 import { Options } from 'nuqs';
 import React from 'react';
 
 interface FilterOption {
-  value: string;
-  label: string;
+  title: string;
   icon?: React.ComponentType<{ className?: string }>;
 }
 
@@ -69,7 +68,7 @@ export function DataTableFilterBox({
     <Popover>
       <PopoverTrigger asChild>
         <Button variant='outline' className='border-dashed'>
-          <PlusCircledIcon className='mr-2 h-4 w-4' />
+          <MagnifyingGlassIcon className='mr-2 h-4 w-4' />
           {title}
           {selectedValuesSet.size > 0 && (
             <>
@@ -95,8 +94,8 @@ export function DataTableFilterBox({
                       key={value}
                       className='rounded-sm px-1 font-normal'
                     >
-                      {options.find((option) => option.value === value)
-                        ?.label || value}
+                      {options.find((option) => option.title === value)
+                        ?.title || value}
                     </Badge>
                   ))
                 )}
@@ -113,13 +112,13 @@ export function DataTableFilterBox({
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
-                  key={option.value}
-                  onSelect={() => handleSelect(option.value)}
+                  key={option.title}
+                  onSelect={() => handleSelect(option.title)}
                 >
                   <div
                     className={cn(
                       'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      selectedValuesSet.has(option.value)
+                      selectedValuesSet.has(option.title)
                         ? 'bg-primary text-primary-foreground'
                         : 'opacity-50 [&_svg]:invisible'
                     )}
@@ -132,7 +131,7 @@ export function DataTableFilterBox({
                       aria-hidden='true'
                     />
                   )}
-                  <span>{option.label}</span>
+                  <span>{option.title}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

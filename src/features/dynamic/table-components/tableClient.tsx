@@ -7,10 +7,13 @@ import { itemData, itemTable } from 'types';
 interface TableClientProps {
   data: itemData[];
   type: itemTable;
+  total: number;
 }
 
-export default function TableClientSide({ data, type }: TableClientProps) {
-  return (
-    <DataTable columns={columns(type)} data={data} totalItems={data.length} />
-  );
+export default function TableClientSide({
+  data,
+  type,
+  total
+}: TableClientProps) {
+  return <DataTable columns={columns(type)} data={data} totalItems={total} />;
 }

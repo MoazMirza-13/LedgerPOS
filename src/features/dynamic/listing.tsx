@@ -10,27 +10,38 @@ type ListingPageProps = {
 export default async function ListingPage({ type, data }: ListingPageProps) {
   // Showcasing the use of search params cache in nested RSCs
   const search = searchParamsCache.get('q');
+  const page = Number(searchParamsCache.get('page'));
+  const limit = Number(searchParamsCache.get('limit'));
+  const categories = searchParamsCache.get('categories')?.split('.') || []; // separate them using "." if multiple
+  const brands = searchParamsCache.get('brands')?.split('.') || [];
 
-  const filteredData = search
-    ? data.filter((item) =>
-        item.title.toLowerCase().includes(search.toLowerCase())
-      )
-    : data;
+  const filteredData = data.filter((item) => {
+    const matchesSearch = search
+      ? item.title.toLowerCase().includes(search.toLowerCase())
+      : true;
 
-  // const page = searchParamsCache.get('page');
-  // const categories = searchParamsCache.get('categories');
-  // const pageLimit = searchParamsCache.get('limit');
+    const matchesCategory =
+      categories.length && 'categories' in item
+        ? categories.includes(item.categories?.title || '')
+        : true;
 
-  const filters = {
-    // page,
-    // limit: pageLimit,
-    // ...(search && { search }) // ✅
-    // ...(categories && { categories: categories })
-  };
+    const matchesBrand =
+      brands.length && 'brands' in item
+        ? brands.includes(item.brands?.title || '')
+        : true;
+
+    return matchesSearch && matchesCategory && matchesBrand;
+  });
+
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  const paginatedData = filteredData.slice(start, end);
+
+  const total_length = filteredData.length;
 
   return (
     <>
-      <TableClientSide type={type} data={filteredData} />
+      <TableClientSide type={type} data={paginatedData} total={total_length} />
     </>
   );
 }
