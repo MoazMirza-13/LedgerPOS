@@ -9,11 +9,11 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
-import ProductTableAction from '@/features/products/components/product-tables/product-table-action';
 import ListingPage from '@/features/dynamic/listing';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
 import { itemData } from 'types';
 import { getCategoriesBrandsData } from '@/lib/actions';
+import TableAction from '@/features/dynamic/table-components/table-action';
 
 export const metadata = {
   title: 'Dashboard: Products'
@@ -51,7 +51,7 @@ export default async function Page(props: pageProps) {
           </Link>
         </div>
         <Separator />
-        <ProductTableAction categories={categories} brands={brands} />
+        <TableAction categories={categories} brands={brands} />
         <Suspense
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}

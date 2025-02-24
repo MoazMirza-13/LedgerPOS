@@ -10,6 +10,9 @@ import Link from 'next/link';
 import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
 import ListingPage from '@/features/dynamic/listing';
+import { fetchListingData } from '@/features/dynamic/fetchListingData';
+import { itemData } from 'types';
+import TableAction from '@/features/dynamic/table-components/table-action';
 
 export const metadata = {
   title: 'Dashboard: Categories'
@@ -27,6 +30,9 @@ export default async function Page(props: pageProps) {
   // This key is used for invoke suspense if any of the search params changed (used for filters).
   const key = serialize({ ...searchParams });
 
+  const data = await fetchListingData('categories');
+  const items_data: itemData[] = data ? data : [];
+
   return (
     <PageContainer scrollable={false}>
       <div className='flex flex-1 flex-col space-y-4'>
@@ -40,12 +46,13 @@ export default async function Page(props: pageProps) {
           </Link>
         </div>
         <Separator />
-        {/* <Suspense
+        <TableAction />
+        <Suspense
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
         >
-          <ListingPage type={'categories'} />
-        </Suspense> */}
+          <ListingPage type={'categories'} data={items_data} />
+        </Suspense>
       </div>
     </PageContainer>
   );
