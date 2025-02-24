@@ -40,12 +40,12 @@ export default async function Page(props: pageProps) {
           </Link>
         </div>
         <Separator />
-        <Suspense
+        {/* <Suspense
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
         >
           <ListingPage type={'categories'} />
-        </Suspense>
+        </Suspense> */}
       </div>
     </PageContainer>
   );

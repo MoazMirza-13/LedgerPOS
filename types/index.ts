@@ -35,6 +35,9 @@ export type Product = {
   img_url: string;
   brand_id: string;
   variants: string[];
+  // for category and brand title in table
+  categories?: Category;
+  brands?: Brand;
 };
 
 export type Category = {
