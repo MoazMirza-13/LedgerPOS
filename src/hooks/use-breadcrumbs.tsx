@@ -29,6 +29,12 @@ export function useBreadcrumbs() {
   const pathname = usePathname();
   const segments = pathname.split('/').filter(Boolean);
 
+  // Find and clean the "new" segment
+  const newIndex = segments.findIndex((segment) => segment.startsWith('new'));
+  if (newIndex !== -1) {
+    segments[newIndex] = segments[newIndex].split('?')[0]; // Remove query params from /new route
+  }
+
   // Memoized values to prevent unnecessary recalculations
   const { type, id, isDynamicRoute } = useMemo(() => {
     const types = ['brands', 'products', 'categories'];

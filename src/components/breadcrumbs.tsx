@@ -8,11 +8,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from './ui/breadcrumb';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Slash } from 'lucide-react';
 
 export function Breadcrumbs() {
   const { breadcrumbs } = useBreadcrumbs();
+
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) return null; // Prevent rendering until hydration is complete
 
   return (
     <Breadcrumb>
