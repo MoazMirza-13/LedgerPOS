@@ -27,7 +27,7 @@ import * as z from 'zod';
 import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
 import { LoaderCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { toastMsg } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
@@ -53,10 +53,28 @@ export default function ProductForm({
   brands: Brand[] | null;
   showUploader: boolean;
 }) {
+  const searchParams = useSearchParams();
+  const brand = searchParams.get('brand');
+  const category = searchParams.get('category');
+
+  if (
+    (brand && !brands?.some((b) => b.title === brand)) ||
+    (category && !categories?.some((c) => c.title === category))
+  ) {
+    notFound();
+  }
+
+  const brandIdFromURL = brands?.find((b) => b.title === brand)?.id || '';
+
+  const categoryIdFromURL =
+    categories?.find((c) => c.title === category)?.id || '';
+
   const defaultValues = {
     name: initialData?.title || '',
-    category: initialData?.category_id || '',
-    brand: initialData?.brand_id || '',
+    category: category
+      ? String(categoryIdFromURL)
+      : initialData?.category_id || '',
+    brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
     price: initialData?.price || 0,
     description: initialData?.description || '',
     productVariants: initialData?.variants || []

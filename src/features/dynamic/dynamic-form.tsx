@@ -17,12 +17,14 @@ import { categoryBrandSubmit } from '@/lib/actions';
 import { toastMsg } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Brand, Category } from 'types';
 import * as z from 'zod';
+import AddProductButton from './add-product';
+import Link from 'next/link';
 
 export default function DynamicForm({
   initialData,
@@ -69,12 +71,21 @@ export default function DynamicForm({
     });
   };
 
+  const pathname = usePathname();
+  const newPath = pathname.includes('new');
+  const newLink = `/dashboard/products/new?${title.toLowerCase()}=${initialData?.title}`;
+
   return (
     <Card className='mx-auto w-full'>
-      <CardHeader>
+      <CardHeader className='flex flex-row items-center justify-between'>
         <CardTitle className='text-left text-2xl font-bold'>
           {pageTitle}
         </CardTitle>
+        {!newPath && (
+          <Link href={newLink}>
+            <AddProductButton />
+          </Link>
+        )}
       </CardHeader>
       <CardContent>
         <Form {...form}>
