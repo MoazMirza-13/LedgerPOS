@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Brand, Category } from 'types';
 import * as z from 'zod';
-import AddProductButton from './add-product';
+import AddProductButton from '../../components/ui/add-product';
 import Link from 'next/link';
 
 export default function DynamicForm({
