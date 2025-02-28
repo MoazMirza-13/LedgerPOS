@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getSupabaseClient } from './actions';
 import { validate as uuidValidate } from 'uuid';
+import { createClient } from '@/utils/supabase/client';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -40,6 +41,15 @@ export const toastMsg = {
 
 export const getImageUrl = async (img: string) => {
   const supabase = await getSupabaseClient();
+  const imgUrl = img
+    ? supabase.storage.from('product_imgs').getPublicUrl(img).data.publicUrl
+    : null;
+  return imgUrl;
+};
+
+// for client side components
+export const getClientImageUrl = async (img: string) => {
+  const supabase = createClient();
   const imgUrl = img
     ? supabase.storage.from('product_imgs').getPublicUrl(img).data.publicUrl
     : null;
