@@ -14,21 +14,19 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { categoryBrandSubmit } from '@/lib/actions';
-import { getClientImageUrl, getImageUrl, toastMsg } from '@/lib/utils';
+import { toastMsg } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Suspense, use, useActionState, useTransition } from 'react';
+import { startTransition, useActionState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Brand, Category, itemTable, Product } from 'types';
+import { Brand, Category, Product } from 'types';
 import * as z from 'zod';
 import AddProductButton from '../../components/ui/add-product';
 import Link from 'next/link';
 import TableClientSide from './table-components/tableClient';
-import { createClient } from '@/utils/supabase/client';
-import { useQuery } from '@tanstack/react-query';
-import PageContainer from '@/components/layout/page-container';
+import { getProducts } from '../products/get-products';
 
 export default function DynamicForm({
   initialData,
@@ -58,11 +56,11 @@ export default function DynamicForm({
     values: defaultValues
   });
 
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startFormTransition] = useTransition();
   const router = useRouter();
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    startTransition(async () => {
+    startFormTransition(async () => {
       const res = await categoryBrandSubmit(values, initialData, type);
       const entity = type === 'categories' ? 'Category' : 'Brand';
 
@@ -79,41 +77,10 @@ export default function DynamicForm({
   const newPath = pathname.includes('new');
   const newLink = `/dashboard/products/new?${title.toLowerCase()}=${initialData?.title}`;
 
-  const getProducts = async () => {
-    const supabase = createClient();
-    let data;
-    const { data: productsData, error } = await supabase.from('products')
-      .select(`
-            *,
-            categories (title),
-            brands (title)
-          `);
-    if (error) return;
-
-    const productsWithImg = productsData
-      ? await Promise.all(
-          productsData.map(async (product) => ({
-            ...product,
-            img_url: await getClientImageUrl(product.img_url)
-          }))
-        )
-      : null;
-
-    data = productsWithImg;
-
-    return data?.reverse();
-  };
-
-  const {
-    data: productsData,
-    isLoading,
-    error,
-    refetch
-  } = useQuery({
-    queryKey: ['products', type],
-    queryFn: getProducts,
-    enabled: false // This prevents auto-fetching on component mount
-  });
+  const [productsRes, productsAction, productsIsPending] = useActionState(
+    () => (initialData ? getProducts(initialData, pathname) : null),
+    null
+  );
 
   return (
     <>
@@ -182,22 +149,34 @@ export default function DynamicForm({
           </Form>
         </CardContent>
       </Card>
-      <div>
-        <Button onClick={() => refetch()}>View Products</Button>
-      </div>
-      {productsData && (
-        <PageContainer scrollable={false}>
-          <div
-            className='flex flex-1 flex-col space-y-4'
-            style={{ minHeight: '400px' }}
-          >
-            <TableClientSide
-              type={'products'}
-              data={productsData as Product[]}
-              total={productsData?.length as number}
-            />
-          </div>
-        </PageContainer>
+
+      {/* table */}
+      {productsRes ? (
+        <div
+          className='flex flex-1 flex-col space-y-4'
+          style={{ minHeight: '600px' }}
+        >
+          <TableClientSide
+            type={'products'}
+            data={productsRes as Product[]}
+            total={productsRes?.length as number}
+          />
+        </div>
+      ) : (
+        <Button
+          className='flex w-40 gap-2'
+          disabled={productsIsPending}
+          onClick={() => {
+            startTransition(() => {
+              productsAction();
+            });
+          }}
+        >
+          View Products
+          {productsIsPending && (
+            <LoaderCircle className='h-5 w-5 animate-spin' />
+          )}
+        </Button>
       )}
     </>
   );

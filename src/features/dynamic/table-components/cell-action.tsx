@@ -36,6 +36,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     } else {
       toast.success(toastMsg.deleteItem);
       setOpen(false);
+      router.push(`/dashboard/${itemTable}`);
     }
   };
 
