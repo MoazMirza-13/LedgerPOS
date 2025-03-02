@@ -3,6 +3,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { itemData, itemTable } from 'types';
+import Link from 'next/link';
 
 type Entity = itemData;
 
@@ -11,7 +12,15 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
 
   if (type === 'categories' || type === 'brands') {
     baseColumns.push(
-      { accessorKey: 'title', header: 'TITLE' },
+      {
+        accessorKey: 'title',
+        header: 'TITLE',
+        cell: ({ row }) => (
+          <Link href={`/dashboard/${type}/${row.original.id}`}>
+            {row.getValue('title')}
+          </Link>
+        )
+      },
       { accessorKey: 'description', header: 'DESCRIPTION' }
     );
   }
@@ -33,7 +42,15 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
           </div>
         )
       },
-      { accessorKey: 'title', header: 'Title' },
+      {
+        accessorKey: 'title',
+        header: 'TITLE',
+        cell: ({ row }) => (
+          <Link href={`/dashboard/${type}/${row.original.id}`}>
+            {row.getValue('title')}
+          </Link>
+        )
+      },
       {
         header: 'CATEGORY',
         accessorFn: (row) =>

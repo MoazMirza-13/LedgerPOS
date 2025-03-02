@@ -151,33 +151,34 @@ export default function DynamicForm({
       </Card>
 
       {/* table */}
-      {productsRes ? (
-        <div
-          className='flex flex-1 flex-col space-y-4'
-          style={{ minHeight: '600px' }}
-        >
-          <TableClientSide
-            type={'products'}
-            data={productsRes as Product[]}
-            total={productsRes?.length as number}
-          />
-        </div>
-      ) : (
-        <Button
-          className='flex w-40 gap-2'
-          disabled={productsIsPending}
-          onClick={() => {
-            startTransition(() => {
-              productsAction();
-            });
-          }}
-        >
-          View Products
-          {productsIsPending && (
-            <LoaderCircle className='h-5 w-5 animate-spin' />
-          )}
-        </Button>
-      )}
+      {!newPath &&
+        (productsRes ? (
+          <div
+            className='flex flex-1 flex-col space-y-4'
+            style={{ minHeight: '600px' }}
+          >
+            <TableClientSide
+              type={'products'}
+              data={productsRes as Product[]}
+              total={productsRes?.length as number}
+            />
+          </div>
+        ) : (
+          <Button
+            className='flex w-40 gap-2'
+            disabled={productsIsPending}
+            onClick={() => {
+              startTransition(() => {
+                productsAction();
+              });
+            }}
+          >
+            View Products
+            {productsIsPending && (
+              <LoaderCircle className='h-5 w-5 animate-spin' />
+            )}
+          </Button>
+        ))}
     </>
   );
 }

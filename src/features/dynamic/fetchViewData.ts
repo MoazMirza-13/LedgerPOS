@@ -32,6 +32,10 @@ export async function fetchViewData(
 
         const fetchedData = queryClient.getQueryData([type, id]);
 
+        if (!fetchedData) {
+          notFound();
+        }
+
         if (type === 'products' && fetchedData) {
           data = {
             ...fetchedData,
