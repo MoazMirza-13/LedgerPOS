@@ -1,5 +1,11 @@
 import type { ActionId, ActionImpl } from 'kbar';
 import * as React from 'react';
+import { Icons } from '../icons';
+import Image from 'next/image';
+
+interface CustomAction extends ActionImpl {
+  imgUrl?: string;
+}
 
 const ResultItem = React.forwardRef(
   (
@@ -8,7 +14,7 @@ const ResultItem = React.forwardRef(
       active,
       currentRootActionId
     }: {
-      action: ActionImpl;
+      action: CustomAction;
       active: boolean;
       currentRootActionId: ActionId;
     },
@@ -22,6 +28,8 @@ const ResultItem = React.forwardRef(
       return action.ancestors.slice(index + 1);
     }, [action.ancestors, currentRootActionId]);
 
+    const Icon = action.icon ? Icons[action.icon as keyof typeof Icons] : null;
+
     return (
       <div
         ref={ref}
@@ -34,7 +42,17 @@ const ResultItem = React.forwardRef(
           ></div>
         )}
         <div className='relative z-10 flex items-center gap-2'>
-          {action.icon && action.icon}
+          {action.section === 'Navigation'
+            ? Icon && <Icon />
+            : action.imgUrl && (
+                <Image
+                  src={action.imgUrl}
+                  alt={action.name}
+                  className='rounded object-cover'
+                  width={50}
+                  height={50}
+                />
+              )}
           <div className='flex flex-col'>
             <div>
               {ancestors.length > 0 &&

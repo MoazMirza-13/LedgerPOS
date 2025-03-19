@@ -13,6 +13,7 @@ import useThemeSwitching from './use-theme-switching';
 import { kbarActions } from './kbar-actions';
 import { createClient } from '@/utils/supabase/client';
 import { Product } from 'types';
+import { getClientImageUrl } from '@/lib/utils';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
   const [apiData, setApiData] = useState<Product[]>([]);
@@ -34,7 +35,17 @@ export default function KBar({ children }: { children: React.ReactNode }) {
         .from('products')
         .select('*');
 
-      if (fetchedData) setApiData(fetchedData);
+      if (fetchedData) {
+        const productsWithImg = fetchedData
+          ? await Promise.all(
+              fetchedData.map(async (product) => ({
+                ...product,
+                img_url: await getClientImageUrl(product.img_url)
+              }))
+            )
+          : null;
+        setApiData(productsWithImg ? productsWithImg : []);
+      }
     };
 
     fetchData();

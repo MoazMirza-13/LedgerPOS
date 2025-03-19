@@ -16,6 +16,7 @@ export function kbarActions(
             keywords: navItem.title.toLowerCase(),
             section: 'Navigation',
             subtitle: `Go to ${navItem.title}`,
+            icon: navItem.icon,
             perform: () => navigateTo(navItem.url)
           }
         : null;
@@ -29,6 +30,7 @@ export function kbarActions(
         keywords: childItem.title.toLowerCase(),
         section: navItem.title,
         subtitle: `Go to ${childItem.title}`,
+        icon: navItem.icon,
         perform: () => navigateTo(childItem.url)
       })) ?? [];
 
@@ -53,7 +55,8 @@ export function kbarActions(
       name: product.title,
       keywords: product.title.toLowerCase(),
       section: 'Products',
-      subtitle: `Go to ${product.title}`,
+      subtitle: `View ${product.title}`,
+      imgUrl: product.img_url,
       perform: () => navigateTo(`/dashboard/products/${product.id}`)
     })) ?? [];
 
