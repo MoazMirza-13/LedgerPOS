@@ -6,14 +6,19 @@ import {
   KBarProvider,
   KBarSearch
 } from 'kbar';
-import { useRouter } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import RenderResults from './render-result';
 import useThemeSwitching from './use-theme-switching';
 import { kbarActions } from './kbar-actions';
+import { createClient } from '@/utils/supabase/client';
+import { Product } from 'types';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
+  const [apiData, setApiData] = useState<Product[]>([]);
+
   const router = useRouter();
+  const pathname = usePathname();
 
   const navigateTo = useCallback(
     (url: string) => {
@@ -22,11 +27,27 @@ export default function KBar({ children }: { children: React.ReactNode }) {
     [router]
   );
 
-  // These action are for the navigation and account section
-  const actions = useMemo(() => kbarActions(navigateTo), [navigateTo]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
+      const { data: fetchedData, error } = await supabase
+        .from('products')
+        .select('*');
+
+      if (fetchedData) setApiData(fetchedData);
+    };
+
+    fetchData();
+  }, [pathname]);
+
+  // These action are for the navigations, account features
+  const actions = useMemo(
+    () => kbarActions(navigateTo, apiData),
+    [navigateTo, apiData]
+  );
 
   return (
-    <KBarProvider actions={actions}>
+    <KBarProvider key={actions.length} actions={actions}>
       <KBarComponent>{children}</KBarComponent>
     </KBarProvider>
   );

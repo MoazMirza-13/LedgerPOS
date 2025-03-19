@@ -1,7 +1,11 @@
 import { navItems } from '@/constants/data';
 import { signOut } from '@/lib/actions';
+import { Product } from 'types';
 
-export function kbarActions(navigateTo: (url: string) => void) {
+export function kbarActions(
+  navigateTo: (url: string) => void,
+  apiData: Product[]
+) {
   const navigationActions = navItems.flatMap((navItem) => {
     const baseAction =
       navItem.url !== '#'
@@ -43,5 +47,15 @@ export function kbarActions(navigateTo: (url: string) => void) {
     perform: signOut
   };
 
-  return [...navigationActions, signOutAction];
+  const productActions =
+    apiData?.map((product) => ({
+      id: `${product.title.toLowerCase()}Action`,
+      name: product.title,
+      keywords: product.title.toLowerCase(),
+      section: 'Products',
+      subtitle: `Go to ${product.title}`,
+      perform: () => navigateTo(`/dashboard/products/${product.id}`)
+    })) ?? [];
+
+  return [...navigationActions, signOutAction, ...productActions];
 }
