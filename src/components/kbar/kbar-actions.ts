@@ -1,6 +1,7 @@
 import { navItems } from '@/constants/data';
 import { signOut } from '@/lib/actions';
-import { nestedArray } from 'types';
+import { formatTitle } from '@/lib/utils';
+import { itemTable, nestedArray } from 'types';
 
 export function kbarActions(
   navigateTo: (url: string) => void,
@@ -37,6 +38,24 @@ export function kbarActions(
     // Return only valid actions (ignoring null base actions for containers)
     return baseAction ? [baseAction, ...childActions] : childActions;
   });
+
+  const newActions = navItems
+    .filter((navItem) => navItem.title !== 'Dashboard') // Exclude "Dashboard"
+    .flatMap((navItem) => {
+      return {
+        id: `new${navItem.title.toLowerCase()}Action`,
+        name: `New ${navItem.title}`,
+        shortcut: ['n', navItem.shortcut?.[1]], // Example: ['n', 'p'] for products
+        keywords: `new ${navItem.title.toLowerCase()}`,
+        section: 'New Actions',
+        subtitle: formatTitle(
+          'Create new',
+          navItem.title.toLowerCase() as itemTable
+        ),
+        icon: navItem.icon,
+        perform: () => navigateTo(`${navItem.url}/new`)
+      };
+    });
 
   // sign-out action
   const signOutAction = {
@@ -83,6 +102,7 @@ export function kbarActions(
 
   return [
     ...navigationActions,
+    ...newActions,
     signOutAction,
     ...productActions,
     ...brandActions,

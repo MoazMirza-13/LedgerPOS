@@ -1,5 +1,5 @@
 import { getCategoriesBrandsData, getDataById } from '@/lib/actions';
-import { getImageUrl } from '@/lib/utils';
+import { formatTitle, getImageUrl } from '@/lib/utils';
 import { QueryClient } from '@tanstack/react-query';
 import { notFound } from 'next/navigation';
 import { Brand, Category, itemTable, Product } from 'types';
@@ -14,13 +14,7 @@ export async function fetchViewData(
     let categories = null;
     let brands = null;
     let showUploader = type === 'products';
-    let pageTitle = `Add New ${
-      type === 'categories'
-        ? 'Category'
-        : type === 'products'
-          ? 'Product'
-          : 'Brand'
-    }`;
+    let pageTitle = formatTitle('Add New', type);
 
     if (id !== 'new') {
       try {
@@ -46,7 +40,7 @@ export async function fetchViewData(
           data = fetchedData as Category | Brand;
         }
 
-        pageTitle = `Edit ${type === 'categories' ? 'category' : type === 'products' ? 'product' : 'brand'}`;
+        pageTitle = formatTitle('Edit', type);
       } catch (error) {
         throw error;
       }

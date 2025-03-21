@@ -56,7 +56,7 @@ export default function KBar({ children }: { children: React.ReactNode }) {
     fetchData();
   }, []);
 
-  // These action are for the navigations, account features
+  // These action are for the navigations, account features, search
   const actions = useMemo(
     () => kbarActions(navigateTo, apiData),
     [navigateTo, apiData]

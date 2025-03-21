@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { getSupabaseClient } from './actions';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
+import { itemTable } from 'types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -59,3 +60,21 @@ export const getClientImageUrl = async (img: string) => {
 export function checkUUID(id: string): boolean {
   return uuidValidate(id);
 }
+
+export const formatTitle = (text: string, type: itemTable) => {
+  let formattedType;
+
+  switch (type) {
+    case 'categories':
+      formattedType = 'Category';
+      break;
+    case 'products':
+      formattedType = 'Product';
+      break;
+    case 'brands':
+      formattedType = 'Brand';
+      break;
+  }
+
+  return `${text} ${formattedType}`;
+};
