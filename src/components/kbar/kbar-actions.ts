@@ -47,7 +47,7 @@ export function kbarActions(
         name: `New ${navItem.title}`,
         shortcut: ['n', navItem.shortcut?.[1]], // Example: ['n', 'p'] for products
         keywords: `new ${navItem.title.toLowerCase()}`,
-        section: 'New Actions',
+        section: 'Create Actions',
         subtitle: formatTitle(
           'Create new',
           navItem.title.toLowerCase() as itemTable
@@ -75,7 +75,7 @@ export function kbarActions(
       name: product.title,
       keywords: product.title.toLowerCase(),
       section: 'Products',
-      subtitle: `View ${product.title}`,
+      subtitle: `View this product`,
       imgUrl: product.img_url,
       perform: () => navigateTo(`/dashboard/products/${product.id}`)
     })) ?? [];
@@ -86,7 +86,7 @@ export function kbarActions(
       name: category.title,
       keywords: category.title.toLowerCase(),
       section: 'Categories',
-      subtitle: `View ${category.title}`,
+      subtitle: `View this category`,
       perform: () => navigateTo(`/dashboard/categories/${category.id}`)
     })) ?? [];
 
@@ -96,16 +96,16 @@ export function kbarActions(
       name: brand.title,
       keywords: brand.title.toLowerCase(),
       section: 'Brands',
-      subtitle: `View ${brand.title}`,
+      subtitle: `View this brand`,
       perform: () => navigateTo(`/dashboard/brands/${brand.id}`)
     })) ?? [];
 
   return [
     ...navigationActions,
     ...newActions,
-    signOutAction,
     ...productActions,
     ...brandActions,
-    ...categoryActions
+    ...categoryActions,
+    signOutAction
   ];
 }

@@ -1,4 +1,4 @@
-import { useRegisterActions } from 'kbar';
+import { useKBar, useRegisterActions } from 'kbar';
 import { useTheme } from 'next-themes';
 
 const useThemeSwitching = () => {
@@ -8,6 +8,8 @@ const useThemeSwitching = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  const { query } = useKBar();
+
   const themeAction = [
     {
       id: 'toggleTheme',
@@ -16,17 +18,36 @@ const useThemeSwitching = () => {
       section: 'Theme',
       perform: toggleTheme
     },
+
     {
-      id: 'setLightTheme',
-      name: 'Set Light Theme',
+      id: 'setTheme',
+      name: 'Set Theme',
       section: 'Theme',
-      perform: () => setTheme('light')
+      subtitle: 'Choose specific theme',
+      keywords: 'theme mode',
+      shortcut: ['s', 't']
     },
     {
-      id: 'setDarkTheme',
-      name: 'Set Dark Theme',
+      id: 'lightTheme',
+      name: `Light ${theme === 'light' ? '(Current)' : ''}`,
+      parent: 'setTheme',
       section: 'Theme',
-      perform: () => setTheme('dark')
+      perform: () => {
+        setTheme('light');
+        // Reset KBar state after selection
+        query.setCurrentRootAction(null);
+      }
+    },
+    {
+      id: 'darkTheme',
+      name: `Dark ${theme === 'dark' ? '(Current)' : ''}`,
+      parent: 'setTheme',
+      section: 'Theme',
+      perform: () => {
+        setTheme('dark');
+        // Reset KBar state after selection
+        query.setCurrentRootAction(null);
+      }
     }
   ];
 
