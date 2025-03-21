@@ -1,10 +1,10 @@
 import { navItems } from '@/constants/data';
 import { signOut } from '@/lib/actions';
-import { Product } from 'types';
+import { nestedArray } from 'types';
 
 export function kbarActions(
   navigateTo: (url: string) => void,
-  apiData: Product[]
+  apiData: nestedArray
 ) {
   const navigationActions = navItems.flatMap((navItem) => {
     const baseAction =
@@ -49,8 +49,9 @@ export function kbarActions(
     perform: signOut
   };
 
+  // api data
   const productActions =
-    apiData?.map((product) => ({
+    apiData.products?.map((product) => ({
       id: `${product.title.toLowerCase()}Action`,
       name: product.title,
       keywords: product.title.toLowerCase(),
@@ -60,5 +61,31 @@ export function kbarActions(
       perform: () => navigateTo(`/dashboard/products/${product.id}`)
     })) ?? [];
 
-  return [...navigationActions, signOutAction, ...productActions];
+  const categoryActions =
+    apiData.categories?.map((category) => ({
+      id: `${category.title.toLowerCase()}Action`,
+      name: category.title,
+      keywords: category.title.toLowerCase(),
+      section: 'Categories',
+      subtitle: `View ${category.title}`,
+      perform: () => navigateTo(`/dashboard/categories/${category.id}`)
+    })) ?? [];
+
+  const brandActions =
+    apiData.brands?.map((brand) => ({
+      id: `${brand.title.toLowerCase()}Action`,
+      name: brand.title,
+      keywords: brand.title.toLowerCase(),
+      section: 'Brands',
+      subtitle: `View ${brand.title}`,
+      perform: () => navigateTo(`/dashboard/brands/${brand.id}`)
+    })) ?? [];
+
+  return [
+    ...navigationActions,
+    signOutAction,
+    ...productActions,
+    ...brandActions,
+    ...categoryActions
+  ];
 }

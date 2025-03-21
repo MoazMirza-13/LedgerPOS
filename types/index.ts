@@ -58,3 +58,9 @@ export type Brand = {
 export type itemTable = 'categories' | 'products' | 'brands';
 
 export type itemData = Product | Category | Brand;
+
+export type nestedArray = {
+  products: Product[];
+  categories: Category[];
+  brands: Brand[];
+};

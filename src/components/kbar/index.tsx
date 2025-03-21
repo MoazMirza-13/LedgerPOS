@@ -6,20 +6,23 @@ import {
   KBarProvider,
   KBarSearch
 } from 'kbar';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import RenderResults from './render-result';
 import useThemeSwitching from './use-theme-switching';
 import { kbarActions } from './kbar-actions';
 import { createClient } from '@/utils/supabase/client';
-import { Product } from 'types';
+import { nestedArray, Product } from 'types';
 import { getClientImageUrl } from '@/lib/utils';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
-  const [apiData, setApiData] = useState<Product[]>([]);
+  const [apiData, setApiData] = useState<nestedArray>({
+    products: [],
+    categories: [],
+    brands: []
+  });
 
   const router = useRouter();
-  const pathname = usePathname();
 
   const navigateTo = useCallback(
     (url: string) => {
@@ -31,25 +34,27 @@ export default function KBar({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchData = async () => {
       const supabase = createClient();
-      const { data: fetchedData, error } = await supabase
-        .from('products')
-        .select('*');
+      const { data, error } = await supabase.rpc('get_nested_data');
 
-      if (fetchedData) {
-        const productsWithImg = fetchedData
+      if (data) {
+        const productsWithImg = data
           ? await Promise.all(
-              fetchedData.map(async (product) => ({
+              data.products.map(async (product: Product) => ({
                 ...product,
                 img_url: await getClientImageUrl(product.img_url)
               }))
             )
           : null;
-        setApiData(productsWithImg ? productsWithImg : []);
+        const updatedData = {
+          ...data,
+          products: productsWithImg
+        };
+        setApiData(updatedData ? updatedData : []);
       }
     };
 
     fetchData();
-  }, [pathname]);
+  }, []);
 
   // These action are for the navigations, account features
   const actions = useMemo(
