@@ -56,6 +56,8 @@ export default function DynamicForm({
     values: defaultValues
   });
 
+  const { isDirty } = form.formState;
+
   const [isPending, startFormTransition] = useTransition();
   const router = useRouter();
 
@@ -133,7 +135,7 @@ export default function DynamicForm({
                   </FormItem>
                 )}
               />
-              <Button type='submit' disabled={isPending}>
+              <Button type='submit' disabled={isPending || !isDirty}>
                 {isPending ? (
                   <div className='flex gap-2'>
                     {initialData ? `Editing ` : `Adding`}

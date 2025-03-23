@@ -38,6 +38,7 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
               priority
               fill
               className='rounded-lg object-contain'
+              sizes='(max-width: 768px) 100vw, 110px'
             />
           </div>
         )

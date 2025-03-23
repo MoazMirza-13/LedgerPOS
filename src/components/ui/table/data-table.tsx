@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import { checkUUID } from '@/lib/utils';
 import {
   DoubleArrowLeftIcon,
   DoubleArrowRightIcon
@@ -93,6 +94,7 @@ export function DataTable<TData, TValue>({
 
   const pathname = usePathname();
   const productsRoute = pathname.includes('/products');
+  const containsUUID = pathname.split('/').some(checkUUID);
 
   return (
     <div className='flex flex-1 flex-col space-y-4'>
@@ -159,7 +161,7 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
 
-      {productsRoute && (
+      {!containsUUID && (
         <div className='flex flex-col items-center justify-end gap-2 space-x-2 py-2 sm:flex-row'>
           <div className='flex w-full items-center justify-between'>
             <div className='flex-1 text-sm text-muted-foreground'>

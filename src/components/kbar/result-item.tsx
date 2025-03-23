@@ -45,13 +45,15 @@ const ResultItem = React.forwardRef(
           {action.section === 'Navigation'
             ? Icon && <Icon />
             : action.imgUrl && (
-                <Image
-                  src={action.imgUrl}
-                  alt={action.name}
-                  className='rounded object-cover'
-                  width={50}
-                  height={50}
-                />
+                <div className='relative h-[60px] w-[60px]'>
+                  <Image
+                    src={action.imgUrl}
+                    alt={action.name}
+                    className='rounded object-contain'
+                    fill
+                    sizes='60px'
+                  />
+                </div>
               )}
           <div className='flex flex-col'>
             <div>

@@ -70,6 +70,7 @@ export default function ProductForm({
     categories?.find((c) => c.title === category)?.id || '';
 
   const defaultValues = {
+    image: null,
     name: initialData?.title || '',
     category: category
       ? String(categoryIdFromURL)
@@ -124,6 +125,8 @@ export default function ProductForm({
     resolver: zodResolver(formSchema),
     values: defaultValues
   });
+
+  const { isDirty } = form.formState;
 
   const [showUploaderState, setShowUploaderState] = useState(showUploader);
   const [isPending, startTransition] = useTransition();
@@ -324,7 +327,7 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
-            <Button type='submit' disabled={isPending}>
+            <Button type='submit' disabled={isPending || !isDirty}>
               {isPending ? (
                 <div className='flex gap-2'>
                   {initialData ? 'Editing' : 'Adding'}
