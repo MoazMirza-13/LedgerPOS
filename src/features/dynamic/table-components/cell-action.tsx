@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { deleteContent } from '@/lib/actions';
 import { toastMsg } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -28,6 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const onConfirm = async () => {
     const error = await deleteContent(itemTable, itemData);
@@ -36,6 +38,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     } else {
       toast.success(toastMsg.deleteItem);
       setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['nestedData'] });
       router.push(`/dashboard/${itemTable}`);
     }
   };

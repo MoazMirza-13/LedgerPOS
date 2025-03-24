@@ -7,21 +7,14 @@ import {
   KBarSearch
 } from 'kbar';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import RenderResults from './render-result';
 import useThemeSwitching from './use-theme-switching';
 import { kbarActions } from './kbar-actions';
-import { createClient } from '@/utils/supabase/client';
-import { nestedArray, Product } from 'types';
-import { getClientImageUrl } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { getNestedData } from '@/lib/get-data-actions';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
-  const [apiData, setApiData] = useState<nestedArray>({
-    products: [],
-    categories: [],
-    brands: []
-  });
-
   const router = useRouter();
 
   const navigateTo = useCallback(
@@ -31,39 +24,19 @@ export default function KBar({ children }: { children: React.ReactNode }) {
     [router]
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.rpc('get_nested_data');
-
-      if (data) {
-        const productsWithImg = data
-          ? await Promise.all(
-              data.products.map(async (product: Product) => ({
-                ...product,
-                img_url: await getClientImageUrl(product.img_url)
-              }))
-            )
-          : null;
-        const updatedData = {
-          ...data,
-          products: productsWithImg
-        };
-        setApiData(updatedData ? updatedData : []);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { data: apiData } = useQuery({
+    queryKey: ['nestedData'],
+    queryFn: getNestedData
+  });
 
   // These action are for the navigations, account features, search
   const actions = useMemo(
-    () => kbarActions(navigateTo, apiData),
+    () => kbarActions(navigateTo, apiData || []),
     [navigateTo, apiData]
   );
 
   return (
-    <KBarProvider key={actions.length} actions={actions}>
+    <KBarProvider key={JSON.stringify(apiData)} actions={actions}>
       <KBarComponent>{children}</KBarComponent>
     </KBarProvider>
   );

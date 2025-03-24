@@ -31,6 +31,7 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { toastMsg } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
+import { useQueryClient } from '@tanstack/react-query';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -131,6 +132,7 @@ export default function ProductForm({
   const [showUploaderState, setShowUploaderState] = useState(showUploader);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
@@ -140,7 +142,10 @@ export default function ProductForm({
       else if (res?.imgError) toast.error(toastMsg.imageUploadError);
       else if (res?.error) toast.error(toastMsg.error);
 
-      if (!res?.error) router.push(`/dashboard/products`);
+      if (!res?.error) {
+        queryClient.invalidateQueries({ queryKey: ['nestedData'] });
+        router.push(`/dashboard/products`);
+      }
     });
   };
 
