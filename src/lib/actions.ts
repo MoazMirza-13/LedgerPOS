@@ -40,23 +40,8 @@ export async function getUserSession() {
   return user;
 }
 
-export async function imageUpload(file: File) {
-  try {
-    const supabase = await createClient();
-    const fileName = `${Date.now()}_${file.name}`;
-    const { data, error } = await supabase.storage
-      .from('product_imgs')
-      .upload(`ns_imgs/${fileName}`, file);
-    if (error) throw error;
-    return data?.path;
-  } catch (error: any) {
-    return { error };
-  }
-}
-
 export async function productSubmit(
   values: {
-    image?: FileList;
     name: string;
     category: string | null;
     brand: string | null;
@@ -65,48 +50,38 @@ export async function productSubmit(
     productVariants?: string[];
   },
   initialData: Product | null,
-  showUploaderState: boolean
+  showUploaderState: boolean,
+  imgPaths: string[]
 ) {
   try {
     const supabase = await createClient();
-    let imgPath;
-
     if (initialData) {
-      if (showUploaderState && values.image?.length) {
-        try {
-          imgPath = await imageUpload(values?.image[0]);
-        } catch (error) {
-          return { imgError: true };
-        }
-      }
+      // if (showUploaderState && values.image?.length) {
+      //   try {
+      //     imgPath = await imageUpload(values?.image[0]);
+      //   } catch (error) {
+      //     return { imgError: true };
+      //   }
+      // }
+      // const { error } = await supabase
+      //   .from('products')
+      //   .update({
+      //     title: values.name,
+      //     price: values.price,
+      //     description: values.description,
+      //     category_id: values.category ? values.category : null,
+      //     brand_id: values.brand ? values.brand : null,
+      //     ...(imgPath && { img_url: imgPath }),
+      //     variants: values.productVariants
+      //   })
+      //   .eq('id', initialData.id)
+      //   .select();
+      // if (error) throw error;
 
-      const { error } = await supabase
-        .from('products')
-        .update({
-          title: values.name,
-          price: values.price,
-          description: values.description,
-          category_id: values.category ? values.category : null,
-          brand_id: values.brand ? values.brand : null,
-          ...(imgPath && { img_url: imgPath }),
-          variants: values.productVariants
-        })
-        .eq('id', initialData.id)
-        .select();
-      if (error) throw error;
-
-      revalidatePath('/dashboard/products');
+      // revalidatePath('/dashboard/products');
       return { successUpdate: true };
     } else {
-      if (!values.image?.length) return;
-
-      try {
-        imgPath = await imageUpload(values?.image[0]);
-      } catch (error) {
-        return { imgError: true };
-      }
-
-      if (imgPath) {
+      if (imgPaths.length > 0) {
         const { error } = await supabase
           .from('products')
           .insert([
@@ -114,13 +89,14 @@ export async function productSubmit(
               title: values.name,
               price: values.price,
               description: values.description,
-              img_url: imgPath,
+              img_url: imgPaths,
               category_id: values.category ? values.category : null,
               brand_id: values.brand ? values.brand : null,
               variants: values.productVariants
             }
           ])
           .select();
+
         if (error) throw error;
         revalidatePath('/dashboard/products');
         return { successNew: true };

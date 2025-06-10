@@ -21,7 +21,16 @@ export async function fetchListingData(type: itemTable) {
       ? await Promise.all(
           productsData.map(async (product) => ({
             ...product,
-            img_url: await getImageUrl(product.img_url)
+            img_url: Array.isArray(product.img_url)
+              ? await Promise.all(
+                  product.img_url
+                    .filter(
+                      (path: string) =>
+                        typeof path === 'string' && path.trim() !== ''
+                    )
+                    .map(async (path: string) => await getImageUrl(path))
+                )
+              : []
           }))
         )
       : null;

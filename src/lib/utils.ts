@@ -78,3 +78,17 @@ export const formatTitle = (text: string, type: itemTable) => {
 
   return `${text} ${formattedType}`;
 };
+
+export async function imageUpload(file: File) {
+  try {
+    const supabase = createClient();
+    const fileName = `${Date.now()}_${file.name}`;
+    const { data, error } = await supabase.storage
+      .from('product_imgs')
+      .upload(`ns_imgs/${fileName}`, file);
+    if (error) throw error;
+    return data?.path;
+  } catch (error: any) {
+    return { error };
+  }
+}

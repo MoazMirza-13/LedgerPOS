@@ -99,8 +99,8 @@ export function FileUploader(props: FileUploaderProps) {
     progresses,
     accept = { 'image/*': [] },
     maxSize = 1024 * 1024 * 2,
-    maxFiles = 1,
-    multiple = false,
+    maxFiles = 4,
+    multiple = maxFiles > 1,
     disabled = false,
     className,
     ...dropzoneProps
@@ -190,7 +190,7 @@ export function FileUploader(props: FileUploaderProps) {
         accept={accept}
         maxSize={maxSize}
         maxFiles={maxFiles}
-        multiple={maxFiles > 1 || multiple}
+        multiple={maxFiles > 4 || multiple}
         disabled={isDisabled}
       >
         {({ getRootProps, getInputProps, isDragActive }) => (

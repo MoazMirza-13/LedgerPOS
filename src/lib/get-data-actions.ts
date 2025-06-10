@@ -11,7 +11,9 @@ export const getNestedData = async () => {
   const productsWithImg = await Promise.all(
     data.products.map(async (product: Product) => ({
       ...product,
-      img_url: await getClientImageUrl(product.img_url)
+      img_url: await Promise.all(
+        (product.img_url || []).map((url) => getClientImageUrl(url))
+      )
     }))
   );
 

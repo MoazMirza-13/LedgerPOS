@@ -29,12 +29,19 @@ export async function fetchViewData(
         if (!fetchedData) {
           notFound();
         }
-
+        // TODO: check to make sure
         if (type === 'products' && fetchedData) {
+          const imageUrls = await Promise.all(
+            ((fetchedData as Product).img_url || []).map((url) =>
+              getImageUrl(url)
+            )
+          );
+
           data = {
             ...fetchedData,
-            img_url: await getImageUrl((fetchedData as Product).img_url)
+            img_url: imageUrls
           };
+
           showUploader = false;
         } else {
           data = fetchedData as Category | Brand;

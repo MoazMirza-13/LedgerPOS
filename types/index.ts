@@ -32,7 +32,7 @@ export type Product = {
   price: number;
   id: string;
   category_id: string;
-  img_url: string;
+  img_url: string[];
   brand_id: string;
   variants: string[];
   // for category and brand title in table

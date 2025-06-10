@@ -28,7 +28,7 @@ import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
 import { LoaderCircle } from 'lucide-react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
-import { toastMsg } from '@/lib/utils';
+import { imageUpload, toastMsg } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import { useQueryClient } from '@tanstack/react-query';
@@ -90,24 +90,33 @@ export default function ProductForm({
         .refine(
           (files) =>
             !files ||
-            (files.length === 1 &&
-              files[0].size <= MAX_FILE_SIZE &&
-              ACCEPTED_IMAGE_TYPES.includes(files[0].type)),
+            (Array.isArray(files) &&
+              files.length <= 4 &&
+              files.every(
+                (file) =>
+                  file.size <= MAX_FILE_SIZE &&
+                  ACCEPTED_IMAGE_TYPES.includes(file.type)
+              )),
           {
             message:
-              'Max file size is 5MB. Only .jpg, .jpeg, .png, and .webp files are accepted.'
+              'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
           }
         )
     : z
         .any()
-        .refine((files) => files?.length === 1, 'Image is required.')
         .refine(
-          (files) => files?.[0]?.size <= MAX_FILE_SIZE,
-          'Max file size is 5MB.'
+          (files) =>
+            Array.isArray(files) && files.length > 0 && files.length <= 4,
+          'You must upload between 1 and 4 images.'
         )
         .refine(
-          (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-          'Only .jpg, .jpeg, .png, and .webp files are accepted.'
+          (files) =>
+            files.every(
+              (file: File) =>
+                file.size <= MAX_FILE_SIZE &&
+                ACCEPTED_IMAGE_TYPES.includes(file.type)
+            ),
+          'Each image must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
         );
 
   const formSchema = z.object({
@@ -134,12 +143,40 @@ export default function ProductForm({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    // handle images
+    if (!values.image?.length) return;
+    const files = Array.from(values.image as FileList);
+    const uploadedImages: (string | { error: any })[] = [];
+    let imgPaths: string[] = [];
+
+    for (const file of files) {
+      const result = await imageUpload(file);
+      uploadedImages.push(result);
+    }
+
+    const hasImgError = uploadedImages.some(
+      (result) => typeof result !== 'string'
+    );
+    if (hasImgError) {
+      toast.error(toastMsg.imageUploadError);
+      return;
+    }
+
+    imgPaths = uploadedImages as string[];
+
+    // submit fn
     startTransition(async () => {
-      const res = await productSubmit(values, initialData, showUploaderState);
+      const { image, ...cleanValues } = values; // not using `image` in submit fn anymore
+
+      const res = await productSubmit(
+        cleanValues,
+        initialData,
+        showUploaderState,
+        imgPaths
+      );
       if (res?.successNew) toast.success(toastMsg.newProduct);
       else if (res?.successUpdate) toast.success(toastMsg.updateProduct);
-      else if (res?.imgError) toast.error(toastMsg.imageUploadError);
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
@@ -176,7 +213,7 @@ export default function ProductForm({
                           <Button
                             type='button'
                             onClick={() =>
-                              window.open(initialData?.img_url, '_blank')
+                              window.open(initialData?.img_url[0], '_blank')
                             }
                           >
                             View Image
@@ -192,7 +229,7 @@ export default function ProductForm({
                         <FileUploader
                           value={field.value}
                           onValueChange={field.onChange}
-                          maxFiles={1} // currently only 1 file, will do 4 files later
+                          maxFiles={4} // currently only 1 file, will do 4 files later
                           maxSize={4 * 1024 * 1024}
                           // disabled={loading}
                           // progresses={progresses}

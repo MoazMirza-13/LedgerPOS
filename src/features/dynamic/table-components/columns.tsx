@@ -30,18 +30,26 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
       {
         accessorKey: 'img_url',
         header: 'IMAGE',
-        cell: ({ row }) => (
-          <div className='relative aspect-square'>
-            <Image
-              src={row.getValue('img_url')}
-              alt='Product image'
-              priority
-              fill
-              className='rounded-lg object-contain'
-              sizes='(max-width: 768px) 100vw, 110px'
-            />
-          </div>
-        )
+        cell: ({ row }) => {
+          const urls = row.getValue('img_url') as string[];
+          const firstUrl =
+            Array.isArray(urls) && urls.length > 0 ? urls[0] : null;
+
+          return (
+            <div className='relative aspect-square'>
+              {firstUrl && (
+                <Image
+                  src={firstUrl}
+                  alt='Product image'
+                  priority
+                  fill
+                  className='rounded-lg object-contain'
+                  sizes='(max-width: 768px) 100vw, 110px'
+                />
+              )}
+            </div>
+          );
+        }
       },
       {
         accessorKey: 'title',
