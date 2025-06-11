@@ -13,7 +13,7 @@ export async function fetchViewData(
     let data = null;
     let categories = null;
     let brands = null;
-    let showUploader = type === 'products';
+    let newProduct = type === 'products';
     let pageTitle = formatTitle('Add New', type);
 
     if (id !== 'new') {
@@ -29,7 +29,7 @@ export async function fetchViewData(
         if (!fetchedData) {
           notFound();
         }
-        // TODO: check to make sure
+
         if (type === 'products' && fetchedData) {
           const imageUrls = await Promise.all(
             ((fetchedData as Product).img_url || []).map((url) =>
@@ -42,7 +42,7 @@ export async function fetchViewData(
             img_url: imageUrls
           };
 
-          showUploader = false;
+          newProduct = false;
         } else {
           data = fetchedData as Category | Brand;
         }
@@ -62,7 +62,7 @@ export async function fetchViewData(
       }
     }
 
-    return { data, categories, brands, showUploader, pageTitle };
+    return { data, categories, brands, newProduct, pageTitle };
   } catch (error) {
     notFound();
   }

@@ -41,6 +41,11 @@ export const toastMsg = {
 };
 
 export const getImageUrl = async (img: string) => {
+  if (img?.includes('supabase.co/storage/')) {
+    // return if url is already correct
+    return img;
+  }
+
   const supabase = await getSupabaseClient();
   const imgUrl = img
     ? supabase.storage.from('product_imgs').getPublicUrl(img).data.publicUrl
@@ -50,6 +55,11 @@ export const getImageUrl = async (img: string) => {
 
 // for client side components
 export const getClientImageUrl = async (img: string) => {
+  if (img?.includes('supabase.co/storage/')) {
+    // return if url is already correct
+    return img;
+  }
+
   const supabase = createClient();
   const imgUrl = img
     ? supabase.storage.from('product_imgs').getPublicUrl(img).data.publicUrl

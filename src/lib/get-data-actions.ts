@@ -17,5 +17,7 @@ export const getNestedData = async () => {
     }))
   );
 
-  return { ...data, products: productsWithImg };
+  const allData = { ...data, products: productsWithImg };
+
+  return allData;
 };

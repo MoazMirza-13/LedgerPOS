@@ -1,6 +1,5 @@
 'use client';
 
-import { FileUploader } from '@/components/file-uploader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -26,12 +25,14 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, X, Upload } from 'lucide-react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { imageUpload, toastMsg } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import { useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
+import { useRef } from 'react';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -46,13 +47,13 @@ export default function ProductForm({
   pageTitle,
   categories,
   brands,
-  showUploader
+  newProduct
 }: {
   initialData: Product | null;
   pageTitle: string;
   categories: Category[] | null;
   brands: Brand[] | null;
-  showUploader: boolean;
+  newProduct: boolean;
 }) {
   const searchParams = useSearchParams();
   const brand = searchParams.get('brand');
@@ -136,45 +137,94 @@ export default function ProductForm({
     values: defaultValues
   });
 
-  const { isDirty } = form.formState;
-
-  const [showUploaderState, setShowUploaderState] = useState(showUploader);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isDirty } = form.formState;
+
+  const [imageSlots, setImageSlots] = useState<(string | File | null)[]>(() => {
+    // Initialize with existing images or empty slots
+    const existingImages = initialData?.img_url || [];
+    const slots = new Array(4).fill(null);
+    existingImages.forEach((url, index) => {
+      if (index < 4) slots[index] = url;
+    });
+    return slots;
+  });
+
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleIndividualImageUpload = (index: number, file: File) => {
+    if (file && file.type.startsWith('image/')) {
+      const newSlots = [...imageSlots];
+      newSlots[index] = file;
+      setImageSlots(newSlots);
+
+      // Update form field with current files
+      const currentFiles = newSlots.filter(
+        (slot) => slot instanceof File
+      ) as File[];
+      form.setValue('image', currentFiles, { shouldDirty: true });
+    }
+  };
+
+  const handleIndividualImageRemove = (index: number) => {
+    const newSlots = [...imageSlots];
+    newSlots[index] = null;
+    setImageSlots(newSlots);
+
+    // Update form field with remaining files
+    const currentFiles = newSlots.filter(
+      (slot) => slot instanceof File
+    ) as File[];
+    form.setValue('image', currentFiles, { shouldDirty: true });
+  };
+
+  const handleIndividualImageReplace = (index: number) => {
+    fileInputRefs.current[index]?.click();
+  };
+
+  const getImagePreviewUrl = (slot: string | File | null): string => {
+    if (!slot) return '';
+    if (typeof slot === 'string') return slot; // existing URL
+    const url = URL.createObjectURL(slot); // new file
+    return url;
+  };
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    // handle images
-    if (!values.image?.length) return;
-    const files = Array.from(values.image as FileList);
-    const uploadedImages: (string | { error: any })[] = [];
-    let imgPaths: string[] = [];
-
-    for (const file of files) {
-      const result = await imageUpload(file);
-      uploadedImages.push(result);
-    }
-
-    const hasImgError = uploadedImages.some(
-      (result) => typeof result !== 'string'
-    );
-    if (hasImgError) {
-      toast.error(toastMsg.imageUploadError);
-      return;
-    }
-
-    imgPaths = uploadedImages as string[];
-
-    // submit fn
     startTransition(async () => {
-      const { image, ...cleanValues } = values; // not using `image` in submit fn anymore
+      // Handle images - only upload new files, keep existing URLs
+      const imgPaths: string[] = [];
+      let hasImgError = false;
 
-      const res = await productSubmit(
-        cleanValues,
-        initialData,
-        showUploaderState,
-        imgPaths
-      );
+      for (let i = 0; i < imageSlots.length; i++) {
+        const slot = imageSlots[i];
+        if (!slot) continue; // skip empty slots
+
+        if (typeof slot === 'string') {
+          // Existing image URL, keep as is
+          imgPaths.push(slot);
+        } else if (slot instanceof File) {
+          // New file, upload it
+          const result = await imageUpload(slot);
+          if (typeof result === 'string') {
+            imgPaths.push(result);
+          } else {
+            hasImgError = true;
+            break;
+          }
+        }
+      }
+
+      if (hasImgError) {
+        toast.error(toastMsg.imageUploadError);
+        return;
+      }
+
+      // submit fn
+      const { image, ...cleanValues } = values; // not using `image` in submit fn anymore
+      const res = await productSubmit(cleanValues, initialData, imgPaths);
+
       if (res?.successNew) toast.success(toastMsg.newProduct);
       else if (res?.successUpdate) toast.success(toastMsg.updateProduct);
       else if (res?.error) toast.error(toastMsg.error);
@@ -205,39 +255,93 @@ export default function ProductForm({
               render={({ field }) => (
                 <div className='space-y-6'>
                   <FormItem className='w-full'>
-                    {/* currently single img, will add multiple functionality later */}
-                    <FormLabel>Image</FormLabel>
+                    <FormLabel>Images</FormLabel>
                     <FormControl>
-                      {!showUploaderState ? (
-                        <div className='m-auto flex w-[24%] justify-between'>
-                          <Button
-                            type='button'
-                            onClick={() =>
-                              window.open(initialData?.img_url[0], '_blank')
-                            }
-                          >
-                            View Image
-                          </Button>
-                          <Button
-                            type='button'
-                            onClick={() => setShowUploaderState(true)}
-                          >
-                            Change Image
-                          </Button>
+                      <div className='space-y-4'>
+                        <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
+                          {Array.from({ length: 4 }).map((_, index) => (
+                            <Card key={index} className='relative aspect-[1.5]'>
+                              <input
+                                ref={(el) => {
+                                  fileInputRefs.current[index] = el;
+                                }}
+                                type='file'
+                                accept='image/*'
+                                className='hidden'
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleIndividualImageUpload(index, file);
+                                }}
+                              />
+
+                              {imageSlots[index] ? (
+                                <CardContent className='group relative h-full p-0'>
+                                  <Image
+                                    src={
+                                      getImagePreviewUrl(imageSlots[index]) ||
+                                      'null'
+                                    }
+                                    alt={`Product image ${index + 1}`}
+                                    fill
+                                    className='rounded-lg object-contain'
+                                  />
+                                  <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                                    <Button
+                                      type='button'
+                                      size='sm'
+                                      variant='secondary'
+                                      onClick={() =>
+                                        handleIndividualImageReplace(index)
+                                      }
+                                    >
+                                      <Upload className='h-4 w-4' />
+                                    </Button>
+                                    <Button
+                                      type='button'
+                                      size='sm'
+                                      variant='destructive'
+                                      onClick={() =>
+                                        handleIndividualImageRemove(index)
+                                      }
+                                    >
+                                      <X className='h-4 w-4' />
+                                    </Button>
+                                  </div>
+
+                                  {/* Show indicator for new vs existing */}
+                                  {!newProduct && (
+                                    <div className='absolute right-2 top-2'>
+                                      <div
+                                        className={`h-2 w-2 rounded-full ${
+                                          typeof imageSlots[index] === 'string'
+                                            ? 'bg-blue-500'
+                                            : 'bg-green-500'
+                                        }`}
+                                      />
+                                    </div>
+                                  )}
+                                </CardContent>
+                              ) : (
+                                <CardContent
+                                  className='flex h-full cursor-pointer flex-col items-center justify-center border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
+                                  onClick={() =>
+                                    fileInputRefs.current[index]?.click()
+                                  }
+                                >
+                                  <Upload className='mb-2 h-8 w-8 text-gray-400' />
+                                  <p className='text-center text-sm text-gray-500'>
+                                    Click to upload
+                                  </p>
+                                  <p className='mt-1 text-center text-xs text-gray-400'>
+                                    Up to 4MB
+                                  </p>
+                                </CardContent>
+                              )}
+                            </Card>
+                          ))}
                         </div>
-                      ) : (
-                        <FileUploader
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          maxFiles={4} // currently only 1 file, will do 4 files later
-                          maxSize={4 * 1024 * 1024}
-                          // disabled={loading}
-                          // progresses={progresses}
-                          // pass the onUpload function here for direct upload
-                          // onUpload={uploadFiles}
-                          // disabled={isUploading}
-                        />
-                      )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

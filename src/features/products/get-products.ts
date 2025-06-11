@@ -22,7 +22,11 @@ export const getProducts = async (
     ? await Promise.all(
         productsData.map(async (product) => ({
           ...product,
-          img_url: await getClientImageUrl(product.img_url)
+          img_url: await Promise.all(
+            product.img_url.map(
+              async (url: string) => await getClientImageUrl(url)
+            )
+          )
         }))
       )
     : null;

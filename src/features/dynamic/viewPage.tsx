@@ -17,7 +17,7 @@ type ViewPage = {
 export default async function ViewPage({ type, id }: ViewPage) {
   const queryClient = new QueryClient(queryClientConfig);
 
-  const { data, categories, brands, showUploader, pageTitle } =
+  const { data, categories, brands, newProduct, pageTitle } =
     await fetchViewData(queryClient, type, id);
 
   return (
@@ -30,7 +30,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
         />
       ) : (
         <ProductForm
-          showUploader={showUploader}
+          newProduct={newProduct}
           categories={categories}
           brands={brands}
           initialData={data as Product}

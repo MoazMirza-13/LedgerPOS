@@ -50,35 +50,28 @@ export async function productSubmit(
     productVariants?: string[];
   },
   initialData: Product | null,
-  showUploaderState: boolean,
   imgPaths: string[]
 ) {
   try {
     const supabase = await createClient();
-    if (initialData) {
-      // if (showUploaderState && values.image?.length) {
-      //   try {
-      //     imgPath = await imageUpload(values?.image[0]);
-      //   } catch (error) {
-      //     return { imgError: true };
-      //   }
-      // }
-      // const { error } = await supabase
-      //   .from('products')
-      //   .update({
-      //     title: values.name,
-      //     price: values.price,
-      //     description: values.description,
-      //     category_id: values.category ? values.category : null,
-      //     brand_id: values.brand ? values.brand : null,
-      //     ...(imgPath && { img_url: imgPath }),
-      //     variants: values.productVariants
-      //   })
-      //   .eq('id', initialData.id)
-      //   .select();
-      // if (error) throw error;
 
-      // revalidatePath('/dashboard/products');
+    if (initialData) {
+      const { error } = await supabase
+        .from('products')
+        .update({
+          title: values.name,
+          price: values.price,
+          description: values.description,
+          category_id: values.category ? values.category : null,
+          brand_id: values.brand ? values.brand : null,
+          img_url: imgPaths,
+          variants: values.productVariants
+        })
+        .eq('id', initialData.id)
+        .select();
+      if (error) throw error;
+
+      revalidatePath('/dashboard/products');
       return { successUpdate: true };
     } else {
       if (imgPaths.length > 0) {

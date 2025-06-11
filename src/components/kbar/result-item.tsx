@@ -47,7 +47,7 @@ const ResultItem = React.forwardRef(
             : action.imgUrl && (
                 <div className='relative h-[60px] w-[60px]'>
                   <Image
-                    src={action.imgUrl}
+                    src={action.imgUrl[0]}
                     alt={action.name}
                     className='rounded object-contain'
                     fill
