@@ -30,7 +30,6 @@ import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { imageUpload, toastMsg } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
-import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useRef } from 'react';
 
@@ -139,7 +138,6 @@ export default function ProductForm({
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { isDirty } = form.formState;
 
   const [imageSlots, setImageSlots] = useState<(string | File | null)[]>(() => {
@@ -230,8 +228,7 @@ export default function ProductForm({
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
-        queryClient.invalidateQueries({ queryKey: ['nestedData'] });
-        router.push(`/dashboard/products`);
+        router.push(`/dashboard/products?updated=true`); // param for nestedData in KBar
       }
     });
   };

@@ -27,7 +27,6 @@ import AddProductButton from '../../components/ui/add-product';
 import Link from 'next/link';
 import TableClientSide from './table-components/tableClient';
 import { getProducts } from '../products/get-products';
-import { useQueryClient } from '@tanstack/react-query';
 
 export default function DynamicForm({
   initialData,
@@ -60,7 +59,6 @@ export default function DynamicForm({
   const { isDirty } = form.formState;
   const [isPending, startFormTransition] = useTransition();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     startFormTransition(async () => {
@@ -73,8 +71,7 @@ export default function DynamicForm({
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
-        queryClient.invalidateQueries({ queryKey: ['nestedData'] });
-        router.push(`/dashboard/${type}`);
+        router.push(`/dashboard/${type}?updated=true`); // param for nestedData in KBar
       }
     });
   };
