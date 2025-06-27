@@ -6,24 +6,16 @@ import {
   KBarProvider,
   KBarSearch
 } from 'kbar';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 import RenderResults from './render-result';
 import useThemeSwitching from './use-theme-switching';
 import { kbarActions } from './kbar-actions';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getNestedData } from '@/lib/get-data-actions';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
-
-  const updated = searchParams.get('updated') === 'true';
-
-  if (updated) {
-    queryClient.invalidateQueries({ queryKey: ['nestedData'] });
-  }
 
   const navigateTo = useCallback(
     (url: string) => {

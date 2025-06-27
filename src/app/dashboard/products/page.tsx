@@ -7,7 +7,6 @@ import { searchParamsCache, serialize } from '@/lib/searchparams';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { SearchParams } from 'nuqs/server';
 import { Suspense } from 'react';
 import ListingPage from '@/features/dynamic/listing';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
@@ -20,7 +19,7 @@ export const metadata = {
 };
 
 type pageProps = {
-  searchParams: Promise<SearchParams>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export default async function Page(props: pageProps) {
@@ -56,7 +55,11 @@ export default async function Page(props: pageProps) {
           key={key}
           fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
         >
-          <ListingPage type={'products'} data={items_data} />
+          <ListingPage
+            type={'products'}
+            data={items_data}
+            searchParams={searchParams}
+          />
         </Suspense>
       </div>
     </PageContainer>

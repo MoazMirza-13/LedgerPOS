@@ -103,19 +103,21 @@ export default function ProductForm({
           }
         )
     : z
-        .any()
+        .array(z.any())
+        .nullable()
         .refine(
-          (files) =>
-            Array.isArray(files) && files.length > 0 && files.length <= 4,
-          'You must upload between 1 and 4 images.'
+          (files) => files !== null && files.length > 0,
+          'Image is required.'
         )
         .refine(
           (files) =>
-            files.every(
-              (file: File) =>
-                file.size <= MAX_FILE_SIZE &&
-                ACCEPTED_IMAGE_TYPES.includes(file.type)
-            ),
+            files === null ||
+            (files.length <= 4 &&
+              files.every(
+                (file: File) =>
+                  file.size <= MAX_FILE_SIZE &&
+                  ACCEPTED_IMAGE_TYPES.includes(file.type)
+              )),
           'Each image must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
         );
 
@@ -190,6 +192,14 @@ export default function ProductForm({
   };
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (imageSlots.every((slot) => slot === null)) {
+      form.setError('image', {
+        type: 'manual',
+        message: 'Image is required.'
+      });
+      return;
+    }
+
     startTransition(async () => {
       // Handle images - only upload new files, keep existing URLs
       const imgPaths: string[] = [];
