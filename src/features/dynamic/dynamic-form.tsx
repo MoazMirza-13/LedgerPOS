@@ -168,13 +168,14 @@ export default function DynamicForm({
           </div>
         ) : (
           <Button
-            className='flex w-40 gap-2'
+            className='flex w-44 gap-2'
             disabled={productsIsPending}
             onClick={() => {
               startTransition(() => {
                 productsAction();
               });
             }}
+            variant={'secondary'}
           >
             View Products
             {productsIsPending && (

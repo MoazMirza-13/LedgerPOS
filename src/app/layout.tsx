@@ -25,7 +25,7 @@ export default async function RootLayout({
   return (
     <html lang='en' className={`${lato.className}`} suppressHydrationWarning>
       <body className={'overflow-hidden'} suppressHydrationWarning>
-        <NextTopLoader showSpinner={false} />
+        <NextTopLoader showSpinner={false} color='#808080' />
         <NuqsAdapter>
           <Providers>
             <Toaster expand={true} />

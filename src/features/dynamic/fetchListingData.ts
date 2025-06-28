@@ -38,7 +38,14 @@ export async function fetchListingData(type: itemTable) {
     data = productsWithImg;
   }
 
-  return data?.reverse();
+  const sortedData = Array.isArray(data)
+    ? data.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+    : data;
+
+  return sortedData;
 }
 
 export function filterListingData(data: itemData[]) {

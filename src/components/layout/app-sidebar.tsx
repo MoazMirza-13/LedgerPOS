@@ -19,7 +19,7 @@ import {
   SidebarRail
 } from '@/components/ui/sidebar';
 import { navItems } from '@/constants/data';
-import { ChevronRight, GalleryVerticalEnd } from 'lucide-react';
+import { ChevronRight, Store } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
@@ -27,7 +27,7 @@ import { Icons } from '../icons';
 
 export const company = {
   name: 'NS',
-  logo: GalleryVerticalEnd,
+  logo: Store,
   plan: 'Admin Panel'
 };
 
@@ -37,7 +37,7 @@ export default function AppSidebar() {
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <div className='flex gap-2 py-2 text-sidebar-accent-foreground'>
+        <div className='flex gap-2 py-2 text-sidebar-accent-foreground dark:text-sidebar-foreground'>
           <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
             <company.logo className='size-4' />
           </div>

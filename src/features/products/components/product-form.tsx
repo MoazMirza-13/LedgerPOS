@@ -331,7 +331,7 @@ export default function ProductForm({
                                 </CardContent>
                               ) : (
                                 <CardContent
-                                  className='flex h-full cursor-pointer flex-col items-center justify-center border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
+                                  className='flex h-full cursor-pointer flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
                                   onClick={() =>
                                     fileInputRefs.current[index]?.click()
                                   }
@@ -387,7 +387,7 @@ export default function ProductForm({
                           <SelectValue placeholder='Select categories' />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className='max-h-60 overflow-y-auto'>
                         <SelectItem value='null'>None</SelectItem>
                         {categories?.map((category) => (
                           <SelectItem
@@ -438,7 +438,7 @@ export default function ProductForm({
                           <SelectValue placeholder='Select brands' />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className='max-h-60 overflow-y-auto'>
                         <SelectItem value='null'>None</SelectItem>
                         {brands?.map((brand) => (
                           <SelectItem key={brand.id} value={String(brand.id)}>

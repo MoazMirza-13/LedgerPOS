@@ -102,9 +102,7 @@ export function DataTable<TData, TValue>({
         <div className='absolute bottom-0 left-0 right-0 top-0 flex overflow-scroll rounded-md border md:overflow-auto'>
           <ScrollArea className='flex-1'>
             <Table className='relative'>
-              <TableHeader
-                className={`sticky top-0 z-10 bg-white dark:bg-black`}
-              >
+              <TableHeader className={`sticky top-0 z-10 bg-background`}>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
