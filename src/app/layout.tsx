@@ -28,7 +28,7 @@ export default async function RootLayout({
         <NextTopLoader showSpinner={false} color='#808080' />
         <NuqsAdapter>
           <Providers>
-            <Toaster expand={true} />
+            <Toaster position='top-center' expand={true} />
             {children}
           </Providers>
         </NuqsAdapter>

@@ -32,6 +32,7 @@ import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import Image from 'next/image';
 import { useRef } from 'react';
+import { Switch } from '@/components/ui/switch';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -79,7 +80,8 @@ export default function ProductForm({
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
     price: initialData?.price || 0,
     description: initialData?.description || '',
-    productVariants: initialData?.variants || []
+    productVariants: initialData?.variants || [],
+    inStock: initialData?.in_stock || false
   };
 
   // Conditional image validation
@@ -130,7 +132,8 @@ export default function ProductForm({
     brand: z.string().nullable(),
     price: z.coerce.number(),
     description: z.string().optional(),
-    productVariants: z.array(z.string()).optional()
+    productVariants: z.array(z.string()).optional(),
+    inStock: z.boolean()
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -463,6 +466,30 @@ export default function ProductForm({
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name='inStock'
+              render={({ field }) => (
+                <FormItem className='!mt-2'>
+                  <FormLabel>Stock Status</FormLabel>
+                  <div className='flex items-center gap-3'>
+                    <span className='text-2xl'>
+                      {field.value ? '✅' : '❌'}
+                    </span>
+                    <Switch
+                      id='stockStatus'
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className='data-[state=checked]:bg-green-600'
+                    />
+                    <span className='text-sm text-gray-400'>
+                      {field.value ? 'In Stock' : 'Out of Stock'}
+                    </span>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='description'

@@ -2,7 +2,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { itemData, itemTable } from 'types';
+import { itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 
 type Entity = itemData;
@@ -68,6 +68,13 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
       {
         header: 'BRAND',
         accessorFn: (row) => ('brands' in row ? row.brands?.title || '' : '')
+      },
+      {
+        header: 'Stock',
+        accessorFn: (row) => {
+          const product = row as Product;
+          return product.in_stock ? '✅' : '❌';
+        }
       },
       { accessorKey: 'price', header: 'PRICE' },
       { accessorKey: 'description', header: 'DESCRIPTION' }
