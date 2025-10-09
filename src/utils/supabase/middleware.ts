@@ -36,6 +36,20 @@ export const updateSession = async (request: NextRequest) => {
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
 
+    // handle invalid / missing role
+    const currentRole = request.cookies.get('currentRole')?.value;
+    const allowedRoles = ['admin', 'super_admin'];
+    if (
+      request.nextUrl.pathname.startsWith('/dashboard') &&
+      (!currentRole || !allowedRoles.includes(currentRole))
+    ) {
+      await supabase.auth.signOut();
+
+      const redirect = NextResponse.redirect(new URL('/', request.url));
+      redirect.cookies.delete('currentRole');
+      return redirect;
+    }
+
     // protected routes
     if (request.nextUrl.pathname.startsWith('/dashboard') && user.error) {
       return NextResponse.redirect(new URL('/', request.url));
