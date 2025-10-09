@@ -35,32 +35,57 @@ export const updateSession = async (request: NextRequest) => {
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
-
-    if (user.error) {
-      const redirect = NextResponse.redirect(new URL('/', request.url));
-      return redirect;
-    }
-
-    // invalid / missing role
-    const { data: userRoleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.data.user?.id)
-      .single();
-
-    const userRole = userRoleData?.role;
     const currentRole = request.cookies.get('currentRole')?.value;
 
-    if (currentRole !== userRole) {
-      await supabase.auth.signOut();
-      const redirect = NextResponse.redirect(new URL('/', request.url));
-      redirect.cookies.delete('currentRole');
-      return redirect;
+    // invalid / missing role
+    if (!user.error) {
+      const { data: userRoleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.data.user?.id)
+        .single();
+
+      const userRole = userRoleData?.role;
+
+      if (currentRole !== userRole) {
+        await supabase.auth.signOut();
+        const redirect = NextResponse.redirect(new URL('/', request.url));
+        redirect.cookies.delete('currentRole');
+        return redirect;
+      }
     }
 
     // protected routes
+    if (request.nextUrl.pathname.startsWith('/dashboard') && user.error) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    const homePage = currentRole === 'super_admin' ? 'overview' : 'products';
+
     if (request.nextUrl.pathname === '/' && !user.error) {
-      return NextResponse.redirect(new URL('/dashboard/overview', request.url));
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
+    }
+
+    if (
+      request.nextUrl.pathname.includes('new') &&
+      !user.error &&
+      currentRole !== 'super_admin'
+    ) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
+    }
+
+    if (
+      request.nextUrl.pathname.includes('overview') &&
+      !user.error &&
+      currentRole !== 'super_admin'
+    ) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
     }
 
     return response;

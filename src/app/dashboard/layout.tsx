@@ -23,10 +23,10 @@ export default async function DashboardLayout({
   const currentRole = cookieStore.get('currentRole')?.value || '';
 
   return (
-    <KBar>
-      <RoleProvider value={currentRole}>
+    <RoleProvider value={currentRole}>
+      <KBar>
         <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
+          <AppSidebar currentRole={currentRole} />
           <SidebarInset>
             <Header />
             {/* page main content */}
@@ -34,7 +34,7 @@ export default async function DashboardLayout({
             {/* page main content ends */}
           </SidebarInset>
         </SidebarProvider>
-      </RoleProvider>
-    </KBar>
+      </KBar>
+    </RoleProvider>
   );
 }

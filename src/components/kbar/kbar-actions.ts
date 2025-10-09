@@ -5,7 +5,8 @@ import { itemTable, nestedArray } from 'types';
 
 export function kbarActions(
   navigateTo: (url: string) => void,
-  apiData: nestedArray
+  apiData: nestedArray,
+  currentRole: string
 ) {
   const navigationActions = navItems.flatMap((navItem) => {
     const baseAction =
@@ -102,7 +103,7 @@ export function kbarActions(
 
   return [
     ...navigationActions,
-    ...newActions,
+    ...(currentRole === 'super_admin' ? newActions : []),
     ...productActions,
     ...brandActions,
     ...categoryActions,
