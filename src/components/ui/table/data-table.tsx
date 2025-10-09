@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import { useRole } from '@/context/RoleContext';
 import { checkUUID } from '@/lib/utils';
 import {
   DoubleArrowLeftIcon,
@@ -96,6 +97,8 @@ export function DataTable<TData, TValue>({
   const productsRoute = pathname.includes('/products');
   const containsUUID = pathname.split('/').some(checkUUID);
 
+  const currentRole = useRole();
+
   return (
     <div className='flex flex-1 flex-col space-y-4'>
       <div className='relative flex flex-1'>
@@ -129,7 +132,9 @@ export function DataTable<TData, TValue>({
                         <TableCell
                           key={cell.id}
                           className={
-                            index === cells.length - 1 && !productsRoute
+                            index === cells.length - 1 &&
+                            !productsRoute &&
+                            currentRole === 'super_admin'
                               ? 'pr-8 text-right'
                               : ''
                           }

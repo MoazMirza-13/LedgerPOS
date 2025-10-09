@@ -1,6 +1,7 @@
 import { getCategoriesBrandsData, getDataById } from '@/lib/actions';
 import { formatTitle, getImageUrl } from '@/lib/utils';
 import { QueryClient } from '@tanstack/react-query';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { Brand, Category, itemTable, Product } from 'types';
 
@@ -10,11 +11,20 @@ export async function fetchViewData(
   id: string
 ) {
   try {
+    const cookieStore = await cookies();
+    const currentRole = cookieStore.get('currentRole')?.value || '';
+
     let data = null;
     let categories = null;
     let brands = null;
     let newProduct = type === 'products';
-    let pageTitle = formatTitle('Add New', type);
+    let pageTitle = '';
+
+    if (currentRole === 'super_admin') {
+      pageTitle = formatTitle(id === 'new' ? 'Add New' : 'Edit', type);
+    } else {
+      pageTitle = formatTitle('', type);
+    }
 
     if (id !== 'new') {
       try {
@@ -46,8 +56,6 @@ export async function fetchViewData(
         } else {
           data = fetchedData as Category | Brand;
         }
-
-        pageTitle = formatTitle('Edit', type);
       } catch (error) {
         throw error;
       }

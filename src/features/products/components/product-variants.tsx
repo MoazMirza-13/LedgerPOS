@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { useRole } from '@/context/RoleContext';
+import RoleGate from '@/components/role-gate/RoleGateClient';
 
 interface ProductSizesProps {
   name: string;
@@ -14,6 +16,8 @@ interface ProductSizesProps {
 export function ProductVariants({ name }: ProductSizesProps) {
   const { control } = useFormContext();
   const [newSize, setNewSize] = useState('');
+
+  const currentRole = useRole();
 
   return (
     <Controller
@@ -54,25 +58,30 @@ export function ProductVariants({ name }: ProductSizesProps) {
               <Input
                 placeholder='Add variants'
                 value={newSize}
+                disabled={currentRole !== 'super_admin'}
                 onChange={(e) => setNewSize(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className='w-full'
               />
-              <Button onClick={addSize} type='button'>
-                Add
-              </Button>
+              <RoleGate allow='super_admin'>
+                <Button onClick={addSize} type='button'>
+                  Add
+                </Button>
+              </RoleGate>
             </div>
             <div className='flex flex-wrap gap-2'>
               {field.value.map((size: string) => (
                 <Badge key={size} variant='secondary' className='text-sm'>
                   {size}
-                  <button
-                    onClick={() => removeSize(size)}
-                    className='ml-2 hover:text-destructive'
-                    type='button'
-                  >
-                    <X className='h-3 w-3' />
-                  </button>
+                  <RoleGate allow='super_admin'>
+                    <button
+                      onClick={() => removeSize(size)}
+                      className='ml-2 hover:text-destructive'
+                      type='button'
+                    >
+                      <X className='h-3 w-3' />
+                    </button>
+                  </RoleGate>
                 </Badge>
               ))}
             </div>

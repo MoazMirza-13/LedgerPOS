@@ -12,7 +12,7 @@ import ListingPage from '@/features/dynamic/listing';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
 import { itemData } from 'types';
 import TableAction from '@/features/dynamic/table-components/table-action';
-import { cookies } from 'next/headers';
+import RoleGate from '@/components/role-gate/RoleGateServer';
 
 export const metadata = {
   title: 'Dashboard: Brands'
@@ -33,22 +33,19 @@ export default async function Page(props: pageProps) {
   const data = await fetchListingData('brands');
   const items_data: itemData[] = data ? data : [];
 
-  const cookieStore = await cookies();
-  const currentRole = cookieStore.get('currentRole')?.value || '';
-
   return (
     <PageContainer scrollable={false}>
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='flex items-start justify-between'>
           <Heading title='Brands' description='Manage brands' />
-          {currentRole === 'super_admin' && (
+          <RoleGate allow='super_admin'>
             <Link
               href='/dashboard/brands/new'
               className={cn(buttonVariants(), 'text-xs md:text-sm')}
             >
               <Plus className='mr-2 h-4 w-4' /> Add New
             </Link>
-          )}
+          </RoleGate>
         </div>
         <Separator />
         <TableAction />

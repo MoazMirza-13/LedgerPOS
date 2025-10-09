@@ -33,6 +33,8 @@ import { Brand, Category, Product } from 'types';
 import Image from 'next/image';
 import { useRef } from 'react';
 import { Switch } from '@/components/ui/switch';
+import RoleGate from '@/components/role-gate/RoleGateClient';
+import { useRole } from '@/context/RoleContext';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -246,6 +248,7 @@ export default function ProductForm({
     });
   };
 
+  const currentRole = useRole();
   return (
     <Card className='mx-auto w-full'>
       <CardHeader>
@@ -296,28 +299,30 @@ export default function ProductForm({
                                     fill
                                     className='rounded-lg object-contain'
                                   />
-                                  <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
-                                    <Button
-                                      type='button'
-                                      size='sm'
-                                      variant='secondary'
-                                      onClick={() =>
-                                        handleIndividualImageReplace(index)
-                                      }
-                                    >
-                                      <Upload className='h-4 w-4' />
-                                    </Button>
-                                    <Button
-                                      type='button'
-                                      size='sm'
-                                      variant='destructive'
-                                      onClick={() =>
-                                        handleIndividualImageRemove(index)
-                                      }
-                                    >
-                                      <X className='h-4 w-4' />
-                                    </Button>
-                                  </div>
+                                  <RoleGate allow='super_admin'>
+                                    <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                                      <Button
+                                        type='button'
+                                        size='sm'
+                                        variant='secondary'
+                                        onClick={() =>
+                                          handleIndividualImageReplace(index)
+                                        }
+                                      >
+                                        <Upload className='h-4 w-4' />
+                                      </Button>
+                                      <Button
+                                        type='button'
+                                        size='sm'
+                                        variant='destructive'
+                                        onClick={() =>
+                                          handleIndividualImageRemove(index)
+                                        }
+                                      >
+                                        <X className='h-4 w-4' />
+                                      </Button>
+                                    </div>
+                                  </RoleGate>
 
                                   {/* Show indicator for new vs existing */}
                                   {!newProduct && (
@@ -363,6 +368,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='name'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Name</FormLabel>
@@ -386,7 +392,7 @@ export default function ProductForm({
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
                           <SelectValue placeholder='Select categories' />
                         </SelectTrigger>
                       </FormControl>
@@ -409,6 +415,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='price'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Price</FormLabel>
@@ -427,6 +434,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='brand'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Brand</FormLabel>
@@ -437,7 +445,7 @@ export default function ProductForm({
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
                           <SelectValue placeholder='Select brands' />
                         </SelectTrigger>
                       </FormControl>
@@ -480,6 +488,7 @@ export default function ProductForm({
                       id='stockStatus'
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      disabled={currentRole !== 'super_admin'}
                       className='data-[state=checked]:bg-green-600'
                     />
                     <span className='text-sm text-gray-400'>
@@ -493,6 +502,7 @@ export default function ProductForm({
             <FormField
               control={form.control}
               name='description'
+              disabled={currentRole !== 'super_admin'}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -507,18 +517,20 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
-            <Button type='submit' disabled={isPending || !isDirty}>
-              {isPending ? (
-                <div className='flex gap-2'>
-                  {initialData ? 'Editing' : 'Adding'}
-                  <LoaderCircle className='h-5 w-5 animate-spin' />
-                </div>
-              ) : initialData ? (
-                'Edit Product'
-              ) : (
-                'Add Product'
-              )}
-            </Button>
+            <RoleGate allow='super_admin'>
+              <Button type='submit' disabled={isPending || !isDirty}>
+                {isPending ? (
+                  <div className='flex gap-2'>
+                    {initialData ? 'Editing' : 'Adding'}
+                    <LoaderCircle className='h-5 w-5 animate-spin' />
+                  </div>
+                ) : initialData ? (
+                  'Edit Product'
+                ) : (
+                  'Add Product'
+                )}
+              </Button>
+            </RoleGate>
           </form>
         </Form>
       </CardContent>
