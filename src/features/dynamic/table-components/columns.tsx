@@ -4,11 +4,16 @@ import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
+import { useRole } from '@/context/RoleContext';
 
 type Entity = itemData;
 
-export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
+export const useColumns = <T extends Entity>(
+  type: itemTable
+): ColumnDef<T>[] => {
   const baseColumns: ColumnDef<T>[] = [];
+
+  const currentRole = useRole();
 
   if (type === 'categories' || type === 'brands') {
     baseColumns.push(
@@ -81,11 +86,12 @@ export const columns = <T extends Entity>(type: itemTable): ColumnDef<T>[] => {
     );
   }
 
-  return [
-    ...baseColumns,
-    {
+  if (currentRole === 'super_admin') {
+    baseColumns.push({
       id: 'actions',
       cell: ({ row }) => <CellAction itemTable={type} itemData={row.original} />
-    }
-  ];
+    });
+  }
+
+  return baseColumns;
 };
