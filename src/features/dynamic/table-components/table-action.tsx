@@ -30,11 +30,12 @@ export default function TableAction({
 
   const pathname = usePathname();
   const productsRoute = pathname.includes('/products');
+  const searchKey = productsRoute ? 'code, title' : 'title';
 
   return (
     <div className='flex flex-wrap items-center gap-4'>
       <DataTableSearch
-        searchKey='title'
+        searchKey={searchKey}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         setPage={setPage}

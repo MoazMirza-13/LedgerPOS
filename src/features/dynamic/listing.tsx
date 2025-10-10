@@ -17,7 +17,7 @@ export default async function ListingPage({
 }: ListingPageProps) {
   const updated = searchParams.updated === 'true';
 
-  const { paginatedData, total_length } = filterListingData(data);
+  const { paginatedData, total_length } = filterListingData(data, type);
 
   return (
     <>

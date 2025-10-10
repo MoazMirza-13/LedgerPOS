@@ -74,7 +74,7 @@ export function kbarActions(
     apiData.products?.map((product) => ({
       id: `${product.title.toLowerCase()}Action`,
       name: product.title,
-      keywords: product.title.toLowerCase(),
+      keywords: product.title.toLowerCase() && product.product_code,
       section: 'Products',
       subtitle: `View this product`,
       imgUrl: product.img_url,

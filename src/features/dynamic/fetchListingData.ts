@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { getImageUrl } from '@/lib/utils';
-import { itemTable, itemData } from 'types';
+import { itemTable, itemData, Product, Category, Brand } from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 
 export async function fetchListingData(type: itemTable) {
@@ -48,7 +48,7 @@ export async function fetchListingData(type: itemTable) {
   return sortedData;
 }
 
-export function filterListingData(data: itemData[]) {
+export function filterListingData(data: itemData[], type: string) {
   // Showcasing the use of search params cache in nested RSCs
   const search = searchParamsCache.get('q');
   const page = Number(searchParamsCache.get('page'));
@@ -57,9 +57,18 @@ export function filterListingData(data: itemData[]) {
   const brands = searchParamsCache.get('brands')?.split('.') || [];
 
   const filteredData = data.filter((item) => {
-    const matchesSearch = search
-      ? item.title.toLowerCase().includes(search.toLowerCase())
-      : true;
+    let value = '';
+
+    if (type === 'products') {
+      const product = item as Product;
+      value = `${product.product_code ?? ''} ${product.title ?? ''}`;
+    } else {
+      const entry = item as Category | Brand;
+      value = entry.title ?? '';
+    }
+
+    const text = value.toLowerCase();
+    const matchesSearch = search ? text.includes(search.toLowerCase()) : true;
 
     const matchesCategoryBrand =
       (categories.length || brands.length) &&

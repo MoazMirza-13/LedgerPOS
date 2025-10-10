@@ -65,6 +65,7 @@ export const useColumns = <T extends Entity>(
           </Link>
         )
       },
+      { accessorKey: 'product_code', header: 'CODE #' },
       {
         header: 'CATEGORY',
         accessorFn: (row) =>
@@ -74,6 +75,8 @@ export const useColumns = <T extends Entity>(
         header: 'BRAND',
         accessorFn: (row) => ('brands' in row ? row.brands?.title || '' : '')
       },
+      { accessorKey: 'price', header: 'PRICE' },
+      { accessorKey: 'quantity', header: 'QUANTITY' },
       {
         header: 'Stock',
         accessorFn: (row) => {
@@ -81,7 +84,6 @@ export const useColumns = <T extends Entity>(
           return product.in_stock ? '✅' : '❌';
         }
       },
-      { accessorKey: 'price', header: 'PRICE' },
       { accessorKey: 'description', header: 'DESCRIPTION' }
     );
   }
