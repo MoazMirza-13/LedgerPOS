@@ -69,7 +69,7 @@ export function ProductVariants({ name }: ProductSizesProps) {
                 </Button>
               </RoleGate>
             </div>
-            <div className='flex flex-wrap gap-2'>
+            <div className='mb-2 flex flex-wrap gap-2'>
               {field.value.map((size: string) => (
                 <Badge key={size} variant='secondary' className='text-sm'>
                   {size}

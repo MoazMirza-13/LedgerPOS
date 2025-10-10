@@ -65,6 +65,8 @@ export async function productSubmit(
     description?: string;
     productVariants?: string[];
     inStock: boolean;
+    quantity: number;
+    product_code?: string;
   },
   initialData: Product | null,
   imgPaths: string[]
@@ -83,7 +85,9 @@ export async function productSubmit(
           brand_id: values.brand ? values.brand : null,
           img_url: imgPaths,
           variants: values.productVariants,
-          in_stock: values.inStock
+          in_stock: values.inStock,
+          quantity: values.quantity,
+          product_code: values.product_code
         })
         .eq('id', initialData.id)
         .select();
@@ -104,7 +108,9 @@ export async function productSubmit(
               category_id: values.category ? values.category : null,
               brand_id: values.brand ? values.brand : null,
               variants: values.productVariants,
-              in_stock: values.inStock
+              in_stock: values.inStock,
+              quantity: values.quantity,
+              product_code: values.product_code
             }
           ])
           .select();

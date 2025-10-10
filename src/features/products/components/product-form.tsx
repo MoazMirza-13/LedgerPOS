@@ -83,7 +83,9 @@ export default function ProductForm({
     price: initialData?.price || 0,
     description: initialData?.description || '',
     productVariants: initialData?.variants || [],
-    inStock: initialData?.in_stock || false
+    inStock: initialData?.in_stock || false,
+    quantity: initialData?.quantity || 0,
+    product_code: initialData?.product_code || ''
   };
 
   // Conditional image validation
@@ -135,7 +137,9 @@ export default function ProductForm({
     price: z.coerce.number(),
     description: z.string().optional(),
     productVariants: z.array(z.string()).optional(),
-    inStock: z.boolean()
+    inStock: z.boolean(),
+    quantity: z.coerce.number(),
+    product_code: z.string().optional()
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -298,6 +302,8 @@ export default function ProductForm({
                                     alt={`Product image ${index + 1}`}
                                     fill
                                     className='rounded-lg object-contain'
+                                    sizes='(max-width: 768px) 100vw, 110px'
+                                    priority
                                   />
                                   <RoleGate allow='super_admin'>
                                     <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
@@ -464,11 +470,46 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
+                name='quantity'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter Quantity'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
                 name='productVariants'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Variants</FormLabel>
                     <ProductVariants name={field.name} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='product_code'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter product code' {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -36,6 +36,8 @@ export type Product = {
   brand_id: string;
   variants: string[];
   in_stock: boolean;
+  quantity: number;
+  product_code: string;
   // for category and brand title in table
   categories?: Category;
   brands?: Brand;
