@@ -7,8 +7,8 @@ import './globals.css';
 import Providers from '@/components/layout/providers';
 
 export const metadata: Metadata = {
-  title: 'NS | Admin Panel',
-  description: 'Admin panel for NS.'
+  title: 'Kashmir Tiles | Admin Panel',
+  description: 'Admin panel for Kashmir Tiles.'
 };
 
 const lato = Lato({

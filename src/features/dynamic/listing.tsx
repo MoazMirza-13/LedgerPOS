@@ -2,7 +2,7 @@ import TableClientSide from '@/features/dynamic/table-components/tableClient';
 import { itemData, itemTable } from 'types';
 import { filterListingData } from './fetchListingData';
 import { SearchParams } from 'nuqs/server';
-import RefetchKBar from '@/components/kbar/RefetchKBar';
+// import RefetchKBar from '@/components/kbar/RefetchKBar';
 
 type ListingPageProps = {
   type: itemTable;
@@ -15,13 +15,13 @@ export default async function ListingPage({
   data,
   searchParams
 }: ListingPageProps) {
-  const updated = searchParams.updated === 'true';
+  // const updated = searchParams.updated === 'true';
 
   const { paginatedData, total_length } = filterListingData(data, type);
 
   return (
     <>
-      {updated && <RefetchKBar />}
+      {/* {updated && <RefetchKBar />} */}
       <TableClientSide type={type} data={paginatedData} total={total_length} />
     </>
   );
