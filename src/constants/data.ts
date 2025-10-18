@@ -33,6 +33,14 @@ export const navItems: NavItem[] = [
     shortcut: ['g', 'b'],
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Invoices',
+    url: '/dashboard/invoices',
+    icon: 'invoice',
+    shortcut: ['g', 'i'],
+    isActive: false,
+    items: [] // No child items
   }
 ];
 

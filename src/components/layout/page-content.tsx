@@ -10,11 +10,12 @@ import { Suspense } from 'react';
 import ListingPage from '@/features/dynamic/listing';
 import TableAction from '@/features/dynamic/table-components/table-action';
 import RoleGate from '@/components/role-gate/RoleGateServer';
+import { itemTable } from 'types';
 
 interface PageContentProps {
   title: string;
   description: string;
-  type: 'brands' | 'categories' | 'products';
+  type: itemTable;
   newLink: string;
   itemsData: any[];
   searchParams: any;

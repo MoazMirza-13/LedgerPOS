@@ -58,7 +58,7 @@ export type Brand = {
   description: string;
 };
 
-export type itemTable = 'categories' | 'products' | 'brands';
+export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';
 
 export type itemData = Product | Category | Brand;
 
