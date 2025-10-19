@@ -80,7 +80,8 @@ export default function ProductForm({
       ? String(categoryIdFromURL)
       : initialData?.category_id || '',
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
-    price: initialData?.price || 0,
+    costPrice: initialData?.cost_price || 0,
+    sellingPrice: initialData?.selling_price || 0,
     description: initialData?.description || '',
     productVariants: initialData?.variants || [],
     inStock: initialData?.in_stock || false,
@@ -134,12 +135,15 @@ export default function ProductForm({
     }),
     category: z.string().nullable(),
     brand: z.string().nullable(),
-    price: z.coerce.number(),
+    costPrice: z.coerce.number(),
+    sellingPrice: z.coerce.number(),
     description: z.string().optional(),
     productVariants: z.array(z.string()).optional(),
     inStock: z.boolean(),
     quantity: z.coerce.number(),
-    product_code: z.string().optional()
+    product_code: z.string().min(1, {
+      message: 'Product code is required'
+    })
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -420,16 +424,16 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='price'
+                name='costPrice'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Cost Price</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
                         step='0'
-                        placeholder='Enter price'
+                        placeholder='Enter cost price'
                         {...field}
                       />
                     </FormControl>
@@ -464,6 +468,25 @@ export default function ProductForm({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='sellingPrice'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Selling Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter selling price'
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

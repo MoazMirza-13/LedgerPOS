@@ -68,7 +68,8 @@ export async function productSubmit(
     name: string;
     category: string | null;
     brand: string | null;
-    price: number;
+    costPrice: number;
+    sellingPrice: number;
     description?: string;
     productVariants?: string[];
     inStock: boolean;
@@ -86,7 +87,8 @@ export async function productSubmit(
         .from('products')
         .update({
           title: values.name,
-          price: values.price,
+          cost_price: values.costPrice,
+          selling_price: values.sellingPrice,
           description: values.description,
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
@@ -109,7 +111,8 @@ export async function productSubmit(
           .insert([
             {
               title: values.name,
-              price: values.price,
+              cost_price: values.costPrice,
+              selling_price: values.sellingPrice,
               description: values.description,
               img_url: imgPaths,
               category_id: values.category ? values.category : null,

@@ -75,8 +75,9 @@ export const useColumns = <T extends Entity>(
         header: 'BRAND',
         accessorFn: (row) => ('brands' in row ? row.brands?.title || '' : '')
       },
-      { accessorKey: 'price', header: 'PRICE' },
+      { accessorKey: 'cost_price', header: 'COST' },
       { accessorKey: 'quantity', header: 'QUANTITY' },
+      { accessorKey: 'selling_price', header: 'SELLING' },
       {
         header: 'Stock',
         accessorFn: (row) => {
