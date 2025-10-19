@@ -5,7 +5,14 @@ import { createClient } from '../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import { Brand, Category, itemData, Product } from 'types';
+import {
+  Brand,
+  Category,
+  Invoice,
+  Invoice_items,
+  itemData,
+  Product
+} from 'types';
 
 export const getSupabaseClient = async () => {
   // for util functions
@@ -191,3 +198,25 @@ export const getCategoriesBrandsData = cache(async () => {
   if (error) throw error;
   return data;
 });
+
+export const invoiceSubmit = async (values: Invoice) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('create_invoice_with_items', {
+    customer_name: values.customer_name,
+    customer_number: values.customer_number,
+    customer_address: values.customer_address,
+    items: values.invoice_items.map((item: Invoice_items) => ({
+      product_code: item.product_code,
+      description: item.description,
+      quantity: item.quantity,
+      boxes: item.boxes,
+      price: item.price
+    }))
+  });
+
+  if (error) {
+    console.error('Invoice creation failed:', error.message);
+  } else {
+    console.log('Invoice created with id:', data);
+  }
+};

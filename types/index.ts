@@ -59,6 +59,21 @@ export type Brand = {
   description: string;
 };
 
+export type Invoice = {
+  customer_name: string;
+  customer_address?: string;
+  customer_number?: string; // phone numbers can include "+92" etc
+  invoice_items: Invoice_items[];
+};
+
+export type Invoice_items = {
+  product_code: string;
+  description?: string;
+  quantity: number;
+  price: number;
+  boxes?: number;
+};
+
 export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';
 
 export type itemData = Product | Category | Brand;

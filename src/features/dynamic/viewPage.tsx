@@ -8,6 +8,7 @@ import {
   QueryClient
 } from '@tanstack/react-query';
 import { queryClientConfig } from '@/lib/tanStack-action';
+import InvoiceForm from '../invoices/invoice-form';
 
 type ViewPage = {
   type: itemTable;
@@ -27,6 +28,11 @@ export default async function ViewPage({ type, id }: ViewPage) {
           type={type}
           initialData={data as Category | Brand}
           pageTitle={pageTitle}
+        />
+      ) : type === 'invoices' ? (
+        <InvoiceForm
+        // initialData={data as Product}
+        // pageTitle={pageTitle}
         />
       ) : (
         <ProductForm
