@@ -66,6 +66,7 @@ export async function getUserSession() {
 export async function productSubmit(
   values: {
     name: string;
+    productCode?: string;
     category: string | null;
     brand: string | null;
     costPrice: number;
@@ -73,8 +74,14 @@ export async function productSubmit(
     description?: string;
     productVariants?: string[];
     inStock: boolean;
-    quantity: number;
-    product_code?: string;
+    quantityInWarehouses: {
+      Zafarwal: number;
+      Ghaziwal: number;
+      EidgahRoad: number;
+      LhrRoad: number;
+      MandiBond: number;
+      MandiTile: number;
+    };
   },
   initialData: Product | null,
   imgPaths: string[]
@@ -87,6 +94,7 @@ export async function productSubmit(
         .from('products')
         .update({
           title: values.name,
+          product_code: values.productCode,
           cost_price: values.costPrice,
           selling_price: values.sellingPrice,
           description: values.description,
@@ -95,8 +103,12 @@ export async function productSubmit(
           img_url: imgPaths,
           variants: values.productVariants,
           in_stock: values.inStock,
-          quantity: values.quantity,
-          product_code: values.product_code
+          quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+          quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+          quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+          quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+          quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+          quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
         })
         .eq('id', initialData.id)
         .select();
@@ -111,6 +123,7 @@ export async function productSubmit(
           .insert([
             {
               title: values.name,
+              product_code: values.productCode,
               cost_price: values.costPrice,
               selling_price: values.sellingPrice,
               description: values.description,
@@ -119,8 +132,12 @@ export async function productSubmit(
               brand_id: values.brand ? values.brand : null,
               variants: values.productVariants,
               in_stock: values.inStock,
-              quantity: values.quantity,
-              product_code: values.product_code
+              quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+              quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+              quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+              quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+              quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+              quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
             }
           ])
           .select();

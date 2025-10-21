@@ -32,7 +32,6 @@ import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import Image from 'next/image';
 import { useRef } from 'react';
-import { Switch } from '@/components/ui/switch';
 import RoleGate from '@/components/role-gate/RoleGateClient';
 import { useRole } from '@/context/RoleContext';
 
@@ -73,6 +72,15 @@ export default function ProductForm({
   const categoryIdFromURL =
     categories?.find((c) => c.title === category)?.id || '';
 
+  const warehouses = [
+    { key: 'Ghaziwal', label: 'Ghaziwal' },
+    { key: 'Zafarwal', label: 'Zafarwal' },
+    { key: 'LhrRoad', label: 'Lhr Road' },
+    { key: 'EidgahRoad', label: 'Eidgah Road' },
+    { key: 'MandiTile', label: 'Mandi Tile' },
+    { key: 'MandiBond', label: 'Mandi Bond' }
+  ];
+
   const defaultValues = {
     image: null,
     name: initialData?.title || '',
@@ -85,8 +93,15 @@ export default function ProductForm({
     description: initialData?.description || '',
     productVariants: initialData?.variants || [],
     inStock: initialData?.in_stock || false,
-    quantity: initialData?.quantity || 0,
-    product_code: initialData?.product_code || ''
+    productCode: initialData?.product_code || '',
+    quantityInWarehouses: {
+      Ghaziwal: initialData?.quantity_in_ghaziwal || 0,
+      Zafarwal: initialData?.quantity_in_zafarwal || 0,
+      LhrRoad: initialData?.quantity_in_lhr_road || 0,
+      EidgahRoad: initialData?.quantity_in_eidgah_road || 0,
+      MandiTile: initialData?.quantity_in_mandi_tile || 0,
+      MandiBond: initialData?.quantity_in_mandi_bond || 0
+    }
   };
 
   // Conditional image validation
@@ -140,9 +155,16 @@ export default function ProductForm({
     description: z.string().optional(),
     productVariants: z.array(z.string()).optional(),
     inStock: z.boolean(),
-    quantity: z.coerce.number(),
-    product_code: z.string().min(1, {
+    productCode: z.string().min(1, {
       message: 'Product code is required'
+    }),
+    quantityInWarehouses: z.object({
+      Ghaziwal: z.coerce.number().default(0),
+      Zafarwal: z.coerce.number().default(0),
+      LhrRoad: z.coerce.number().default(0),
+      EidgahRoad: z.coerce.number().default(0),
+      MandiTile: z.coerce.number().default(0),
+      MandiBond: z.coerce.number().default(0)
     })
   });
 
@@ -153,6 +175,7 @@ export default function ProductForm({
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const currentRole = useRole();
   const { isDirty } = form.formState;
 
   const [imageSlots, setImageSlots] = useState<(string | File | null)[]>(() => {
@@ -256,7 +279,6 @@ export default function ProductForm({
     });
   };
 
-  const currentRole = useRole();
   return (
     <Card className='mx-auto w-full'>
       <CardHeader>
@@ -391,6 +413,39 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
+                name='productCode'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter product code' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='costPrice'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cost Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter cost price'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name='category'
                 render={({ field }) => (
                   <FormItem>
@@ -424,16 +479,16 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='costPrice'
+                name='sellingPrice'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cost Price</FormLabel>
+                    <FormLabel>Selling Price</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
                         step='0'
-                        placeholder='Enter cost price'
+                        placeholder='Enter selling price'
                         {...field}
                       />
                     </FormControl>
@@ -474,46 +529,6 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='sellingPrice'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Selling Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0'
-                        placeholder='Enter selling price'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='quantity'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantity</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0'
-                        placeholder='Enter Quantity'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-              <FormField
-                control={form.control}
                 name='productVariants'
                 render={({ field }) => (
                   <FormItem>
@@ -523,26 +538,47 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='product_code'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Product Code</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter product code' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
-            <FormField
+            {/* quantity */}
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              {warehouses.map((w) => (
+                <FormField
+                  key={w.key}
+                  control={form.control}
+                  name={
+                    `quantityInWarehouses.${w.key}` as
+                      | 'quantityInWarehouses.Ghaziwal'
+                      | 'quantityInWarehouses.Zafarwal'
+                      | 'quantityInWarehouses.LhrRoad'
+                      | 'quantityInWarehouses.EidgahRoad'
+                      | 'quantityInWarehouses.MandiTile'
+                      | 'quantityInWarehouses.MandiBond'
+                  }
+                  disabled={currentRole !== 'super_admin'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity in {w.label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0'
+                          placeholder={`Enter Quantity for ${w.label}`}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* might need stock status in future, from backend by default it will be false */}
+            {/* <FormField
               control={form.control}
               name='inStock'
               render={({ field }) => (
-                <FormItem className='!mt-2'>
+                <FormItem>
                   <FormLabel>Stock Status</FormLabel>
                   <div className='flex items-center gap-3'>
                     <span className='text-2xl'>
@@ -562,7 +598,7 @@ export default function ProductForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
             <FormField
               control={form.control}
               name='description'

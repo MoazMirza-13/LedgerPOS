@@ -64,12 +64,16 @@ export function ProductVariants({ name }: ProductSizesProps) {
                 className='w-full'
               />
               <RoleGate allow='super_admin'>
-                <Button onClick={addSize} type='button'>
+                <Button
+                  disabled={newSize === ''}
+                  onClick={addSize}
+                  type='button'
+                >
                   Add
                 </Button>
               </RoleGate>
             </div>
-            <div className='mb-2 flex flex-wrap gap-2'>
+            <div className='flex flex-wrap gap-2'>
               {field.value.map((size: string) => (
                 <Badge key={size} variant='secondary' className='text-sm'>
                   {size}

@@ -76,13 +76,26 @@ export const useColumns = <T extends Entity>(
         accessorFn: (row) => ('brands' in row ? row.brands?.title || '' : '')
       },
       { accessorKey: 'cost_price', header: 'COST' },
-      { accessorKey: 'quantity', header: 'QUANTITY' },
+      {
+        header: 'QUANTITY',
+        accessorFn: (row) => {
+          const product = row as Product;
+          const totalQuantity =
+            (product.quantity_in_zafarwal || 0) +
+            (product.quantity_in_ghaziwal || 0) +
+            (product.quantity_in_lhr_road || 0) +
+            (product.quantity_in_eidgah_road || 0) +
+            (product.quantity_in_mandi_tile || 0) +
+            (product.quantity_in_mandi_bond || 0);
+          return totalQuantity;
+        }
+      },
       { accessorKey: 'selling_price', header: 'SELLING' },
       {
         header: 'Stock',
-        accessorFn: (row) => {
-          const product = row as Product;
-          return product.in_stock ? '✅' : '❌';
+        cell: ({ row }) => {
+          const quantity = row.getValue('QUANTITY') as number;
+          return quantity > 0 ? '✅' : '❌';
         }
       },
       { accessorKey: 'description', header: 'DESCRIPTION' }

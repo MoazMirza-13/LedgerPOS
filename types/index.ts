@@ -28,6 +28,7 @@ export type SidebarNavItem = NavItemWithChildren;
 
 export type Product = {
   title: string;
+  product_code: string;
   description: string;
   created_at: string;
   cost_price: number;
@@ -38,8 +39,12 @@ export type Product = {
   brand_id: string;
   variants: string[];
   in_stock: boolean;
-  quantity: number;
-  product_code: string;
+  quantity_in_zafarwal: number;
+  quantity_in_ghaziwal: number;
+  quantity_in_lhr_road: number;
+  quantity_in_eidgah_road: number;
+  quantity_in_mandi_tile: number;
+  quantity_in_mandi_bond: number;
   // for category and brand title in table
   categories?: Category;
   brands?: Brand;
