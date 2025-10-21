@@ -1,6 +1,6 @@
-// import KBar from '@/components/kbar';
-import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
+// import KBar from '@/components/kbar';
+import AppSidebar from '@/components/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { RoleProvider } from '@/context/RoleContext';
 import type { Metadata } from 'next';
@@ -26,7 +26,7 @@ export default async function DashboardLayout({
     <RoleProvider value={currentRole}>
       {/* <KBar> */}
       <SidebarProvider defaultOpen={defaultOpen}>
-        <AppSidebar currentRole={currentRole} />
+        <AppSidebar />
         <SidebarInset>
           <Header />
           {/* page main content */}

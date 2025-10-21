@@ -6,8 +6,9 @@ export const navItems: NavItem[] = [
     title: 'Dashboard',
     url: '/dashboard/overview',
     icon: 'dashboard',
-    isActive: false,
     shortcut: ['g', 'd'],
+    isActive: false,
+    group: 'Overview',
     items: [] // Empty array as there are no child items for Dashboard
   },
   {
@@ -16,6 +17,7 @@ export const navItems: NavItem[] = [
     icon: 'product',
     shortcut: ['g', 'p'],
     isActive: false,
+    group: 'Stock Management',
     items: [] // No child items
   },
   {
@@ -24,6 +26,7 @@ export const navItems: NavItem[] = [
     icon: 'category',
     shortcut: ['g', 'c'],
     isActive: false,
+    group: 'Stock Management',
     items: [] // No child items
   },
   {
@@ -32,6 +35,16 @@ export const navItems: NavItem[] = [
     icon: 'brand',
     shortcut: ['g', 'b'],
     isActive: false,
+    group: 'Stock Management',
+    items: [] // No child items
+  },
+  {
+    title: 'Invoices',
+    url: '/dashboard/invoices',
+    icon: 'invoice',
+    shortcut: ['g', 'i'],
+    isActive: false,
+    group: 'Billing',
     items: [] // No child items
   }
 ];

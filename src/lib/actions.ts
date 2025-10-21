@@ -5,7 +5,14 @@ import { createClient } from '../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import { Brand, Category, itemData, Product } from 'types';
+import {
+  Brand,
+  Category,
+  Invoice,
+  Invoice_items,
+  itemData,
+  Product
+} from 'types';
 
 export const getSupabaseClient = async () => {
   // for util functions
@@ -59,14 +66,22 @@ export async function getUserSession() {
 export async function productSubmit(
   values: {
     name: string;
+    productCode?: string;
     category: string | null;
     brand: string | null;
-    price: number;
+    costPrice: number;
+    sellingPrice: number;
     description?: string;
     productVariants?: string[];
     inStock: boolean;
-    quantity: number;
-    product_code?: string;
+    quantityInWarehouses: {
+      Zafarwal: number;
+      Ghaziwal: number;
+      EidgahRoad: number;
+      LhrRoad: number;
+      MandiBond: number;
+      MandiTile: number;
+    };
   },
   initialData: Product | null,
   imgPaths: string[]
@@ -79,15 +94,21 @@ export async function productSubmit(
         .from('products')
         .update({
           title: values.name,
-          price: values.price,
+          product_code: values.productCode,
+          cost_price: values.costPrice,
+          selling_price: values.sellingPrice,
           description: values.description,
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
           img_url: imgPaths,
           variants: values.productVariants,
           in_stock: values.inStock,
-          quantity: values.quantity,
-          product_code: values.product_code
+          quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+          quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+          quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+          quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+          quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+          quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
         })
         .eq('id', initialData.id)
         .select();
@@ -102,15 +123,21 @@ export async function productSubmit(
           .insert([
             {
               title: values.name,
-              price: values.price,
+              product_code: values.productCode,
+              cost_price: values.costPrice,
+              selling_price: values.sellingPrice,
               description: values.description,
               img_url: imgPaths,
               category_id: values.category ? values.category : null,
               brand_id: values.brand ? values.brand : null,
               variants: values.productVariants,
               in_stock: values.inStock,
-              quantity: values.quantity,
-              product_code: values.product_code
+              quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+              quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+              quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+              quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+              quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+              quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
             }
           ])
           .select();
@@ -191,3 +218,25 @@ export const getCategoriesBrandsData = cache(async () => {
   if (error) throw error;
   return data;
 });
+
+export const invoiceSubmit = async (values: Invoice) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('create_invoice_with_items', {
+    customer_name: values.customer_name,
+    customer_number: values.customer_number,
+    customer_address: values.customer_address,
+    items: values.invoice_items.map((item: Invoice_items) => ({
+      product_code: item.product_code,
+      description: item.description,
+      quantity: item.quantity,
+      boxes: item.boxes,
+      price: item.price
+    }))
+  });
+
+  if (error) {
+    console.error('Invoice creation failed:', error.message);
+  } else {
+    console.log('Invoice created with id:', data);
+  }
+};
