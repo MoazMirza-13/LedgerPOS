@@ -5,6 +5,7 @@ import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
+import { formatToPKTDate } from '@/lib/utils';
 
 type Entity = itemData;
 
@@ -115,6 +116,13 @@ export const useColumns = <T extends Entity>(
       },
       { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
       { accessorKey: 'customer_address', header: 'CUSTOMER ADDRESS' },
+      {
+        accessorKey: 'created_at',
+        header: 'DATE',
+        cell: ({ row }) => (
+          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
+        )
+      },
       { accessorKey: 'total_price', header: 'TOTAL' }
     );
   }

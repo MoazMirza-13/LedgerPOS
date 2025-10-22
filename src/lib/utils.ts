@@ -4,6 +4,7 @@ import { getSupabaseClient } from './actions';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
 import { itemTable } from 'types';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -104,5 +105,13 @@ export async function imageUpload(file: File) {
     return data?.path;
   } catch (error: any) {
     return { error };
+  }
+}
+
+export function formatToPKTDate(utcDate: string): string {
+  try {
+    return formatInTimeZone(new Date(utcDate), 'Asia/Karachi', 'dd-MM-yyyy');
+  } catch {
+    return '';
   }
 }
