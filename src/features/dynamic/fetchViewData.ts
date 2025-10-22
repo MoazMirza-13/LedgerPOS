@@ -1,9 +1,20 @@
-import { getCategoriesBrandsData, getDataById } from '@/lib/actions';
+import {
+  getCategoriesBrandsData,
+  getDataById,
+  getSupabaseClient
+} from '@/lib/actions';
 import { formatTitle, getImageUrl } from '@/lib/utils';
 import { QueryClient } from '@tanstack/react-query';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { Brand, Category, itemTable, Product } from 'types';
+import {
+  Brand,
+  Category,
+  Invoice,
+  Invoice_items,
+  itemTable,
+  Product
+} from 'types';
 
 export async function fetchViewData(
   queryClient: QueryClient,
@@ -34,7 +45,9 @@ export async function fetchViewData(
           staleTime: Infinity // Never refetch automatically
         });
 
-        const fetchedData = queryClient.getQueryData([type, id]);
+        const fetchedData = queryClient.getQueryData<
+          Invoice | Product | Category | Brand
+        >([type, id]);
 
         if (!fetchedData) {
           notFound();
@@ -53,6 +66,19 @@ export async function fetchViewData(
           };
 
           newProduct = false;
+        } else if (type === 'invoices' && fetchedData) {
+          const supabase = await getSupabaseClient();
+          const { data: invoice_items, error } = await supabase
+            .from('invoice_items')
+            .select('*')
+            .eq('invoice_id', fetchedData.id);
+
+          if (error) throw error;
+
+          data = {
+            ...fetchedData,
+            invoice_items: (invoice_items as Invoice_items[]) || []
+          };
         } else {
           data = fetchedData as Category | Brand;
         }

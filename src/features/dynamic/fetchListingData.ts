@@ -7,7 +7,7 @@ export async function fetchListingData(type: itemTable) {
   const supabase = await createClient();
   let data;
 
-  if (type === 'categories' || type === 'brands') {
+  if (type === 'categories' || type === 'brands' || type === 'invoices') {
     const { data: fetchedData, error } = await supabase.from(type).select('*');
     data = fetchedData;
   } else if (type === 'products') {

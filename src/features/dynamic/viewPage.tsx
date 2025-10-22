@@ -1,6 +1,6 @@
 import ProductForm from '@/features/products/components/product-form';
 import DynamicForm from './dynamic-form';
-import { Brand, Category, itemTable, Product } from 'types';
+import { Brand, Category, Invoice, itemTable, Product } from 'types';
 import { fetchViewData } from './fetchViewData';
 import {
   dehydrate,
@@ -30,10 +30,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
           pageTitle={pageTitle}
         />
       ) : type === 'invoices' ? (
-        <InvoiceForm
-        // initialData={data as Product}
-        // pageTitle={pageTitle}
-        />
+        <InvoiceForm initialData={data as Invoice} pageTitle={pageTitle} />
       ) : (
         <ProductForm
           newProduct={newProduct}

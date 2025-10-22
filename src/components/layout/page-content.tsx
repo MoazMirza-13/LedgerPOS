@@ -10,14 +10,14 @@ import { Suspense } from 'react';
 import ListingPage from '@/features/dynamic/listing';
 import TableAction from '@/features/dynamic/table-components/table-action';
 import RoleGate from '@/components/role-gate/RoleGateServer';
-import { itemTable } from 'types';
+import { itemData, itemTable } from 'types';
 
 interface PageContentProps {
   title: string;
   description: string;
   type: itemTable;
   newLink: string;
-  itemsData: any[];
+  itemsData: itemData[];
   searchParams: any;
   pageKey: string | number;
   extraTableProps?: Record<string, any>;

@@ -66,6 +66,7 @@ export type Brand = {
 };
 
 export type Invoice = {
+  id?: number;
   customer_name: string;
   customer_address?: string;
   customer_number?: string; // phone numbers can include "+92" etc
@@ -84,7 +85,7 @@ export type Invoice_items = {
 
 export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';
 
-export type itemData = Product | Category | Brand;
+export type itemData = Product | Category | Brand | Invoice;
 
 export type nestedArray = {
   products: Product[];

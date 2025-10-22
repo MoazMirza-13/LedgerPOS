@@ -219,29 +219,50 @@ export const getCategoriesBrandsData = cache(async () => {
   return data;
 });
 
-export const invoiceSubmit = async (values: Invoice) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc(
-    'create_invoice_with_items_warehouse',
-    {
-      customer_name: values.customer_name,
-      customer_number: values.customer_number,
-      customer_address: values.customer_address,
-      total_price: values.total_price,
-      items: values.invoice_items.map((item: Invoice_items) => ({
-        product_code: item.product_code,
-        description: item.description,
-        quantity: item.quantity,
-        boxes: item.boxes,
-        price: item.price,
-        warehouse: item.warehouse
-      }))
+export const invoiceSubmit = async (
+  values: Invoice,
+  initialData: Invoice | null
+) => {
+  try {
+    const supabase = await createClient();
+    if (!initialData) {
+      const { error } = await supabase.rpc(
+        'create_invoice_with_items_warehouse',
+        {
+          customer_name: values.customer_name,
+          customer_number: values.customer_number,
+          customer_address: values.customer_address,
+          total_price: values.total_price,
+          items: values.invoice_items.map((item: Invoice_items) => ({
+            product_code: item.product_code,
+            description: item.description,
+            quantity: item.quantity,
+            boxes: item.boxes,
+            price: item.price,
+            warehouse: item.warehouse
+          }))
+        }
+      );
+      if (error) throw error;
+      revalidatePath(`/dashboard/invoices`);
+      return { successNew: true };
+    } else {
+      const { error } = await supabase
+        .from('invoices')
+        .update([
+          {
+            customer_name: values.customer_name,
+            customer_number: values.customer_number,
+            customer_address: values.customer_address
+          }
+        ])
+        .eq('id', initialData.id)
+        .select();
+      if (error) throw error;
+      revalidatePath(`/dashboard/invoices`);
+      return { successUpdate: true };
     }
-  );
-
-  if (error) {
-    console.error('Invoice creation failed:', error.message);
-  } else {
-    console.log('Invoice created with id:', data);
+  } catch (error: any) {
+    return { error };
   }
 };

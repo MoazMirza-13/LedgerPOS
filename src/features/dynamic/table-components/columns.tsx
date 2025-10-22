@@ -102,6 +102,23 @@ export const useColumns = <T extends Entity>(
     );
   }
 
+  if (type === 'invoices') {
+    baseColumns.push(
+      {
+        accessorKey: 'customer_name',
+        header: 'CUSTOMER NAME',
+        cell: ({ row }) => (
+          <Link href={`/dashboard/${type}/${row.original.id}`}>
+            {row.getValue('customer_name')}
+          </Link>
+        )
+      },
+      { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
+      { accessorKey: 'customer_address', header: 'CUSTOMER ADDRESS' },
+      { accessorKey: 'total_price', header: 'TOTAL' }
+    );
+  }
+
   if (currentRole === 'super_admin') {
     baseColumns.push({
       id: 'actions',

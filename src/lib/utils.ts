@@ -37,7 +37,9 @@ export const toastMsg = {
   error: 'Something went wrong',
   imageUploadError: 'Image upload failed',
   signIn: 'Signed In Successfully!',
-  deleteItem: 'Item has been deleted'
+  deleteItem: 'Item has been deleted',
+  newInvoice: 'New Invoice has been added',
+  updateInvoice: 'Invoice has been updated'
 };
 
 export const getImageUrl = async (img: string) => {
@@ -84,6 +86,8 @@ export const formatTitle = (text: string, type: itemTable) => {
     case 'brands':
       formattedType = 'Brand';
       break;
+    case 'invoices':
+      formattedType = 'Invoice';
   }
 
   return `${text} ${formattedType}`;

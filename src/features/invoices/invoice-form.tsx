@@ -25,6 +25,10 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { warehouses } from '@/constants/data';
+import { Invoice } from 'types';
+import { toast } from 'sonner';
+import { toastMsg } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const invoiceItemSchema = z.object({
   id: z.string().optional(),
@@ -45,26 +49,23 @@ const formSchema = z.object({
   invoice_items: z.array(invoiceItemSchema).min(1)
 });
 
-export default function InvoiceForm() {
+export default function InvoiceForm({
+  initialData,
+  pageTitle
+}: {
+  initialData: Invoice | null;
+  pageTitle: string;
+}) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      customer_name: '',
-      customer_number: '',
-      customer_address: '',
-      invoice_items: [
-        {
-          id: '1',
-          product_code: '',
-          description: '',
-          quantity: 0,
-          boxes: 0,
-          price: 0,
-          warehouse: ''
-        }
-      ]
+      customer_name: initialData?.customer_name || '',
+      customer_number: initialData?.customer_number || '',
+      customer_address: initialData?.customer_address || '',
+      invoice_items: initialData?.invoice_items || []
     }
   });
 
@@ -75,13 +76,13 @@ export default function InvoiceForm() {
   });
 
   const items = watch('invoice_items');
+  const { isDirty } = form.formState;
 
   const calculateTotal = () =>
     items.reduce((sum, item) => sum + item.quantity * item.price, 0);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
-      // Check for duplicate product_code + warehouse combos
       const seen = new Set<string>();
       const duplicates: { code: string; warehouse: string }[] = [];
 
@@ -98,31 +99,36 @@ export default function InvoiceForm() {
       }
 
       if (duplicates.length > 0) {
-        //! something went wrong here (toast)
-        console.log(
-          `Duplicate entries found:\n${duplicates
-            .map((d) => `Code "${d.code}" in Warehouse "${d.warehouse}"`)
-            .join('\n')}`
-        );
+        toast.error(toastMsg.error);
+
+        // console.log(
+        //   `Duplicate entries found:\n${duplicates
+        //     .map((d) => `Code "${d.code}" in Warehouse "${d.warehouse}"`)
+        //     .join('\n')}`
+        // );
         return;
       }
 
       const totalPrice = calculateTotal();
       const finalData = { ...values, total_price: totalPrice };
 
-      console.log('🚀 ~ onSubmit ~ finalData:', finalData);
+      const res = await invoiceSubmit(finalData, initialData);
 
-      await invoiceSubmit(finalData);
+      if (res?.successNew) toast.success(toastMsg.newInvoice);
+      else if (res?.successUpdate) toast.success(toastMsg.updateInvoice);
+      else if (res?.error) toast.error(toastMsg.error);
+
+      if (!res?.error) {
+        router.push(`/dashboard/invoices`);
+      }
     });
   };
-
-  const { isDirty } = form.formState;
 
   return (
     <Card className='mx-auto w-full'>
       <CardHeader>
         <CardTitle className='mb-4 text-left text-2xl font-bold'>
-          Invoice
+          {pageTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -183,6 +189,7 @@ export default function InvoiceForm() {
                 </h2>
                 <Button
                   type='button'
+                  disabled={!!initialData}
                   onClick={() =>
                     append({
                       id: String(Date.now()),
@@ -202,176 +209,186 @@ export default function InvoiceForm() {
               </div>
 
               <div className='overflow-x-auto rounded-lg border'>
-                <table className='w-full'>
-                  <thead>
-                    <tr className='border-b bg-muted'>
-                      <th className='px-4 py-3 text-left text-sm font-semibold'>
-                        Code Number
-                      </th>
-                      <th className='px-4 py-3 text-left text-sm font-semibold'>
-                        Description
-                      </th>
-                      <th className='px-4 py-3 text-center text-sm font-semibold'>
-                        Quantity
-                      </th>
-                      <th className='px-4 py-3 text-center text-sm font-semibold'>
-                        Boxes
-                      </th>
-                      <th className='px-4 py-3 text-center text-sm font-semibold'>
-                        Warehouse
-                      </th>
-                      <th className='px-4 py-3 text-right text-sm font-semibold'>
-                        Price
-                      </th>
-                      <th className='px-4 py-3 text-right text-sm font-semibold'>
-                        Total
-                      </th>
-                      <th className='px-4 py-3 text-center text-sm font-semibold'>
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fields.map((field, index) => (
-                      <tr key={field.id} className='border-b hover:bg-muted/50'>
-                        <td className='px-4 py-3'>
-                          <FormField
-                            control={control}
-                            name={`invoice_items.${index}.product_code`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input placeholder='Code' {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                        <td className='px-4 py-3'>
-                          <FormField
-                            control={control}
-                            name={`invoice_items.${index}.description`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input placeholder='Description' {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                        <td className='px-4 py-3'>
-                          <FormField
-                            control={control}
-                            name={`invoice_items.${index}.quantity`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type='number'
-                                    min='0'
-                                    className='text-center'
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                        <td className='px-4 py-3'>
-                          <FormField
-                            control={control}
-                            name={`invoice_items.${index}.boxes`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type='number'
-                                    min='0'
-                                    className='text-center'
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                        <td className='w-[16%] px-4 py-3'>
-                          <FormField
-                            control={form.control}
-                            name={`invoice_items.${index}.warehouse`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select
-                                  onValueChange={(value) =>
-                                    field.onChange(
-                                      value === 'null' ? '' : value
-                                    )
-                                  }
-                                  value={field.value ? String(field.value) : ''}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder='Warehouse' />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className='max-h-60 overflow-y-auto'>
-                                    <SelectItem value='null'>None</SelectItem>
-                                    {warehouses?.map((warehouse) => (
-                                      <SelectItem
-                                        key={warehouse.key}
-                                        value={warehouse.key}
-                                      >
-                                        {warehouse.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                        <td className='px-4 py-3'>
-                          <FormField
-                            control={control}
-                            name={`invoice_items.${index}.price`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    type='number'
-                                    min='0'
-                                    className='text-right'
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </td>
-                        <td className='px-4 py-3 text-right font-semibold'>
-                          {/* $ */}
-                          {(
-                            items[index].quantity * items[index].price
-                          ).toLocaleString(undefined, {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 2
-                          })}
-                        </td>
-                        <td className='px-4 py-3 text-center'>
-                          <button
-                            type='button'
-                            onClick={() => remove(index)}
-                            disabled={items.length === 1}
-                            className='rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
-                          >
-                            <Trash2 className='h-4 w-4' />
-                          </button>
-                        </td>
+                <fieldset disabled={!!initialData}>
+                  <table className='w-full'>
+                    <thead>
+                      <tr className='border-b bg-muted'>
+                        <th className='px-4 py-3 text-left text-sm font-semibold'>
+                          Code Number
+                        </th>
+                        <th className='px-4 py-3 text-left text-sm font-semibold'>
+                          Description
+                        </th>
+                        <th className='px-4 py-3 text-center text-sm font-semibold'>
+                          Quantity
+                        </th>
+                        <th className='px-4 py-3 text-center text-sm font-semibold'>
+                          Boxes
+                        </th>
+                        <th className='px-4 py-3 text-center text-sm font-semibold'>
+                          Warehouse
+                        </th>
+                        <th className='px-4 py-3 text-right text-sm font-semibold'>
+                          Price
+                        </th>
+                        <th className='px-4 py-3 text-right text-sm font-semibold'>
+                          Total
+                        </th>
+                        <th className='px-4 py-3 text-center text-sm font-semibold'>
+                          Action
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {fields.map((field, index) => (
+                        <tr
+                          key={field.id}
+                          className='border-b hover:bg-muted/50'
+                        >
+                          <td className='px-4 py-3'>
+                            <FormField
+                              control={control}
+                              name={`invoice_items.${index}.product_code`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input placeholder='Code' {...field} />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                          <td className='px-4 py-3'>
+                            <FormField
+                              control={control}
+                              name={`invoice_items.${index}.description`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      placeholder='Description'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                          <td className='px-4 py-3'>
+                            <FormField
+                              control={control}
+                              name={`invoice_items.${index}.quantity`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type='number'
+                                      min='0'
+                                      className='text-center'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                          <td className='px-4 py-3'>
+                            <FormField
+                              control={control}
+                              name={`invoice_items.${index}.boxes`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type='number'
+                                      min='0'
+                                      className='text-center'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                          <td className='w-[16%] px-4 py-3'>
+                            <FormField
+                              control={form.control}
+                              name={`invoice_items.${index}.warehouse`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <Select
+                                    onValueChange={(value) =>
+                                      field.onChange(
+                                        value === 'null' ? '' : value
+                                      )
+                                    }
+                                    value={
+                                      field.value ? String(field.value) : ''
+                                    }
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder='Warehouse' />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className='max-h-60 overflow-y-auto'>
+                                      <SelectItem value='null'>None</SelectItem>
+                                      {warehouses?.map((warehouse) => (
+                                        <SelectItem
+                                          key={warehouse.key}
+                                          value={warehouse.key}
+                                        >
+                                          {warehouse.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                          <td className='px-4 py-3'>
+                            <FormField
+                              control={control}
+                              name={`invoice_items.${index}.price`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <Input
+                                      type='number'
+                                      min='0'
+                                      className='text-right'
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          </td>
+                          <td className='px-4 py-3 text-right font-semibold'>
+                            {/* $ */}
+                            {(
+                              items[index].quantity * items[index].price
+                            ).toLocaleString(undefined, {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 2
+                            })}
+                          </td>
+                          <td className='px-4 py-3 text-center'>
+                            <button
+                              type='button'
+                              onClick={() => remove(index)}
+                              disabled={items.length === 1}
+                              className='rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
+                            >
+                              <Trash2 className='h-4 w-4' />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </fieldset>
               </div>
             </div>
 
@@ -412,11 +429,13 @@ export default function InvoiceForm() {
               >
                 {isPending ? (
                   <div className='flex gap-2'>
-                    Saving
+                    {initialData ? 'Editing' : 'Adding'}
                     <LoaderCircle className='h-5 w-5 animate-spin' />
                   </div>
+                ) : initialData ? (
+                  'Edit Invoice'
                 ) : (
-                  'Save Invoice'
+                  'Add Invoice'
                 )}
               </Button>
             </div>
