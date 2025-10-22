@@ -34,6 +34,7 @@ import Image from 'next/image';
 import { useRef } from 'react';
 import RoleGate from '@/components/role-gate/RoleGateClient';
 import { useRole } from '@/context/RoleContext';
+import { warehouses } from '@/constants/data';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -71,15 +72,6 @@ export default function ProductForm({
 
   const categoryIdFromURL =
     categories?.find((c) => c.title === category)?.id || '';
-
-  const warehouses = [
-    { key: 'Ghaziwal', label: 'Ghaziwal' },
-    { key: 'Zafarwal', label: 'Zafarwal' },
-    { key: 'LhrRoad', label: 'Lhr Road' },
-    { key: 'EidgahRoad', label: 'Eidgah Road' },
-    { key: 'MandiTile', label: 'Mandi Tile' },
-    { key: 'MandiBond', label: 'Mandi Bond' }
-  ];
 
   const defaultValues = {
     image: null,

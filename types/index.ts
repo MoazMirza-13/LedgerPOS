@@ -69,6 +69,7 @@ export type Invoice = {
   customer_name: string;
   customer_address?: string;
   customer_number?: string; // phone numbers can include "+92" etc
+  total_price: number;
   invoice_items: Invoice_items[];
 };
 
@@ -78,6 +79,7 @@ export type Invoice_items = {
   quantity: number;
   price: number;
   boxes?: number;
+  warehouse: string;
 };
 
 export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';

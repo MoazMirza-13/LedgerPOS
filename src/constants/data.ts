@@ -49,6 +49,15 @@ export const navItems: NavItem[] = [
   }
 ];
 
+export const warehouses = [
+  { key: 'Ghaziwal', label: 'Ghaziwal' },
+  { key: 'Zafarwal', label: 'Zafarwal' },
+  { key: 'LhrRoad', label: 'Lhr Road' },
+  { key: 'EidgahRoad', label: 'Eidgah Road' },
+  { key: 'MandiTile', label: 'Mandi Tile' },
+  { key: 'MandiBond', label: 'Mandi Bond' }
+];
+
 // demo for dashboard
 export interface SaleUser {
   id: number;

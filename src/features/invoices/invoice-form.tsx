@@ -17,14 +17,25 @@ import {
 import { Input } from '@/components/ui/input';
 import { LoaderCircle, Trash2, Plus } from 'lucide-react';
 import { invoiceSubmit } from '@/lib/actions';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { warehouses } from '@/constants/data';
 
 const invoiceItemSchema = z.object({
   id: z.string().optional(),
-  product_code: z.string(),
+  product_code: z.string().min(1, {
+    message: 'Product code is required'
+  }),
   description: z.string().optional(),
-  quantity: z.coerce.number().min(0),
+  quantity: z.coerce.number().min(1),
   boxes: z.coerce.number().optional(),
-  price: z.coerce.number().min(0)
+  price: z.coerce.number().min(1),
+  warehouse: z.string().min(1, 'Warehouse is required')
 });
 
 const formSchema = z.object({
@@ -50,7 +61,8 @@ export default function InvoiceForm() {
           description: '',
           quantity: 0,
           boxes: 0,
-          price: 0
+          price: 0,
+          warehouse: ''
         }
       ]
     }
@@ -69,7 +81,38 @@ export default function InvoiceForm() {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
-      await invoiceSubmit(values);
+      // Check for duplicate product_code + warehouse combos
+      const seen = new Set<string>();
+      const duplicates: { code: string; warehouse: string }[] = [];
+
+      for (const item of values.invoice_items) {
+        const key = `${item.product_code}_${item.warehouse}`;
+        if (seen.has(key)) {
+          duplicates.push({
+            code: item.product_code,
+            warehouse: item.warehouse
+          });
+        } else {
+          seen.add(key);
+        }
+      }
+
+      if (duplicates.length > 0) {
+        //! something went wrong here (toast)
+        console.log(
+          `Duplicate entries found:\n${duplicates
+            .map((d) => `Code "${d.code}" in Warehouse "${d.warehouse}"`)
+            .join('\n')}`
+        );
+        return;
+      }
+
+      const totalPrice = calculateTotal();
+      const finalData = { ...values, total_price: totalPrice };
+
+      console.log('🚀 ~ onSubmit ~ finalData:', finalData);
+
+      await invoiceSubmit(finalData);
     });
   };
 
@@ -147,7 +190,8 @@ export default function InvoiceForm() {
                       description: '',
                       quantity: 0,
                       boxes: 0,
-                      price: 0
+                      price: 0,
+                      warehouse: ''
                     })
                   }
                   className='gap-2'
@@ -172,6 +216,9 @@ export default function InvoiceForm() {
                       </th>
                       <th className='px-4 py-3 text-center text-sm font-semibold'>
                         Boxes
+                      </th>
+                      <th className='px-4 py-3 text-center text-sm font-semibold'>
+                        Warehouse
                       </th>
                       <th className='px-4 py-3 text-right text-sm font-semibold'>
                         Price
@@ -249,6 +296,41 @@ export default function InvoiceForm() {
                             )}
                           />
                         </td>
+                        <td className='w-[16%] px-4 py-3'>
+                          <FormField
+                            control={form.control}
+                            name={`invoice_items.${index}.warehouse`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <Select
+                                  onValueChange={(value) =>
+                                    field.onChange(
+                                      value === 'null' ? '' : value
+                                    )
+                                  }
+                                  value={field.value ? String(field.value) : ''}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder='Warehouse' />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className='max-h-60 overflow-y-auto'>
+                                    <SelectItem value='null'>None</SelectItem>
+                                    {warehouses?.map((warehouse) => (
+                                      <SelectItem
+                                        key={warehouse.key}
+                                        value={warehouse.key}
+                                      >
+                                        {warehouse.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+                        </td>
                         <td className='px-4 py-3'>
                           <FormField
                             control={control}
@@ -258,7 +340,6 @@ export default function InvoiceForm() {
                                 <FormControl>
                                   <Input
                                     type='number'
-                                    step='0.01'
                                     min='0'
                                     className='text-right'
                                     {...field}
@@ -326,7 +407,7 @@ export default function InvoiceForm() {
             <div className='pt-4'>
               <Button
                 type='submit'
-                disabled={isPending || !isDirty}
+                disabled={!form.formState.isValid || isPending || !isDirty}
                 className='bg-primary text-primary-foreground hover:bg-primary/90'
               >
                 {isPending ? (

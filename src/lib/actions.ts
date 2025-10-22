@@ -221,18 +221,23 @@ export const getCategoriesBrandsData = cache(async () => {
 
 export const invoiceSubmit = async (values: Invoice) => {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('create_invoice_with_items', {
-    customer_name: values.customer_name,
-    customer_number: values.customer_number,
-    customer_address: values.customer_address,
-    items: values.invoice_items.map((item: Invoice_items) => ({
-      product_code: item.product_code,
-      description: item.description,
-      quantity: item.quantity,
-      boxes: item.boxes,
-      price: item.price
-    }))
-  });
+  const { data, error } = await supabase.rpc(
+    'create_invoice_with_items_warehouse',
+    {
+      customer_name: values.customer_name,
+      customer_number: values.customer_number,
+      customer_address: values.customer_address,
+      total_price: values.total_price,
+      items: values.invoice_items.map((item: Invoice_items) => ({
+        product_code: item.product_code,
+        description: item.description,
+        quantity: item.quantity,
+        boxes: item.boxes,
+        price: item.price,
+        warehouse: item.warehouse
+      }))
+    }
+  );
 
   if (error) {
     console.error('Invoice creation failed:', error.message);
