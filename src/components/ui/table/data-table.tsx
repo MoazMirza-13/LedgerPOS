@@ -17,7 +17,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { useRole } from '@/context/RoleContext';
-import { checkUUID } from '@/lib/utils';
+import { checkUUID } from '@/utils/utils';
 import {
   DoubleArrowLeftIcon,
   DoubleArrowRightIcon

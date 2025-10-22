@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl } from '@/utils/utils';
 import { itemTable, itemData, Product, Category, Brand } from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 

@@ -3,7 +3,7 @@ import {
   getDataById,
   getSupabaseClient
 } from '@/lib/actions';
-import { formatTitle, getImageUrl } from '@/lib/utils';
+import { formatTitle, getImageUrl } from '@/utils/utils';
 import { QueryClient } from '@tanstack/react-query';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';

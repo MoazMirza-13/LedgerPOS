@@ -17,7 +17,7 @@ import * as z from 'zod';
 import { signIn } from '@/lib/actions';
 import { LoaderCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { toastMsg } from '@/lib/utils';
+import { toastMsg } from '@/utils/utils';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),

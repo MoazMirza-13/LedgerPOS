@@ -1,6 +1,6 @@
 //to get filtered products in dynamic-form
 
-import { getClientImageUrl, toastMsg } from '@/lib/utils';
+import { getClientImageUrl, toastMsg } from '@/utils/utils';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { Brand, Category } from 'types';

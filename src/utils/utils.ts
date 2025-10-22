@@ -1,10 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { getSupabaseClient } from './actions';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
 import { itemTable } from 'types';
 import { formatInTimeZone } from 'date-fns-tz';
+import { getSupabaseClient } from '@/lib/actions';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

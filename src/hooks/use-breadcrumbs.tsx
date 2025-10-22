@@ -1,6 +1,6 @@
 'use client';
 import { useItemQuery } from '@/lib/tanStack-action';
-import { checkUUID } from '@/lib/utils';
+import { checkUUID } from '@/utils/utils';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 

@@ -27,7 +27,7 @@ import {
 import { warehouses } from '@/constants/data';
 import { Invoice } from 'types';
 import { toast } from 'sonner';
-import { toastMsg } from '@/lib/utils';
+import { toastMsg } from '@/utils/utils';
 import { useRouter } from 'next/navigation';
 
 const invoiceItemSchema = z.object({

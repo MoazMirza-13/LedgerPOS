@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-import { getClientImageUrl } from './utils';
+import { getClientImageUrl } from '@/utils/utils';
 import { Product } from 'types';
 
 export const getNestedData = async () => {

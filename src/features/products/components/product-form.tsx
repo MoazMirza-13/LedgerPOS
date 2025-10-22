@@ -27,7 +27,7 @@ import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
 import { LoaderCircle, X, Upload } from 'lucide-react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
-import { imageUpload, toastMsg } from '@/lib/utils';
+import { imageUpload, toastMsg } from '@/utils/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import Image from 'next/image';

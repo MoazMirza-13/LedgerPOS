@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { deleteContent } from '@/lib/actions';
-import { toastMsg } from '@/lib/utils';
+import { toastMsg } from '@/utils/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';

@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { categoryBrandSubmit } from '@/lib/actions';
-import { toastMsg } from '@/lib/utils';
+import { toastMsg } from '@/utils/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';

@@ -1,6 +1,6 @@
 import { navItems } from '@/constants/data';
 import { signOut } from '@/lib/actions';
-import { formatTitle } from '@/lib/utils';
+import { formatTitle } from '@/utils/utils';
 import { itemTable, nestedArray } from 'types';
 
 export function kbarActions(

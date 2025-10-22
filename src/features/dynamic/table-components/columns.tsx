@@ -5,7 +5,7 @@ import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
-import { formatToPKTDate } from '@/lib/utils';
+import { formatToPKTDate } from '@/utils/utils';
 
 type Entity = itemData;
 
