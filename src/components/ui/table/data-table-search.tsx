@@ -55,7 +55,7 @@ export function DataTableSearch({
 
   return (
     <Input
-      placeholder={`Search ${searchKey}...`}
+      placeholder={`Search by ${searchKey}...`}
       value={searchQuery ?? ''}
       onChange={(e) => handleSearch(e.target.value)}
       className={cn('w-full md:max-w-sm', isLoading && 'animate-pulse')}

@@ -233,6 +233,7 @@ export const invoiceSubmit = async (
           customer_number: values.customer_number,
           customer_address: values.customer_address,
           total_price: values.total_price,
+          payment: values.payment,
           items: values.invoice_items.map((item: Invoice_items) => ({
             product_code: item.product_code,
             description: item.description,
@@ -253,7 +254,8 @@ export const invoiceSubmit = async (
           {
             customer_name: values.customer_name,
             customer_number: values.customer_number,
-            customer_address: values.customer_address
+            customer_address: values.customer_address,
+            payment: values.payment
           }
         ])
         .eq('id', initialData.id)

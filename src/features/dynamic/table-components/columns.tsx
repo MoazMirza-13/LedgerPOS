@@ -2,7 +2,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { itemData, itemTable, Product } from 'types';
+import { Invoice, itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
@@ -123,7 +123,15 @@ export const useColumns = <T extends Entity>(
           <span>{formatToPKTDate(row.getValue('created_at'))}</span>
         )
       },
-      { accessorKey: 'total_price', header: 'TOTAL' }
+      { accessorKey: 'total_price', header: 'TOTAL' },
+      {
+        accessorKey: 'payment',
+        header: 'PAYMENT',
+        cell: ({ row }) => {
+          const invoice = row.original as Invoice;
+          return invoice.payment ? '✅' : '❌';
+        }
+      }
     );
   }
 

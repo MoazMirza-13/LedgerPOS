@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-import { getImageUrl } from '@/utils/utils';
-import { itemTable, itemData, Product, Category, Brand } from 'types';
+import { formatToPKTDate, getImageUrl } from '@/utils/utils';
+import { itemTable, itemData, Product, Category, Brand, Invoice } from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 
 export async function fetchListingData(type: itemTable) {
@@ -62,6 +62,9 @@ export function filterListingData(data: itemData[], type: string) {
     if (type === 'products') {
       const product = item as Product;
       value = `${product.product_code ?? ''} ${product.title ?? ''}`;
+    } else if (type === 'invoices') {
+      const invoice = item as Invoice;
+      value = `${invoice.customer_name ?? ''} ${invoice.created_at ? formatToPKTDate(invoice.created_at) : ''}`;
     } else {
       const entry = item as Category | Brand;
       value = entry.title ?? '';

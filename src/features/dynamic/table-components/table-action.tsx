@@ -29,8 +29,14 @@ export default function TableAction({
   } = useTableFilters();
 
   const pathname = usePathname();
-  const productsRoute = pathname.includes('/products');
-  const searchKey = productsRoute ? 'code, title' : 'title';
+
+  let searchKey = 'title';
+
+  if (pathname.includes('/products')) {
+    searchKey = 'code, title';
+  } else if (pathname.includes('/invoice')) {
+    searchKey = 'customer name, date';
+  }
 
   return (
     <div className='flex flex-wrap items-center gap-4'>
@@ -41,7 +47,7 @@ export default function TableAction({
         setPage={setPage}
       />
 
-      {productsRoute && (
+      {pathname.includes('/products') && (
         <>
           <DataTableFilterBox
             filterKey='categories'

@@ -72,6 +72,8 @@ export type Invoice = {
   customer_number?: string; // phone numbers can include "+92" etc
   total_price: number;
   invoice_items: Invoice_items[];
+  created_at?: string;
+  payment: boolean;
 };
 
 export type Invoice_items = {
