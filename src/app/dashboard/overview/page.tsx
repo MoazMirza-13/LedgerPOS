@@ -1,5 +1,5 @@
-import { LowStockProducts } from '@/components/dashboard/low-stock-products';
-import { UnpaidInvoices } from '@/components/dashboard/unpaid_invoices';
+import { LowStockProducts } from '@/features/overview/low-stock-products';
+import { UnpaidInvoices } from '@/features/overview/unpaid_invoices';
 import PageContainer from '@/components/layout/page-container';
 
 export default function Page() {
