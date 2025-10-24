@@ -108,7 +108,7 @@ export async function imageUpload(file: File) {
   }
 }
 
-export function formatToPKTDate(utcDate: string): string {
+export function formatToPKTDate(utcDate: string | Date): string {
   try {
     return formatInTimeZone(new Date(utcDate), 'Asia/Karachi', 'dd-MM-yyyy');
   } catch {

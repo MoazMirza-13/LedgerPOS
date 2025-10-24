@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { toastMsg } from '@/utils/utils';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
+import { printInvoice } from './print-invoice';
 
 const invoiceItemSchema = z.object({
   product_code: z.string().min(1, {
@@ -116,8 +117,10 @@ export default function InvoiceForm({
 
       const res = await invoiceSubmit(finalData, initialData);
 
-      if (res?.successNew) toast.success(toastMsg.newInvoice);
-      else if (res?.successUpdate) toast.success(toastMsg.updateInvoice);
+      if (res?.successNew) {
+        toast.success(toastMsg.newInvoice);
+        await printInvoice(finalData);
+      } else if (res?.successUpdate) toast.success(toastMsg.updateInvoice);
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
