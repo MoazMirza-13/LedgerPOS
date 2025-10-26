@@ -39,6 +39,7 @@ export type Product = {
   brand_id: string;
   variants: string[];
   in_stock: boolean;
+  min_quantity: number;
   quantity_in_zafarwal: number;
   quantity_in_ghaziwal: number;
   quantity_in_lhr_road: number;

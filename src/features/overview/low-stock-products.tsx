@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { Product } from 'types';
 import { getSupabaseClient } from '@/lib/actions';
 import { getImageUrl } from '@/utils/utils';
+import Link from 'next/link';
 
 export async function LowStockProducts() {
   const supabase = await getSupabaseClient();
@@ -24,7 +25,8 @@ export async function LowStockProducts() {
     product.quantity_in_mandi_bond;
 
   const lowStockProducts =
-    products?.filter((p: Product) => getTotalQuantity(p) < 50) || [];
+    products?.filter((p: Product) => getTotalQuantity(p) < p.min_quantity) ||
+    [];
 
   const productsWithUrls = await Promise.all(
     lowStockProducts.map(async (p) => ({
@@ -37,7 +39,7 @@ export async function LowStockProducts() {
     <Card className='flex h-[70vh] flex-col'>
       <CardHeader>
         <CardTitle>Low Stock Products</CardTitle>
-        <CardDescription>Products with quantity less than 50</CardDescription>
+        <CardDescription>Products with less quantity</CardDescription>
       </CardHeader>
       {!error && (
         <CardContent className='overflow-y-auto'>
@@ -48,15 +50,16 @@ export async function LowStockProducts() {
               </div>
             ) : (
               productsWithUrls.map((product) => (
-                <div
+                <Link
                   key={product.id}
                   className='flex gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
+                  href={`products/${product.id}`}
                 >
                   {product.resolvedImgUrl && (
                     <div className='flex-shrink-0'>
                       <Image
                         src={product.resolvedImgUrl}
-                        alt={product.title}
+                        alt='low_stock_product'
                         width={80}
                         height={80}
                         className='h-auto w-auto rounded-md object-cover'
@@ -65,11 +68,8 @@ export async function LowStockProducts() {
                   )}
 
                   <div className='min-w-0 flex-1'>
-                    <h3 className='truncate font-semibold text-foreground'>
-                      {product.title}
-                    </h3>
                     <p className='text-sm text-muted-foreground'>
-                      Code: {product.product_code}
+                      Product: {product.product_code}
                     </p>
                     <div className='mt-2 flex items-center gap-2'>
                       <Badge variant='destructive'>
@@ -77,7 +77,7 @@ export async function LowStockProducts() {
                       </Badge>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

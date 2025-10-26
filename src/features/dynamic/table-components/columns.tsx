@@ -98,8 +98,10 @@ export const useColumns = <T extends Entity>(
       {
         header: 'Stock',
         cell: ({ row }) => {
+          const product = row.original as Product;
           const quantity = row.getValue('QUANTITY') as number;
-          return quantity > 0 ? '✅' : '❌';
+          const minQuantity = product.min_quantity;
+          return quantity > minQuantity ? '✅' : '❌';
         }
       }
     );
