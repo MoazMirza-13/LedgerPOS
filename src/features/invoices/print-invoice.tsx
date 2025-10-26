@@ -49,13 +49,12 @@ export async function printInvoice(finalData: Invoice) {
         <table class="w-full">
           <thead>
             <tr class="bg-teal-50 border-b-2 border-teal-500">
-              <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Product Code</th>
-              <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Description</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Qty</th>
+              <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Product</th>
               <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Boxes</th>
+              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Qty</th>
+              <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Warehouse</th>
               <th class="px-4 py-4 text-right text-xs font-bold text-slate-900 tracking-wider">Price</th>
               <th class="px-4 py-4 text-right text-xs font-bold text-slate-900 tracking-wider">Total</th>
-              <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Warehouse</th>
             </tr>
           </thead>
           <tbody>
@@ -64,14 +63,13 @@ export async function printInvoice(finalData: Invoice) {
                 (item: any) => `
                 <tr class="border-b border-slate-200 hover:bg-slate-50">
                   <td class="px-4 py-3 text-sm font-medium text-slate-900">${item.product_code}</td>
-                  <td class="px-4 py-3 text-sm text-slate-700">${item.description}</td>
-                  <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.quantity}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.boxes}</td>
-                  <td class="px-4 py-3 text-sm text-slate-700 text-right">Rs. ${item.price.toFixed(2)}</td>
-                  <td class="px-4 py-3 text-sm font-semibold text-slate-900 text-right">
-                    Rs. ${(item.quantity * item.price).toFixed(2)}
-                  </td>
+                  <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.quantity}</td>
                   <td class="px-4 py-3 text-sm text-slate-600">${item.warehouse}</td>
+                  <td class="px-4 py-3 text-sm text-slate-700 text-right">Rs. ${item.price}</td>
+                  <td class="px-4 py-3 text-sm font-semibold text-slate-900 text-right">
+                    Rs. ${item.quantity * item.price}
+                  </td>
                 </tr>`
               )
               .join('')}

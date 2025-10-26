@@ -58,15 +58,14 @@ export const useColumns = <T extends Entity>(
         }
       },
       {
-        accessorKey: 'title',
-        header: 'TITLE',
+        accessorKey: 'product_code',
+        header: 'Product',
         cell: ({ row }) => (
           <Link href={`/dashboard/${type}/${row.original.id}`}>
-            {row.getValue('title')}
+            {row.getValue('product_code')}
           </Link>
         )
       },
-      { accessorKey: 'product_code', header: 'CODE #' },
       {
         header: 'CATEGORY',
         accessorFn: (row) =>
@@ -75,8 +74,12 @@ export const useColumns = <T extends Entity>(
       {
         header: 'BRAND',
         accessorFn: (row) => ('brands' in row ? row.brands?.title || '' : '')
-      },
-      { accessorKey: 'cost_price', header: 'COST' },
+      }
+    );
+    if (currentRole === 'super_admin') {
+      baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
+    }
+    baseColumns.push(
       {
         header: 'QUANTITY',
         accessorFn: (row) => {
@@ -98,8 +101,7 @@ export const useColumns = <T extends Entity>(
           const quantity = row.getValue('QUANTITY') as number;
           return quantity > 0 ? '✅' : '❌';
         }
-      },
-      { accessorKey: 'description', header: 'DESCRIPTION' }
+      }
     );
   }
 

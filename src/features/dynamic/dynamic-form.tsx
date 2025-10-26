@@ -82,10 +82,10 @@ export default function DynamicForm({
   const newPath = pathname.includes('new');
   const newLink = `/dashboard/products/new?${title.toLowerCase()}=${initialData?.title}`;
 
-  // const [productsRes, productsAction, productsIsPending] = useActionState(
-  //   () => (initialData ? getProducts(initialData, pathname) : null),
-  //   null
-  // );
+  const [productsRes, productsAction, productsIsPending] = useActionState(
+    () => (initialData ? getProducts(initialData, pathname) : null),
+    null
+  );
 
   const currentRole = useRole();
 
@@ -164,7 +164,7 @@ export default function DynamicForm({
       </Card>
 
       {/* table */}
-      {/* <RoleGate allow='super_admin'>
+      <RoleGate allow='super_admin'>
         {!newPath &&
           (productsRes ? (
             <div
@@ -174,7 +174,6 @@ export default function DynamicForm({
               <TableClientSide
                 type={'products'}
                 data={productsRes as Product[]}
-                total={productsRes?.length as number}
               />
             </div>
           ) : (
@@ -194,7 +193,7 @@ export default function DynamicForm({
               )}
             </Button>
           ))}
-      </RoleGate> */}
+      </RoleGate>
     </>
   );
 }

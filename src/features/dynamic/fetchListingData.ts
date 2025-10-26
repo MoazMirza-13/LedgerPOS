@@ -51,8 +51,6 @@ export async function fetchListingData(type: itemTable) {
 export function filterListingData(data: itemData[], type: string) {
   // Showcasing the use of search params cache in nested RSCs
   const search = searchParamsCache.get('q');
-  const page = Number(searchParamsCache.get('page'));
-  const limit = Number(searchParamsCache.get('limit'));
   const categories = searchParamsCache.get('categories')?.split('.') || []; // separate them using "." if multiple
   const brands = searchParamsCache.get('brands')?.split('.') || [];
 
@@ -83,9 +81,5 @@ export function filterListingData(data: itemData[], type: string) {
     return matchesSearch && matchesCategoryBrand;
   });
 
-  const start = (page - 1) * limit;
-  const end = start + limit;
-  const paginatedData = filteredData.slice(start, end);
-
-  return { paginatedData, total_length: filteredData.length };
+  return { filteredData };
 }

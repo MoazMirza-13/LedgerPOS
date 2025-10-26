@@ -218,21 +218,18 @@ export default function InvoiceForm({
                     <thead>
                       <tr className='border-b bg-muted'>
                         <th className='px-4 py-3 text-left text-sm font-semibold'>
-                          Code Number
-                        </th>
-                        <th className='px-4 py-3 text-left text-sm font-semibold'>
-                          Description
-                        </th>
-                        <th className='px-4 py-3 text-center text-sm font-semibold'>
-                          Quantity
+                          Product
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
                           Boxes
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
+                          Quantity
+                        </th>
+                        <th className='px-4 py-3 text-center text-sm font-semibold'>
                           Warehouse
                         </th>
-                        <th className='px-4 py-3 text-right text-sm font-semibold'>
+                        <th className='px-4 py-3 text-sm font-semibold'>
                           Price
                         </th>
                         <th className='px-4 py-3 text-right text-sm font-semibold'>
@@ -256,7 +253,7 @@ export default function InvoiceForm({
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <Input placeholder='Code' {...field} />
+                                    <Input placeholder='Product' {...field} />
                                   </FormControl>
                                 </FormItem>
                               )}
@@ -265,13 +262,19 @@ export default function InvoiceForm({
                           <td className='px-4 py-3'>
                             <FormField
                               control={control}
-                              name={`invoice_items.${index}.description`}
+                              name={`invoice_items.${index}.boxes`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
                                     <Input
-                                      placeholder='Description'
+                                      type='number'
+                                      min='0'
+                                      className='text-center'
                                       {...field}
+                                      value={
+                                        field.value === 0 ? '' : field.value
+                                      }
+                                      placeholder='Add Boxes'
                                     />
                                   </FormControl>
                                 </FormItem>
@@ -290,30 +293,17 @@ export default function InvoiceForm({
                                       min='0'
                                       className='text-center'
                                       {...field}
+                                      value={
+                                        field.value === 0 ? '' : field.value
+                                      }
+                                      placeholder='Add Quantity'
                                     />
                                   </FormControl>
                                 </FormItem>
                               )}
                             />
                           </td>
-                          <td className='px-4 py-3'>
-                            <FormField
-                              control={control}
-                              name={`invoice_items.${index}.boxes`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type='number'
-                                      min='0'
-                                      className='text-center'
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </td>
+
                           <td className='w-[16%] px-4 py-3'>
                             <FormField
                               control={form.control}
@@ -363,6 +353,10 @@ export default function InvoiceForm({
                                       min='0'
                                       className='text-right'
                                       {...field}
+                                      value={
+                                        field.value === 0 ? '' : field.value
+                                      }
+                                      placeholder='Add Price'
                                     />
                                   </FormControl>
                                 </FormItem>

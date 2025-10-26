@@ -17,12 +17,12 @@ export default async function ListingPage({
 }: ListingPageProps) {
   // const updated = searchParams.updated === 'true';
 
-  const { paginatedData, total_length } = filterListingData(data, type);
+  const { filteredData } = filterListingData(data, type);
 
   return (
     <>
       {/* {updated && <RefetchKBar />} */}
-      <TableClientSide type={type} data={paginatedData} total={total_length} />
+      <TableClientSide type={type} data={filteredData} />
     </>
   );
 }

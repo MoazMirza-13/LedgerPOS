@@ -18,12 +18,10 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
 import { LoaderCircle, X, Upload } from 'lucide-react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
@@ -75,17 +73,13 @@ export default function ProductForm({
 
   const defaultValues = {
     image: null,
-    name: initialData?.title || '',
     category: category
       ? String(categoryIdFromURL)
       : initialData?.category_id || '',
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
     costPrice: initialData?.cost_price || 0,
     sellingPrice: initialData?.selling_price || 0,
-    description: initialData?.description || '',
-    productVariants: initialData?.variants || [],
-    inStock: initialData?.in_stock || false,
-    productCode: initialData?.product_code || '',
+    product: initialData?.product_code || '', // for KT product_code column will be used instead of name || title
     quantityInWarehouses: {
       Ghaziwal: initialData?.quantity_in_ghaziwal || 0,
       Zafarwal: initialData?.quantity_in_zafarwal || 0,
@@ -137,18 +131,12 @@ export default function ProductForm({
 
   const formSchema = z.object({
     image: imageValidation,
-    name: z.string().min(1, {
-      message: 'Product name is required'
-    }),
     category: z.string().nullable(),
     brand: z.string().nullable(),
     costPrice: z.coerce.number(),
     sellingPrice: z.coerce.number(),
-    description: z.string().optional(),
-    productVariants: z.array(z.string()).optional(),
-    inStock: z.boolean(),
-    productCode: z.string().min(1, {
-      message: 'Product code is required'
+    product: z.string().min(1, {
+      message: 'Product is required'
     }),
     quantityInWarehouses: z.object({
       Ghaziwal: z.coerce.number().default(0),
@@ -254,6 +242,11 @@ export default function ProductForm({
 
       if (hasImgError) {
         toast.error(toastMsg.imageUploadError);
+        return;
+      }
+
+      if (values.costPrice > values.sellingPrice) {
+        toast.error(toastMsg.error);
         return;
       }
 
@@ -364,9 +357,10 @@ export default function ProductForm({
                               ) : (
                                 <CardContent
                                   className='flex h-full cursor-pointer flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
-                                  onClick={() =>
-                                    fileInputRefs.current[index]?.click()
-                                  }
+                                  onClick={() => {
+                                    if (currentRole === 'super_admin')
+                                      fileInputRefs.current[index]?.click();
+                                  }}
                                 >
                                   <Upload className='mb-2 h-8 w-8 text-gray-400' />
                                   <p className='text-center text-sm text-gray-500'>
@@ -391,45 +385,89 @@ export default function ProductForm({
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name='name'
+                name='product'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name</FormLabel>
+                    <FormLabel>Product</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter product name' {...field} />
+                      <Input placeholder='Enter product' {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <RoleGate allow='super_admin'>
+                <FormField
+                  control={form.control}
+                  name='costPrice'
+                  disabled={currentRole !== 'super_admin'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cost Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0'
+                          placeholder='Enter cost price'
+                          {...field}
+                          value={
+                            field.value === 0 && !initialData ? '' : field.value
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </RoleGate>
+              <FormField
+                control={form.control}
+                name='brand'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brand</FormLabel>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === 'null' ? null : value)
+                      }
+                      value={field.value ? String(field.value) : ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
+                          <SelectValue placeholder='Select brands' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className='max-h-60 overflow-y-auto'>
+                        <SelectItem value='null'>None</SelectItem>
+                        {brands?.map((brand) => (
+                          <SelectItem key={brand.id} value={String(brand.id)}>
+                            {brand.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name='productCode'
+                name='sellingPrice'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Code</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Enter product code' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='costPrice'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cost Price</FormLabel>
+                    <FormLabel>Selling Price</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
                         step='0'
-                        placeholder='Enter cost price'
+                        placeholder='Enter selling price'
                         {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -469,67 +507,6 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='sellingPrice'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Selling Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0'
-                        placeholder='Enter selling price'
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='brand'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Brand</FormLabel>
-                    <Select
-                      onValueChange={(value) =>
-                        field.onChange(value === 'null' ? null : value)
-                      }
-                      value={field.value ? String(field.value) : ''}
-                    >
-                      <FormControl>
-                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
-                          <SelectValue placeholder='Select brands' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='max-h-60 overflow-y-auto'>
-                        <SelectItem value='null'>None</SelectItem>
-                        {brands?.map((brand) => (
-                          <SelectItem key={brand.id} value={String(brand.id)}>
-                            {brand.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='productVariants'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Product Variants</FormLabel>
-                    <ProductVariants name={field.name} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
             {/* quantity */}
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
@@ -556,6 +533,9 @@ export default function ProductForm({
                           step='0'
                           placeholder={`Enter Quantity for ${w.label}`}
                           {...field}
+                          value={
+                            field.value === 0 && !initialData ? '' : field.value
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -564,51 +544,6 @@ export default function ProductForm({
                 />
               ))}
             </div>
-
-            {/* might need stock status in future, from backend by default it will be false */}
-            {/* <FormField
-              control={form.control}
-              name='inStock'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Stock Status</FormLabel>
-                  <div className='flex items-center gap-3'>
-                    <span className='text-2xl'>
-                      {field.value ? '✅' : '❌'}
-                    </span>
-                    <Switch
-                      id='stockStatus'
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={currentRole !== 'super_admin'}
-                      className='data-[state=checked]:bg-green-600'
-                    />
-                    <span className='text-sm text-gray-400'>
-                      {field.value ? 'In Stock' : 'Out of Stock'}
-                    </span>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-            <FormField
-              control={form.control}
-              name='description'
-              disabled={currentRole !== 'super_admin'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder='Enter product description'
-                      className='resize-none'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <RoleGate allow='super_admin'>
               <Button type='submit' disabled={isPending || !isDirty}>
                 {isPending ? (

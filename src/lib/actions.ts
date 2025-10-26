@@ -65,15 +65,11 @@ export async function getUserSession() {
 
 export async function productSubmit(
   values: {
-    name: string;
-    productCode?: string;
+    product: string;
     category: string | null;
     brand: string | null;
     costPrice: number;
     sellingPrice: number;
-    description?: string;
-    productVariants?: string[];
-    inStock: boolean;
     quantityInWarehouses: {
       Zafarwal: number;
       Ghaziwal: number;
@@ -93,16 +89,12 @@ export async function productSubmit(
       const { error } = await supabase
         .from('products')
         .update({
-          title: values.name,
-          product_code: values.productCode,
+          product_code: values.product,
           cost_price: values.costPrice,
           selling_price: values.sellingPrice,
-          description: values.description,
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
           img_url: imgPaths,
-          variants: values.productVariants,
-          in_stock: values.inStock,
           quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
           quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
           quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
@@ -122,16 +114,12 @@ export async function productSubmit(
           .from('products')
           .insert([
             {
-              title: values.name,
-              product_code: values.productCode,
+              product_code: values.product,
               cost_price: values.costPrice,
               selling_price: values.sellingPrice,
-              description: values.description,
               img_url: imgPaths,
               category_id: values.category ? values.category : null,
               brand_id: values.brand ? values.brand : null,
-              variants: values.productVariants,
-              in_stock: values.inStock,
               quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
               quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
               quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
