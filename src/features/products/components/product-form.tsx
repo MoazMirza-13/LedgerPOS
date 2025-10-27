@@ -81,6 +81,7 @@ export default function ProductForm({
     sellingPrice: initialData?.selling_price || 0,
     product: initialData?.product_code || '', // for KT product_code column will be used instead of name || title
     minQuantity: initialData?.min_quantity || 0,
+    boxes: initialData?.boxes || 0,
     quantityInWarehouses: {
       Ghaziwal: initialData?.quantity_in_ghaziwal || 0,
       Zafarwal: initialData?.quantity_in_zafarwal || 0,
@@ -140,6 +141,7 @@ export default function ProductForm({
       message: 'Product is required'
     }),
     minQuantity: z.coerce.number(),
+    boxes: z.coerce.number(),
     quantityInWarehouses: z.object({
       Ghaziwal: z.coerce.number().default(0),
       Zafarwal: z.coerce.number().default(0),
@@ -521,6 +523,28 @@ export default function ProductForm({
                         type='number'
                         step='0'
                         placeholder='Enter min quantity'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='boxes'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Boxes</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter quantity per box'
                         {...field}
                         value={
                           field.value === 0 && !initialData ? '' : field.value

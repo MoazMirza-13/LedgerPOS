@@ -71,6 +71,7 @@ export async function productSubmit(
     costPrice: number;
     sellingPrice: number;
     minQuantity: number;
+    boxes: number;
     quantityInWarehouses: {
       Zafarwal: number;
       Ghaziwal: number;
@@ -96,6 +97,7 @@ export async function productSubmit(
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
           min_quantity: values.minQuantity,
+          boxes: values.boxes,
           img_url: imgPaths,
           quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
           quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
@@ -123,6 +125,7 @@ export async function productSubmit(
               category_id: values.category ? values.category : null,
               brand_id: values.brand ? values.brand : null,
               min_quantity: values.minQuantity,
+              boxes: values.boxes,
               quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
               quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
               quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
@@ -197,6 +200,18 @@ export const getDataById = async (type: string, id: string) => {
     .single();
 
   if (error) throw error;
+  return data;
+};
+
+export const getProductByCode = async (code: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('product_code', code)
+    .single();
+
+  if (error) return null;
   return data;
 };
 

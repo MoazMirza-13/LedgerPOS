@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { LoaderCircle, Trash2, Plus } from 'lucide-react';
-import { invoiceSubmit } from '@/lib/actions';
+import { getProductByCode, invoiceSubmit } from '@/lib/actions';
 import {
   Select,
   SelectContent,
@@ -36,11 +36,11 @@ const invoiceItemSchema = z.object({
   product_code: z.string().min(1, {
     message: 'Product code is required'
   }),
-  description: z.string().optional(),
   quantity: z.coerce.number().min(1),
   boxes: z.coerce.number().optional(),
   price: z.coerce.number().min(1),
-  warehouse: z.string().min(1, 'Warehouse is required')
+  warehouse: z.string().min(1, 'Warehouse is required'),
+  product: z.any().optional()
 });
 
 const formSchema = z.object({
@@ -90,6 +90,11 @@ export default function InvoiceForm({
       const duplicates: { code: string; warehouse: string }[] = [];
 
       for (const item of values.invoice_items) {
+        if (item.price < item.product.selling_price) {
+          toast.error(toastMsg.error);
+          return;
+        }
+
         const key = `${item.product_code}_${item.warehouse}`;
         if (seen.has(key)) {
           duplicates.push({
@@ -127,6 +132,18 @@ export default function InvoiceForm({
         router.push(`/dashboard/invoices`);
       }
     });
+  };
+
+  const handleGetProduct = async (index: number) => {
+    const product = await getProductByCode(items[index].product_code);
+
+    if (!product) {
+      toast.error('Product not found');
+      return;
+    }
+
+    form.setValue(`invoice_items.${index}.price`, product.selling_price);
+    form.setValue(`invoice_items.${index}.product`, product);
   };
 
   return (
@@ -198,7 +215,6 @@ export default function InvoiceForm({
                   onClick={() =>
                     append({
                       product_code: '',
-                      description: '',
                       quantity: 0,
                       boxes: 0,
                       price: 0,
@@ -217,7 +233,7 @@ export default function InvoiceForm({
                   <table className='w-full'>
                     <thead>
                       <tr className='border-b bg-muted'>
-                        <th className='px-4 py-3 text-left text-sm font-semibold'>
+                        <th className='w-[20%] px-4 py-3 text-left text-sm font-semibold'>
                           Product
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
@@ -246,132 +262,211 @@ export default function InvoiceForm({
                           key={field.id}
                           className='border-b hover:bg-muted/50'
                         >
-                          <td className='px-4 py-3'>
+                          <td className='flex gap-2 px-4 py-3'>
                             <FormField
                               control={control}
                               name={`invoice_items.${index}.product_code`}
                               render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input placeholder='Product' {...field} />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </td>
-                          <td className='px-4 py-3'>
-                            <FormField
-                              control={control}
-                              name={`invoice_items.${index}.boxes`}
-                              render={({ field }) => (
-                                <FormItem>
+                                <FormItem className='w-full'>
                                   <FormControl>
                                     <Input
-                                      type='number'
-                                      min='0'
-                                      className='text-center'
+                                      placeholder='Product Code'
                                       {...field}
-                                      value={
-                                        field.value === 0 ? '' : field.value
-                                      }
-                                      placeholder='Add Boxes'
+                                      disabled={items[index].product}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          e.preventDefault();
+                                          handleGetProduct(index);
+                                        }
+                                      }}
                                     />
                                   </FormControl>
                                 </FormItem>
                               )}
                             />
+                            {!items[index].product && (
+                              <Button
+                                type='button'
+                                onClick={() => handleGetProduct(index)}
+                                className='px-2'
+                              >
+                                GET
+                              </Button>
+                            )}
                           </td>
-                          <td className='px-4 py-3'>
-                            <FormField
-                              control={control}
-                              name={`invoice_items.${index}.quantity`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type='number'
-                                      min='0'
-                                      className='text-center'
-                                      {...field}
-                                      value={
-                                        field.value === 0 ? '' : field.value
-                                      }
-                                      placeholder='Add Quantity'
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </td>
+                          {items[index].product ? (
+                            <>
+                              <td className='px-4 py-3'>
+                                <FormField
+                                  control={control}
+                                  name={`invoice_items.${index}.boxes`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type='number'
+                                          min='0'
+                                          className='text-center'
+                                          {...field}
+                                          value={
+                                            field.value === 0 ? '' : field.value
+                                          }
+                                          placeholder='Add Boxes'
+                                          onChange={(e) => {
+                                            const value = Number(
+                                              e.target.value
+                                            );
+                                            const itemsPerBox =
+                                              items[index].product?.boxes || 1;
 
-                          <td className='w-[16%] px-4 py-3'>
-                            <FormField
-                              control={form.control}
-                              name={`invoice_items.${index}.warehouse`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <Select
-                                    onValueChange={(value) =>
-                                      field.onChange(
-                                        value === 'null' ? '' : value
-                                      )
-                                    }
-                                    value={
-                                      field.value ? String(field.value) : ''
-                                    }
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder='Warehouse' />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent className='max-h-60 overflow-y-auto'>
-                                      <SelectItem value='null'>None</SelectItem>
-                                      {warehouses?.map((warehouse) => (
-                                        <SelectItem
-                                          key={warehouse.key}
-                                          value={warehouse.key}
-                                        >
-                                          {warehouse.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </FormItem>
-                              )}
-                            />
-                          </td>
-                          <td className='px-4 py-3'>
-                            <FormField
-                              control={control}
-                              name={`invoice_items.${index}.price`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input
-                                      type='number'
-                                      min='0'
-                                      className='text-right'
-                                      {...field}
-                                      value={
-                                        field.value === 0 ? '' : field.value
-                                      }
-                                      placeholder='Add Price'
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </td>
-                          <td className='px-4 py-3 text-right font-semibold'>
-                            {/* $ */}
-                            {(
-                              items[index].quantity * items[index].price
-                            ).toLocaleString(undefined, {
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 2
-                            })}
-                          </td>
+                                            field.onChange(value);
+                                            form.setValue(
+                                              `invoice_items.${index}.quantity`,
+                                              value > 0
+                                                ? value * itemsPerBox
+                                                : 0
+                                            );
+                                          }}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+                              <td className='px-4 py-3'>
+                                <FormField
+                                  control={control}
+                                  name={`invoice_items.${index}.quantity`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type='number'
+                                          min='0'
+                                          className='text-center'
+                                          {...field}
+                                          value={
+                                            field.value === 0 ? '' : field.value
+                                          }
+                                          placeholder='Add Quantity'
+                                          onChange={(e) => {
+                                            const value = Number(
+                                              e.target.value
+                                            );
+                                            const itemsPerBox =
+                                              items[index].product?.boxes || 1;
+
+                                            field.onChange(value);
+                                            form.setValue(
+                                              `invoice_items.${index}.boxes`,
+                                              value > 0
+                                                ? Math.floor(
+                                                    value / itemsPerBox
+                                                  )
+                                                : 0
+                                            );
+                                          }}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+
+                              <td className='w-[16%] px-4 py-3'>
+                                <FormField
+                                  control={form.control}
+                                  name={`invoice_items.${index}.warehouse`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <Select
+                                        onValueChange={(value) =>
+                                          field.onChange(
+                                            value === 'null' ? '' : value
+                                          )
+                                        }
+                                        value={
+                                          field.value ? String(field.value) : ''
+                                        }
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder='Warehouse' />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent className='max-h-60 overflow-y-auto'>
+                                          <SelectItem value='null'>
+                                            None
+                                          </SelectItem>
+                                          {warehouses?.map((warehouse) => (
+                                            <SelectItem
+                                              key={warehouse.key}
+                                              value={warehouse.key}
+                                            >
+                                              {warehouse.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+                              <td className='px-4 py-3'>
+                                <FormField
+                                  control={control}
+                                  name={`invoice_items.${index}.price`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type='number'
+                                          min='0'
+                                          className='text-right'
+                                          {...field}
+                                          value={
+                                            field.value === 0 ? '' : field.value
+                                          }
+                                          placeholder='Add Price'
+                                          onChange={(e) => {
+                                            const value = Number(
+                                              e.target.value
+                                            );
+                                            const minPrice =
+                                              items[index].product
+                                                ?.selling_price ?? 0;
+
+                                            if (value < minPrice) {
+                                              field.onChange(minPrice);
+                                            } else {
+                                              field.onChange(value);
+                                            }
+                                          }}
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+                              <td className='px-4 py-3 text-right font-semibold'>
+                                {/* $ */}
+                                {(
+                                  items[index].quantity * items[index].price
+                                ).toLocaleString(undefined, {
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 2
+                                })}
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            </>
+                          )}
                           <td className='px-4 py-3 text-center'>
                             <button
                               type='button'
