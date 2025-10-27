@@ -76,6 +76,7 @@ export type Invoice = {
   invoice_items: Invoice_items[];
   created_at?: string;
   payment: boolean;
+  reference?: string;
 };
 
 export type Invoice_items = {

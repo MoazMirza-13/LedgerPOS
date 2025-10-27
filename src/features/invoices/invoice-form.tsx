@@ -20,11 +20,12 @@ import { getProductByCode, invoiceSubmit } from '@/lib/actions';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { warehouses } from '@/constants/data';
+import { references, warehouses } from '@/constants/data';
 import { Invoice } from 'types';
 import { toast } from 'sonner';
 import { toastMsg } from '@/utils/utils';
@@ -48,7 +49,8 @@ const formSchema = z.object({
   customer_number: z.string().optional(),
   customer_address: z.string().optional(),
   invoice_items: z.array(invoiceItemSchema).min(1),
-  payment: z.boolean().default(false)
+  payment: z.boolean().default(false),
+  reference: z.string().optional()
 });
 
 export default function InvoiceForm({
@@ -68,6 +70,7 @@ export default function InvoiceForm({
       customer_number: initialData?.customer_number || '',
       customer_address: initialData?.customer_address || '',
       payment: initialData?.payment || false,
+      reference: initialData?.reference || '',
       invoice_items: initialData?.invoice_items || []
     }
   });
@@ -90,7 +93,7 @@ export default function InvoiceForm({
       const duplicates: { code: string; warehouse: string }[] = [];
 
       for (const item of values.invoice_items) {
-        if (item.price < item.product.selling_price) {
+        if (item.price < item.product?.selling_price) {
           toast.error(toastMsg.error);
           return;
         }
@@ -402,6 +405,7 @@ export default function InvoiceForm({
                                             <SelectItem
                                               key={warehouse.key}
                                               value={warehouse.key}
+                                              className='cursor-pointer'
                                             >
                                               {warehouse.label}
                                             </SelectItem>
@@ -510,6 +514,42 @@ export default function InvoiceForm({
                     </span>
                   </div>
                 </div>
+              </div>
+              <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                <FormField
+                  control={form.control}
+                  name={`reference`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(value === 'null' ? '' : value)
+                        }
+                        value={field.value ? String(field.value) : ''}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Reference' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className='max-h-60 overflow-y-auto'>
+                          <SelectItem value='null'>None</SelectItem>
+                          <SelectGroup>
+                            {references.map((reference) => (
+                              <SelectItem
+                                key={reference}
+                                value={reference}
+                                className='cursor-pointer'
+                              >
+                                {reference}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
               </div>
               <FormField
                 control={form.control}
