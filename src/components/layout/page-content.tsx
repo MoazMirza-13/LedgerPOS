@@ -19,7 +19,7 @@ interface PageContentProps {
   newLink?: string;
   searchParams?: any;
   pageKey?: string | number;
-  reference_bills?: boolean;
+  reference_bills?: boolean | string;
   extraTableProps?: Record<string, any>;
 }
 
@@ -31,7 +31,7 @@ export const PageContent: React.FC<PageContentProps> = ({
   itemsData,
   searchParams,
   pageKey,
-  reference_bills,
+  reference_bills = false,
   extraTableProps
 }) => {
   return (

@@ -51,9 +51,9 @@ export async function fetchListingData(type: itemTable) {
 export function filterListingData(
   data: itemData[],
   type: string,
-  reference_bills: boolean
+  reference_bills: boolean | string
 ) {
-  if (reference_bills) {
+  if (reference_bills === true) {
     const invoices = data.filter((i): i is Invoice => 'payment' in i);
 
     const filtered = invoices.filter(
@@ -75,6 +75,19 @@ export function filterListingData(
     }));
 
     return { filteredData: finalData };
+  } else if (typeof reference_bills === 'string') {
+    const invoices = data.filter((i): i is Invoice => 'payment' in i);
+
+    const filteredData = invoices.filter(
+      (i) =>
+        !i.payment &&
+        i.reference &&
+        i.reference.trim() !== '' &&
+        i.reference.trim().toLowerCase() ===
+          reference_bills.trim().toLowerCase()
+    );
+
+    return { filteredData };
   } else {
     // Showcasing the use of search params cache in nested RSCs
     const search = searchParamsCache.get('q');

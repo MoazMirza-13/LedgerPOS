@@ -14,10 +14,14 @@ export const useColumns = <T extends Entity>(
   type: itemTable
 ): ColumnDef<T>[] => {
   const pathname = usePathname();
+  const currentRole = useRole();
+
   const baseColumns: ColumnDef<T>[] = [];
 
-  const reference_bills_path = pathname.includes('reference');
-  const currentRole = useRole();
+  const reference_bills_path = pathname === '/dashboard/reference-bills';
+  const reference_detail_path =
+    pathname.startsWith('/dashboard/reference-bills/') &&
+    pathname !== '/dashboard/reference-bills';
 
   if (type === 'categories' || type === 'brands') {
     baseColumns.push(
@@ -110,7 +114,7 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (type === 'invoices' && !reference_bills_path) {
+  if (type === 'invoices' && (reference_detail_path || !reference_bills_path)) {
     baseColumns.push(
       {
         accessorKey: 'customer_name',
@@ -147,7 +151,15 @@ export const useColumns = <T extends Entity>(
     return [
       {
         accessorKey: 'reference',
-        header: 'REFERENCE NAME'
+        header: 'REFERENCE NAME',
+        cell: ({ row }) => {
+          const invoiceRow = row.original as Reference_bills;
+          return (
+            <Link href={`/dashboard/reference-bills/${invoiceRow.reference}`}>
+              {invoiceRow.reference}
+            </Link>
+          );
+        }
       },
       {
         header: 'TOTAL',

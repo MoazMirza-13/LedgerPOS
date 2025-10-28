@@ -8,7 +8,7 @@ type ListingPageProps = {
   type: itemTable;
   data: itemData[];
   searchParams: SearchParams;
-  reference_bills?: boolean;
+  reference_bills?: boolean | string;
 };
 
 export default async function ListingPage({
@@ -19,7 +19,11 @@ export default async function ListingPage({
 }: ListingPageProps) {
   // const updated = searchParams.updated === 'true';
 
-  const { filteredData } = filterListingData(data, type, !!reference_bills);
+  const { filteredData } = filterListingData(
+    data,
+    type,
+    reference_bills ?? false
+  );
 
   return (
     <>

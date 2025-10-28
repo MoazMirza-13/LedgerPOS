@@ -98,6 +98,16 @@ export const updateSession = async (request: NextRequest) => {
       );
     }
 
+    if (
+      request.nextUrl.pathname.includes('references') &&
+      !user.error &&
+      currentRole !== 'super_admin'
+    ) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
+    }
+
     return response;
   } catch (e) {
     // If you are here, a Supabase client could not be created!
