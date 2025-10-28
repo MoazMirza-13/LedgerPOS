@@ -55,7 +55,7 @@ export type Product = {
 export type Category = {
   title: string;
   created_at: string;
-  id: number;
+  id: string;
   description: string;
 };
 
@@ -63,12 +63,12 @@ export type Category = {
 export type Brand = {
   title: string;
   created_at: string;
-  id: number;
+  id: string;
   description: string;
 };
 
 export type Invoice = {
-  id?: number;
+  id?: string;
   customer_name: string;
   customer_address?: string;
   customer_number?: string; // phone numbers can include "+92" etc
@@ -88,9 +88,15 @@ export type Invoice_items = {
   warehouse: string;
 };
 
+export type Reference_bills = {
+  reference: string;
+  total_price: number;
+  id?: string;
+};
+
 export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';
 
-export type itemData = Product | Category | Brand | Invoice;
+export type itemData = Product | Category | Brand | Invoice | Reference_bills;
 
 export type nestedArray = {
   products: Product[];

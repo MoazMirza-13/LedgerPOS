@@ -2,18 +2,21 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { Invoice, itemData, itemTable, Product } from 'types';
+import { Invoice, itemData, itemTable, Product, Reference_bills } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
+import { usePathname } from 'next/navigation';
 
 type Entity = itemData;
 
 export const useColumns = <T extends Entity>(
   type: itemTable
 ): ColumnDef<T>[] => {
+  const pathname = usePathname();
   const baseColumns: ColumnDef<T>[] = [];
 
+  const reference_bills_path = pathname.includes('reference');
   const currentRole = useRole();
 
   if (type === 'categories' || type === 'brands') {
@@ -107,7 +110,7 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (type === 'invoices') {
+  if (type === 'invoices' && !reference_bills_path) {
     baseColumns.push(
       {
         accessorKey: 'customer_name',
@@ -140,7 +143,20 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (currentRole === 'super_admin') {
+  if (type === 'invoices' && reference_bills_path) {
+    return [
+      {
+        accessorKey: 'reference',
+        header: 'REFERENCE NAME'
+      },
+      {
+        header: 'TOTAL',
+        accessorFn: (row) => (row as Reference_bills).total_price
+      }
+    ];
+  }
+
+  if (currentRole === 'super_admin' && !reference_bills_path) {
     baseColumns.push({
       id: 'actions',
       cell: ({ row }) => <CellAction itemTable={type} itemData={row.original} />

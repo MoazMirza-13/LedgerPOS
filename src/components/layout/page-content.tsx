@@ -15,10 +15,11 @@ interface PageContentProps {
   title: string;
   description: string;
   type: itemTable;
-  newLink: string;
   itemsData: itemData[];
-  searchParams: any;
-  pageKey: string | number;
+  newLink?: string;
+  searchParams?: any;
+  pageKey?: string | number;
+  reference_bills?: boolean;
   extraTableProps?: Record<string, any>;
 }
 
@@ -30,28 +31,36 @@ export const PageContent: React.FC<PageContentProps> = ({
   itemsData,
   searchParams,
   pageKey,
+  reference_bills,
   extraTableProps
 }) => {
   return (
     <div className='flex flex-1 flex-col space-y-4'>
       <div className='flex items-start justify-between'>
         <Heading title={title} description={description} />
-        <RoleGate allow='super_admin'>
-          <Link
-            href={newLink}
-            className={cn(buttonVariants(), 'text-xs md:text-sm')}
-          >
-            <Plus className='mr-2 h-4 w-4' /> Add New
-          </Link>
-        </RoleGate>
+        {newLink && (
+          <RoleGate allow='super_admin'>
+            <Link
+              href={newLink}
+              className={cn(buttonVariants(), 'text-xs md:text-sm')}
+            >
+              <Plus className='mr-2 h-4 w-4' /> Add New
+            </Link>
+          </RoleGate>
+        )}
       </div>
       <Separator />
-      <TableAction {...extraTableProps} />
+      {searchParams && <TableAction {...extraTableProps} />}
       <Suspense
         key={pageKey}
         fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
       >
-        <ListingPage type={type} data={itemsData} searchParams={searchParams} />
+        <ListingPage
+          type={type}
+          data={itemsData}
+          searchParams={searchParams}
+          reference_bills={reference_bills}
+        />
       </Suspense>
     </div>
   );
