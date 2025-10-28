@@ -22,6 +22,10 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard/brands': [
     { title: 'Dashboard', link: '/dashboard' },
     { title: 'Brands', link: '/dashboard/brands' }
+  ],
+  '/dashboard/invoices': [
+    { title: 'Dashboard', link: '/dashboard' },
+    { title: 'Invoices', link: '/dashboard/invoices' }
   ]
 };
 
@@ -37,7 +41,7 @@ export function useBreadcrumbs() {
 
   // Memoized values to prevent unnecessary recalculations
   const { type, id, isDynamicRoute } = useMemo(() => {
-    const types = ['brands', 'products', 'categories'];
+    const types = ['brands', 'products', 'categories', 'invoices'];
     const lastSegment = segments[segments.length - 1] || '';
     const type = types.find((t) => pathname.includes(`/${t}/`)) || '';
     const checkId = checkUUID(lastSegment);
@@ -63,11 +67,13 @@ export function useBreadcrumbs() {
 
       // Handle dynamic segment replacement
       if (isLast && isDynamicRoute) {
+        const dynamicTitle =
+          dynamicData?.title ||
+          dynamicData?.product_code ||
+          dynamicData?.customer_name ||
+          '';
         return {
-          title:
-            !isLoading && dynamicData?.title && !checkUUID(dynamicData.title)
-              ? dynamicData.title
-              : '',
+          title: !isLoading && dynamicTitle,
           link: fullPath
         };
       }
@@ -77,7 +83,7 @@ export function useBreadcrumbs() {
         link: fullPath
       };
     });
-  }, [pathname, segments, isDynamicRoute, dynamicData]);
+  }, [pathname, segments, isDynamicRoute, dynamicData, isLoading]);
 
   return {
     breadcrumbs

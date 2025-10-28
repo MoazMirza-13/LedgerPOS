@@ -287,7 +287,7 @@ export default function InvoiceForm({
                                 </FormItem>
                               )}
                             />
-                            {!items[index].product && (
+                            {!items[index].product && !initialData && (
                               <Button
                                 type='button'
                                 onClick={() => handleGetProduct(index)}
@@ -297,7 +297,7 @@ export default function InvoiceForm({
                               </Button>
                             )}
                           </td>
-                          {items[index].product ? (
+                          {items[index].product || initialData ? (
                             <>
                               <td className='px-4 py-3'>
                                 <FormField
