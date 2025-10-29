@@ -312,7 +312,9 @@ export default function InvoiceForm({
                                           className='text-center'
                                           {...field}
                                           value={
-                                            field.value === 0 ? '' : field.value
+                                            field.value === 0 && !initialData
+                                              ? ''
+                                              : field.value
                                           }
                                           placeholder='Add Boxes'
                                           onChange={(e) => {

@@ -539,7 +539,7 @@ export default function ProductForm({
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Boxes</FormLabel>
+                    <FormLabel>Quantity per Box</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
