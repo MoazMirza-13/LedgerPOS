@@ -472,6 +472,15 @@ export default function ProductForm({
                         value={
                           field.value === 0 && !initialData ? '' : field.value
                         }
+                        onChange={(e) => {
+                          const newValue = Number(e.target.value);
+                          const cost = form.getValues('costPrice');
+                          if (newValue < cost) {
+                            field.onChange(cost); // auto-fix to costPrice
+                          } else {
+                            field.onChange(newValue);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

@@ -35,7 +35,7 @@ export default function TableAction({
   if (pathname.includes('/products')) {
     searchKey = 'code, title';
   } else if (pathname.includes('/invoice')) {
-    searchKey = 'customer name, date';
+    searchKey = 'invoice number, customer name, date';
   }
 
   return (

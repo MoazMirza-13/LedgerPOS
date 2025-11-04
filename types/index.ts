@@ -77,6 +77,7 @@ export type Invoice = {
   created_at?: string;
   payment: boolean;
   reference?: string;
+  invoice_number?: number;
 };
 
 export type Invoice_items = {

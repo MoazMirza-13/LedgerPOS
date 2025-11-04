@@ -16,7 +16,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { LoaderCircle, Trash2, Plus } from 'lucide-react';
-import { getProductByCode, invoiceSubmit } from '@/lib/actions';
+import {
+  getMaxInvoiceNumber,
+  getProductByCode,
+  invoiceSubmit
+} from '@/lib/actions';
 import {
   Select,
   SelectContent,
@@ -121,10 +125,20 @@ export default function InvoiceForm({
       }
 
       const totalPrice = calculateTotal();
-      const finalData = { ...values, total_price: totalPrice };
+
+      let newInvoiceNumber;
+      if (!initialData) {
+        const maxInvoiceNumber = await getMaxInvoiceNumber();
+        newInvoiceNumber = maxInvoiceNumber + 1;
+      }
+
+      const finalData = {
+        ...values,
+        total_price: totalPrice,
+        ...(newInvoiceNumber && { invoice_number: newInvoiceNumber }) // include only if defined
+      };
 
       const res = await invoiceSubmit(finalData, initialData);
-
       if (res?.successNew) {
         toast.success(toastMsg.newInvoice);
         await printInvoice(finalData);
@@ -426,15 +440,42 @@ export default function InvoiceForm({
                                           <SelectItem value='null'>
                                             None
                                           </SelectItem>
-                                          {warehouses?.map((warehouse) => (
-                                            <SelectItem
-                                              key={warehouse.key}
-                                              value={warehouse.key}
-                                              className='cursor-pointer'
-                                            >
-                                              {warehouse.label}
-                                            </SelectItem>
-                                          ))}
+                                          {warehouses?.map((warehouse) => {
+                                            const product =
+                                              items[index].product;
+                                            const qtyMap = {
+                                              Ghaziwal:
+                                                product?.quantity_in_ghaziwal,
+                                              Zafarwal:
+                                                product?.quantity_in_zafarwal,
+                                              LhrRoad:
+                                                product?.quantity_in_lhr_road,
+                                              EidgahRoad:
+                                                product?.quantity_in_eidgah_road,
+                                              MandiTile:
+                                                product?.quantity_in_mandi_tile,
+                                              MandiBond:
+                                                product?.quantity_in_mandi_bond
+                                            };
+
+                                            const qty =
+                                              qtyMap[
+                                                warehouse.key as keyof typeof qtyMap
+                                              ] ?? 0;
+
+                                            return (
+                                              <SelectItem
+                                                key={warehouse.key}
+                                                value={warehouse.key}
+                                                className='flex cursor-pointer justify-between'
+                                              >
+                                                <span>{warehouse.label} </span>
+                                                <span className='text-sm text-muted-foreground'>
+                                                  ({qty})
+                                                </span>
+                                              </SelectItem>
+                                            );
+                                          })}
                                         </SelectContent>
                                       </Select>
                                     </FormItem>

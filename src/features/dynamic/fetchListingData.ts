@@ -102,7 +102,7 @@ export function filterListingData(
         value = `${product.product_code ?? ''} ${product.title ?? ''}`;
       } else if (type === 'invoices') {
         const invoice = item as Invoice;
-        value = `${invoice.customer_name ?? ''} ${invoice.created_at ? formatToPKTDate(invoice.created_at) : ''}`;
+        value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${invoice.created_at ? formatToPKTDate(invoice.created_at) : ''}`;
       } else {
         const entry = item as Category | Brand;
         value = entry.title ?? '';

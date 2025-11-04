@@ -28,7 +28,7 @@ export async function printInvoice(finalData: Invoice) {
             </div>
           </div>
           <div class="text-right">
-            <p class="text-teal-300 text-xs font-semibold tracking-widest">INVOICE</p>
+            <p class="text-teal-300 text-xs font-semibold tracking-widest">INVOICE# ${finalData.invoice_number}</p>
             <p class="text-slate-400 text-sm mt-2">${currentDate}</p>
           </div>
         </div>

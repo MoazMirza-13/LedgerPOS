@@ -241,6 +241,7 @@ export const invoiceSubmit = async (
           total_price: values.total_price,
           payment: values.payment,
           reference: values.reference,
+          invoice_number: values.invoice_number,
           items: values.invoice_items.map((item: Invoice_items) => ({
             product_code: item.product_code,
             description: item.description,
@@ -274,5 +275,21 @@ export const invoiceSubmit = async (
     }
   } catch (error: any) {
     return { error };
+  }
+};
+
+export const getMaxInvoiceNumber = async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('invoices')
+    .select('invoice_number')
+    .order('invoice_number', {
+      ascending: false
+    })
+    .limit(1);
+
+  if (!error) {
+    const maxInvoiceNumber = data.length ? data[0].invoice_number : null;
+    return maxInvoiceNumber;
   }
 };

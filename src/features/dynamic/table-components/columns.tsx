@@ -116,6 +116,7 @@ export const useColumns = <T extends Entity>(
 
   if (type === 'invoices' && (reference_detail_path || !reference_bills_path)) {
     baseColumns.push(
+      { accessorKey: 'invoice_number', header: '#' },
       {
         accessorKey: 'customer_name',
         header: 'CUSTOMER NAME',
