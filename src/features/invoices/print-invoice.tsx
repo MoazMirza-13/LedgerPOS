@@ -50,8 +50,9 @@ export async function printInvoice(finalData: Invoice) {
           <thead>
             <tr class="bg-teal-50 border-b-2 border-teal-500">
               <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Product</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Boxes</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Qty</th>
+              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Box</th>
+              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Piece</th>
+              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Total Quantity</th>
               <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Warehouse</th>
               <th class="px-4 py-4 text-right text-xs font-bold text-slate-900 tracking-wider">Price</th>
               <th class="px-4 py-4 text-right text-xs font-bold text-slate-900 tracking-wider">Total</th>
@@ -65,6 +66,18 @@ export async function printInvoice(finalData: Invoice) {
                   <td class="px-4 py-3 text-sm font-medium text-slate-900">${item.product_code}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.boxes}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.quantity}</td>
+                  <td class="px-4 py-3 text-sm text-slate-700 text-center">
+                  ${(() => {
+                    const itemsPerBox = item.product?.boxes || 1;
+                    const totalPieces = item.quantity || 0;
+                    const boxes = Math.floor(totalPieces / itemsPerBox);
+                    const pieces = totalPieces % itemsPerBox;
+                    if (!totalPieces) return '-';
+                    return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
+                      boxes && pieces ? ' and ' : ''
+                    }${pieces ? pieces + ' Piece' + (pieces > 1 ? 's' : '') : ''}`;
+                  })()}
+                </td>
                   <td class="px-4 py-3 text-sm text-slate-600">${item.warehouse}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-right">Rs. ${item.price}</td>
                   <td class="px-4 py-3 text-sm font-semibold text-slate-900 text-right">

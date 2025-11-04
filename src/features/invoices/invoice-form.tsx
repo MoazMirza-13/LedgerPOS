@@ -240,10 +240,13 @@ export default function InvoiceForm({
                           Product
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
-                          Boxes
+                          Box
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
-                          Quantity
+                          Piece
+                        </th>
+                        <th className='px-4 py-3 text-center text-sm font-semibold'>
+                          Total Quantity
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
                           Warehouse
@@ -316,7 +319,7 @@ export default function InvoiceForm({
                                               ? ''
                                               : field.value
                                           }
-                                          placeholder='Add Boxes'
+                                          placeholder='Add Box'
                                           onChange={(e) => {
                                             const value = Number(
                                               e.target.value
@@ -353,7 +356,7 @@ export default function InvoiceForm({
                                           value={
                                             field.value === 0 ? '' : field.value
                                           }
-                                          placeholder='Add Quantity'
+                                          placeholder='Add Piece'
                                           onChange={(e) => {
                                             const value = Number(
                                               e.target.value
@@ -377,7 +380,27 @@ export default function InvoiceForm({
                                   )}
                                 />
                               </td>
-
+                              <td className='px-4 py-3 text-center'>
+                                <Input
+                                  readOnly
+                                  className='w-max cursor-default select-none bg-muted/40 text-center font-medium text-muted-foreground'
+                                  value={(() => {
+                                    const itemsPerBox =
+                                      items[index].product?.boxes || 1;
+                                    const totalPieces =
+                                      items[index].quantity || 0;
+                                    const boxes = Math.floor(
+                                      totalPieces / itemsPerBox
+                                    );
+                                    const pieces = totalPieces % itemsPerBox;
+                                    if (!totalPieces) return '';
+                                    return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
+                                      boxes && pieces ? ' and ' : ''
+                                    }${pieces ? pieces + ' Piece' + (pieces > 1 ? 's' : '') : ''}`;
+                                  })()}
+                                  placeholder='Total Quantity'
+                                />
+                              </td>
                               <td className='w-[16%] px-4 py-3'>
                                 <FormField
                                   control={form.control}
