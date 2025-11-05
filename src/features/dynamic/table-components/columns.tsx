@@ -110,6 +110,15 @@ export const useColumns = <T extends Entity>(
           const minQuantity = product.min_quantity;
           return quantity > minQuantity ? '✅' : '❌';
         }
+      },
+      {
+        header: 'TOTAL',
+        cell: ({ row }) => {
+          const product = row.original as Product;
+          const quantity = row.getValue('QUANTITY') as number;
+          const totalStock = quantity * product.cost_price;
+          return totalStock;
+        }
       }
     );
   }

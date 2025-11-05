@@ -254,9 +254,6 @@ export default function InvoiceForm({
                           Product
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
-                          Box
-                        </th>
-                        <th className='px-4 py-3 text-center text-sm font-semibold'>
                           Piece
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
@@ -316,45 +313,6 @@ export default function InvoiceForm({
                           </td>
                           {items[index].product || initialData ? (
                             <>
-                              <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.boxes`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-center'
-                                          {...field}
-                                          value={
-                                            field.value === 0 && !initialData
-                                              ? ''
-                                              : field.value
-                                          }
-                                          placeholder='Add Box'
-                                          onChange={(e) => {
-                                            const value = Number(
-                                              e.target.value
-                                            );
-                                            const itemsPerBox =
-                                              items[index].product?.boxes || 1;
-
-                                            field.onChange(value);
-                                            form.setValue(
-                                              `invoice_items.${index}.quantity`,
-                                              value > 0
-                                                ? value * itemsPerBox
-                                                : 0
-                                            );
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
-                              </td>
                               <td className='px-4 py-3'>
                                 <FormField
                                   control={control}
@@ -504,7 +462,7 @@ export default function InvoiceForm({
                                             );
                                             const minPrice =
                                               items[index].product
-                                                ?.selling_price ?? 0;
+                                                ?.cost_price ?? 0;
 
                                             if (value < minPrice) {
                                               field.onChange(minPrice);

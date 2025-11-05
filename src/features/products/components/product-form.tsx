@@ -287,11 +287,11 @@ export default function ProductForm({
               render={({ field }) => (
                 <div className='space-y-6'>
                   <FormItem className='w-full'>
-                    <FormLabel>Images</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
                       <div className='space-y-4'>
                         <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
-                          {Array.from({ length: 4 }).map((_, index) => (
+                          {Array.from({ length: 1 }).map((_, index) => (
                             <Card key={index} className='relative aspect-[1.5]'>
                               <input
                                 ref={(el) => {
