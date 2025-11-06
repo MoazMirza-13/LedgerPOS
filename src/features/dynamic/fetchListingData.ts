@@ -15,12 +15,7 @@ export async function fetchListingData(type: itemTable) {
   const supabase = await createClient();
   let data;
 
-  if (
-    type === 'categories' ||
-    type === 'brands' ||
-    type === 'invoices' ||
-    type === 'references'
-  ) {
+  if (type === 'categories' || type === 'brands' || type === 'references') {
     const { data: fetchedData, error } = await supabase.from(type).select('*');
     data = fetchedData;
   } else if (type === 'products') {
@@ -49,6 +44,13 @@ export async function fetchListingData(type: itemTable) {
       : null;
 
     data = productsWithImg;
+  } else if (type === 'invoices') {
+    const { data: invoicesData, error } = await supabase.from(type).select(`
+      *,
+      references (name)
+      `);
+
+    data = invoicesData;
   }
 
   const sortedData = Array.isArray(data)

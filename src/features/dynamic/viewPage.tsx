@@ -19,7 +19,7 @@ type ViewPage = {
 export default async function ViewPage({ type, id }: ViewPage) {
   const queryClient = new QueryClient(queryClientConfig);
 
-  const { data, categories, brands, newProduct, pageTitle } =
+  const { data, categories, brands, references, newProduct, pageTitle } =
     await fetchViewData(queryClient, type, id);
 
   return (
@@ -41,6 +41,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
               <InvoiceForm
                 initialData={data as Invoice}
                 pageTitle={pageTitle}
+                references={references}
               />
             );
 

@@ -28,6 +28,7 @@ export async function fetchViewData(
     let data = null;
     let categories = null;
     let brands = null;
+    let references = null;
     let newProduct = type === 'products';
     let pageTitle = '';
 
@@ -96,7 +97,16 @@ export async function fetchViewData(
       }
     }
 
-    return { data, categories, brands, newProduct, pageTitle };
+    if (type === 'invoices') {
+      const supabase = await getSupabaseClient();
+      const { data } = await supabase.from('references').select('*');
+
+      if (data) {
+        references = data;
+      }
+    }
+
+    return { data, categories, brands, references, newProduct, pageTitle };
   } catch (error) {
     notFound();
   }

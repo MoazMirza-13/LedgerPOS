@@ -29,43 +29,45 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { references, warehouses } from '@/constants/data';
-import { Invoice } from 'types';
+import { warehouses } from '@/constants/data';
+import { Invoice, Reference } from 'types';
 import { toast } from 'sonner';
 import { toastMsg } from '@/utils/utils';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { printInvoice } from './print-invoice';
 
-const invoiceItemSchema = z.object({
-  product_code: z.string().min(1, {
-    message: 'Product code is required'
-  }),
-  quantity: z.coerce.number().min(1),
-  boxes: z.coerce.number().optional(),
-  price: z.coerce.number().min(1),
-  warehouse: z.string().min(1, 'Warehouse is required'),
-  product: z.any().optional()
-});
-
-const formSchema = z.object({
-  customer_name: z.string().min(1, 'Customer name is required'),
-  customer_number: z.string().optional(),
-  customer_address: z.string().optional(),
-  invoice_items: z.array(invoiceItemSchema).min(1),
-  payment: z.boolean().default(false),
-  reference: z.string().optional()
-});
-
 export default function InvoiceForm({
   initialData,
-  pageTitle
+  pageTitle,
+  references
 }: {
   initialData: Invoice | null;
   pageTitle: string;
+  references: Reference[] | null;
 }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  const invoiceItemSchema = z.object({
+    product_code: z.string().min(1, {
+      message: 'Product code is required'
+    }),
+    quantity: z.coerce.number().min(1),
+    boxes: z.coerce.number().optional(),
+    price: z.coerce.number().min(1),
+    warehouse: z.string().min(1, 'Warehouse is required'),
+    product: z.any().optional()
+  });
+
+  const formSchema = z.object({
+    customer_name: z.string().min(1, 'Customer name is required'),
+    customer_number: z.string().optional(),
+    customer_address: z.string().optional(),
+    invoice_items: z.array(invoiceItemSchema).min(1),
+    payment: z.boolean().default(false),
+    reference: z.string().optional()
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -559,13 +561,13 @@ export default function InvoiceForm({
                         <SelectContent className='max-h-60 overflow-y-auto'>
                           <SelectItem value='null'>None</SelectItem>
                           <SelectGroup>
-                            {references.map((reference) => (
+                            {references?.map((reference) => (
                               <SelectItem
-                                key={reference}
-                                value={reference}
+                                key={reference.id}
+                                value={String(reference.id)}
                                 className='cursor-pointer'
                               >
-                                {reference}
+                                {reference.name}
                               </SelectItem>
                             ))}
                           </SelectGroup>

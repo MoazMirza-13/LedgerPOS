@@ -144,7 +144,11 @@ export const useColumns = <T extends Entity>(
           <span>{formatToPKTDate(row.getValue('created_at'))}</span>
         )
       },
-      { accessorKey: 'reference', header: 'REFERENCE' },
+      {
+        header: 'REFERENCE',
+        accessorFn: (row) =>
+          'references' in row ? row.references?.name || '' : ''
+      },
       { accessorKey: 'total_price', header: 'TOTAL' },
       {
         accessorKey: 'payment',
