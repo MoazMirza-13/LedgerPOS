@@ -34,7 +34,6 @@ import { Invoice, Reference } from 'types';
 import { toast } from 'sonner';
 import { toastMsg } from '@/utils/utils';
 import { useRouter } from 'next/navigation';
-import { Switch } from '@/components/ui/switch';
 import { printInvoice } from './print-invoice';
 
 export default function InvoiceForm({
@@ -65,7 +64,6 @@ export default function InvoiceForm({
     customer_number: z.string().optional(),
     customer_address: z.string().optional(),
     invoice_items: z.array(invoiceItemSchema).min(1),
-    payment: z.boolean().default(false),
     reference: z.string().optional()
   });
 
@@ -75,7 +73,6 @@ export default function InvoiceForm({
       customer_name: initialData?.customer_name || '',
       customer_number: initialData?.customer_number || '',
       customer_address: initialData?.customer_address || '',
-      payment: initialData?.payment || false,
       reference: initialData?.reference || '',
       invoice_items: initialData?.invoice_items || []
     }
@@ -577,30 +574,6 @@ export default function InvoiceForm({
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name='payment'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Status</FormLabel>
-                    <div className='flex items-center gap-3'>
-                      <span className='text-2xl'>
-                        {field.value ? '✅' : '❌'}
-                      </span>
-                      <Switch
-                        id='payment'
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className='data-[state=checked]:bg-green-600'
-                      />
-                      <span className='text-sm text-gray-400'>
-                        {field.value ? 'Received' : 'Pending'}
-                      </span>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             {/* Buttons */}

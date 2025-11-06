@@ -75,7 +75,6 @@ export type Invoice = {
   total_price: number;
   invoice_items: Invoice_items[];
   created_at?: string;
-  payment: boolean;
   reference?: string;
   invoice_number?: number;
   references?: Reference;

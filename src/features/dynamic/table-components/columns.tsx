@@ -149,15 +149,7 @@ export const useColumns = <T extends Entity>(
         accessorFn: (row) =>
           'references' in row ? row.references?.name || '' : ''
       },
-      { accessorKey: 'total_price', header: 'TOTAL' },
-      {
-        accessorKey: 'payment',
-        header: 'PAYMENT',
-        cell: ({ row }) => {
-          const invoice = row.original as Invoice;
-          return invoice.payment ? '✅' : '❌';
-        }
-      }
+      { accessorKey: 'total_price', header: 'TOTAL' }
     );
   }
 

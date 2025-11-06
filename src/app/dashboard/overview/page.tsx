@@ -1,5 +1,4 @@
 import { LowStockProducts } from '@/features/overview/low-stock-products';
-import { UnpaidInvoices } from '@/features/overview/unpaid_invoices';
 import PageContainer from '@/components/layout/page-container';
 
 export default function Page() {
@@ -13,13 +12,12 @@ export default function Page() {
                 Dashboard
               </h1>
               <p className='text-muted-foreground'>
-                Monitor low-stock products and unpaid invoices
+                Monitor low-stock products
               </p>
             </div>
 
-            <div className='mx-auto grid grid-cols-1 gap-8 lg:grid-cols-2'>
+            <div className='mx-auto grid grid-cols-1 gap-8 lg:grid-cols-1'>
               <LowStockProducts />
-              <UnpaidInvoices />
             </div>
           </div>
         </main>
