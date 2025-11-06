@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { queryClientConfig } from '@/lib/tanStack-action';
 import InvoiceForm from '../invoices/invoice-form';
+import ReferenceForm from '../references/reference-form';
 
 type ViewPage = {
   type: itemTable;
@@ -23,23 +24,41 @@ export default async function ViewPage({ type, id }: ViewPage) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {type === 'categories' || type === 'brands' ? (
-        <DynamicForm
-          type={type}
-          initialData={data as Category | Brand}
-          pageTitle={pageTitle}
-        />
-      ) : type === 'invoices' ? (
-        <InvoiceForm initialData={data as Invoice} pageTitle={pageTitle} />
-      ) : (
-        <ProductForm
-          newProduct={newProduct}
-          categories={categories}
-          brands={brands}
-          initialData={data as Product}
-          pageTitle={pageTitle}
-        />
-      )}
+      {(() => {
+        switch (type) {
+          case 'categories':
+          case 'brands':
+            return (
+              <DynamicForm
+                type={type}
+                initialData={data as Category | Brand}
+                pageTitle={pageTitle}
+              />
+            );
+
+          case 'invoices':
+            return (
+              <InvoiceForm
+                initialData={data as Invoice}
+                pageTitle={pageTitle}
+              />
+            );
+
+          case 'references':
+            return <ReferenceForm pageTitle={pageTitle} />;
+
+          case 'products':
+            return (
+              <ProductForm
+                newProduct={newProduct}
+                categories={categories}
+                brands={brands}
+                initialData={data as Product}
+                pageTitle={pageTitle}
+              />
+            );
+        }
+      })()}
     </HydrationBoundary>
   );
 }

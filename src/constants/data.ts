@@ -48,6 +48,15 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'References',
+    url: '/dashboard/references',
+    icon: 'user',
+    shortcut: ['g', 'r'],
+    isActive: false,
+    group: 'Billing',
+    items: [] // No child items
+  },
+  {
     title: 'Reference Bills',
     url: '/dashboard/reference-bills',
     icon: 'referenceBills',

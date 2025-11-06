@@ -12,7 +12,7 @@ import { deleteContent } from '@/lib/actions';
 import { toastMsg } from '@/utils/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { itemData } from 'types';
@@ -28,8 +28,12 @@ export const CellAction: React.FC<CellActionProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+
   const router = useRouter();
   const queryClient = useQueryClient();
+  const pathname = usePathname();
+
+  const referenceRoute = pathname.includes('/references');
 
   const onConfirm = async () => {
     const error = await deleteContent(itemTable, itemData);
@@ -60,14 +64,15 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-          <DropdownMenuItem
-            onClick={() =>
-              router.push(`/dashboard/${itemTable}/${itemData.id}`)
-            }
-          >
-            <Edit className='mr-2 h-4 w-4' /> Edit
-          </DropdownMenuItem>
+          {!referenceRoute && (
+            <DropdownMenuItem
+              onClick={() =>
+                router.push(`/dashboard/${itemTable}/${itemData.id}`)
+              }
+            >
+              <Edit className='mr-2 h-4 w-4' /> Edit
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className='mr-2 h-4 w-4' /> Delete
           </DropdownMenuItem>

@@ -31,6 +31,7 @@ export function formatBytes(
 }
 
 export const toastMsg = {
+  //todo refactor
   newProduct: 'New product has been added',
   updateProduct: 'Product has been updated',
   dynamicNew: (type: string) => `New ${type} has been added`,
@@ -40,7 +41,8 @@ export const toastMsg = {
   signIn: 'Signed In Successfully!',
   deleteItem: 'Item has been deleted',
   newInvoice: 'New Invoice has been added',
-  updateInvoice: 'Invoice has been updated'
+  updateInvoice: 'Invoice has been updated',
+  newReference: 'New Reference has been added'
 };
 
 export const getImageUrl = async (img: string) => {
@@ -89,6 +91,9 @@ export const formatTitle = (text: string, type: itemTable) => {
       break;
     case 'invoices':
       formattedType = 'Invoice';
+      break;
+    case 'references':
+      formattedType = 'Reference';
   }
 
   return `${text} ${formattedType}`;

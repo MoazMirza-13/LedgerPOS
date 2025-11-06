@@ -157,6 +157,22 @@ export const useColumns = <T extends Entity>(
     );
   }
 
+  if (type === 'references') {
+    baseColumns.push(
+      {
+        accessorKey: 'name',
+        header: 'REFERENCE NAME',
+        cell: ({ row }) => (
+          //todo link to reference ledger
+          <Link href={`/dashboard/${type}/will-check`}>
+            {row.getValue('name')}
+          </Link>
+        )
+      },
+      { accessorKey: 'balance', header: 'BALANCE' }
+    );
+  }
+
   if (type === 'invoices' && reference_bills_path) {
     return [
       {

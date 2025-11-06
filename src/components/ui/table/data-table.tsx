@@ -34,7 +34,6 @@ export function DataTable<TData, TValue>({
 
   const pathname = usePathname();
   const productsRoute = pathname.includes('/products');
-  const referenceRoute = pathname.includes('/reference');
 
   const currentRole = useRole();
 
@@ -73,8 +72,7 @@ export function DataTable<TData, TValue>({
                           className={
                             index === cells.length - 1 &&
                             !productsRoute &&
-                            currentRole === 'super_admin' &&
-                            !referenceRoute
+                            currentRole === 'super_admin'
                               ? 'pr-8 text-right'
                               : ''
                           }

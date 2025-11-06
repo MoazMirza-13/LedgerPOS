@@ -89,15 +89,32 @@ export type Invoice_items = {
   warehouse: string;
 };
 
+export type Reference = {
+  name: string;
+  balance: number;
+  id?: string;
+};
+
 export type Reference_bills = {
   reference: string;
   total_price: number;
   id?: string;
 };
 
-export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';
+export type itemTable =
+  | 'categories'
+  | 'products'
+  | 'brands'
+  | 'invoices'
+  | 'references';
 
-export type itemData = Product | Category | Brand | Invoice | Reference_bills;
+export type itemData =
+  | Product
+  | Category
+  | Brand
+  | Invoice
+  | Reference
+  | Reference_bills;
 
 export type nestedArray = {
   products: Product[];

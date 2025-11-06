@@ -11,7 +11,8 @@ import {
   Invoice,
   Invoice_items,
   itemData,
-  Product
+  Product,
+  Reference
 } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -293,3 +294,19 @@ export const getMaxInvoiceNumber = async () => {
     return maxInvoiceNumber;
   }
 };
+
+export async function ReferenceSubmit(values: Reference) {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from('references')
+      .insert([{ name: values.name, balance: values.balance }])
+      .select();
+    if (error) throw error;
+    revalidatePath(`/dashboard/references`);
+    return { successNew: true };
+  } catch (error: any) {
+    return { error };
+  }
+}

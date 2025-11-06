@@ -1,13 +1,26 @@
 import { createClient } from '@/utils/supabase/server';
 import { formatToPKTDate, getImageUrl } from '@/utils/utils';
-import { itemTable, itemData, Product, Category, Brand, Invoice } from 'types';
+import {
+  itemTable,
+  itemData,
+  Product,
+  Category,
+  Brand,
+  Invoice,
+  Reference
+} from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 
 export async function fetchListingData(type: itemTable) {
   const supabase = await createClient();
   let data;
 
-  if (type === 'categories' || type === 'brands' || type === 'invoices') {
+  if (
+    type === 'categories' ||
+    type === 'brands' ||
+    type === 'invoices' ||
+    type === 'references'
+  ) {
     const { data: fetchedData, error } = await supabase.from(type).select('*');
     data = fetchedData;
   } else if (type === 'products') {
@@ -103,6 +116,9 @@ export function filterListingData(
       } else if (type === 'invoices') {
         const invoice = item as Invoice;
         value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${invoice.created_at ? formatToPKTDate(invoice.created_at) : ''}`;
+      } else if (type === 'references') {
+        const reference = item as Reference;
+        value = `{${reference.name ?? ''}`;
       } else {
         const entry = item as Category | Brand;
         value = entry.title ?? '';
