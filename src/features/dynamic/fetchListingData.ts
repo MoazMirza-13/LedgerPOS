@@ -61,10 +61,14 @@ export async function fetchListingData(type: itemTable, id?: string) {
   }
 
   const sortedData = Array.isArray(data)
-    ? data.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
+    ? data.sort((a, b) => {
+        const aTime = new Date(a.created_at).getTime();
+        const bTime = new Date(b.created_at).getTime();
+
+        // if type is references_ledger => ascending (a - b)
+        // otherwise => descending (b - a)
+        return type === 'references_ledger' ? aTime - bTime : bTime - aTime;
+      })
     : data;
 
   return sortedData;

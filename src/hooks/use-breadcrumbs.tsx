@@ -80,7 +80,7 @@ export function useBreadcrumbs() {
         const dynamicTitle =
           dynamicData?.title ||
           dynamicData?.product_code ||
-          dynamicData?.customer_name ||
+          dynamicData?.invoice_number ||
           dynamicData?.name ||
           '';
         return {

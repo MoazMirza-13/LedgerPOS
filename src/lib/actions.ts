@@ -240,7 +240,6 @@ export const invoiceSubmit = async (
           customer_number: values.customer_number,
           customer_address: values.customer_address,
           total_price: values.total_price,
-          reference: values.reference,
           invoice_number: values.invoice_number,
           items: values.invoice_items.map((item: Invoice_items) => ({
             product_code: item.product_code,
@@ -249,7 +248,8 @@ export const invoiceSubmit = async (
             boxes: item.boxes,
             price: item.price,
             warehouse: item.warehouse
-          }))
+          })),
+          ...(values.reference !== '' ? { reference: values.reference } : {})
         }
       );
       if (error) throw error;
@@ -262,8 +262,7 @@ export const invoiceSubmit = async (
           {
             customer_name: values.customer_name,
             customer_number: values.customer_number,
-            customer_address: values.customer_address,
-            reference: values.reference
+            customer_address: values.customer_address
           }
         ])
         .eq('id', initialData.id)

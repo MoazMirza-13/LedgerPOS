@@ -50,7 +50,6 @@ export async function printInvoice(finalData: Invoice) {
           <thead>
             <tr class="bg-teal-50 border-b-2 border-teal-500">
               <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Product</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Box</th>
               <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Piece</th>
               <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Total Quantity</th>
               <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Warehouse</th>
@@ -64,7 +63,6 @@ export async function printInvoice(finalData: Invoice) {
                 (item: any) => `
                 <tr class="border-b border-slate-200 hover:bg-slate-50">
                   <td class="px-4 py-3 text-sm font-medium text-slate-900">${item.product_code}</td>
-                  <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.boxes}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.quantity}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">
                   ${(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -45,6 +45,7 @@ export default function InvoiceForm({
   pageTitle: string;
   references: Reference[] | null;
 }) {
+  const [productsLoaded, setProductsLoaded] = useState(!initialData);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -96,7 +97,7 @@ export default function InvoiceForm({
       const duplicates: { code: string; warehouse: string }[] = [];
 
       for (const item of values.invoice_items) {
-        if (item.price < item.product?.selling_price) {
+        if (item.price < item.product?.cost_price) {
           toast.error(toastMsg.error);
           return;
         }
@@ -161,6 +162,24 @@ export default function InvoiceForm({
     form.setValue(`invoice_items.${index}.price`, product.selling_price);
     form.setValue(`invoice_items.${index}.product`, product);
   };
+
+  useEffect(() => {
+    const loadProductsForInitialData = async () => {
+      if (initialData && initialData.invoice_items) {
+        for (let i = 0; i < initialData.invoice_items.length; i++) {
+          const product = await getProductByCode(
+            initialData.invoice_items[i].product_code
+          );
+          if (product) {
+            form.setValue(`invoice_items.${i}.product`, product);
+          }
+        }
+      }
+      setProductsLoaded(true);
+    };
+
+    if (initialData) loadProductsForInitialData();
+  }, [form, initialData]);
 
   return (
     <Card className='mx-auto w-full'>
@@ -364,6 +383,11 @@ export default function InvoiceForm({
                                       totalPieces / itemsPerBox
                                     );
                                     const pieces = totalPieces % itemsPerBox;
+                                    if (
+                                      !productsLoaded &&
+                                      !items[index].product
+                                    )
+                                      return '';
                                     if (!totalPieces) return '';
                                     return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
                                       boxes && pieces ? ' and ' : ''
@@ -427,9 +451,11 @@ export default function InvoiceForm({
                                                 className='flex cursor-pointer justify-between'
                                               >
                                                 <span>{warehouse.label} </span>
-                                                <span className='text-sm text-muted-foreground'>
-                                                  ({qty})
-                                                </span>
+                                                {!initialData && (
+                                                  <span className='text-sm text-muted-foreground'>
+                                                    ({qty})
+                                                  </span>
+                                                )}
                                               </SelectItem>
                                             );
                                           })}
@@ -549,6 +575,7 @@ export default function InvoiceForm({
                           field.onChange(value === 'null' ? '' : value)
                         }
                         value={field.value ? String(field.value) : ''}
+                        disabled={!!initialData}
                       >
                         <FormControl>
                           <SelectTrigger>
