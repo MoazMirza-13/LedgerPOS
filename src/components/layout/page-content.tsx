@@ -19,7 +19,6 @@ interface PageContentProps {
   newLink?: string;
   searchParams?: any;
   pageKey?: string | number;
-  reference_bills?: boolean | string;
   extraTableProps?: Record<string, any>;
 }
 
@@ -31,7 +30,6 @@ export const PageContent: React.FC<PageContentProps> = ({
   itemsData,
   searchParams,
   pageKey,
-  reference_bills = false,
   extraTableProps
 }) => {
   return (
@@ -55,12 +53,7 @@ export const PageContent: React.FC<PageContentProps> = ({
         key={pageKey}
         fallback={<DataTableSkeleton columnCount={5} rowCount={10} />}
       >
-        <ListingPage
-          type={type}
-          data={itemsData}
-          searchParams={searchParams}
-          reference_bills={reference_bills}
-        />
+        <ListingPage type={type} data={itemsData} searchParams={searchParams} />
       </Suspense>
     </div>
   );

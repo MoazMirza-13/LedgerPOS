@@ -63,47 +63,7 @@ export async function fetchListingData(type: itemTable) {
   return sortedData;
 }
 
-export function filterListingData(
-  data: itemData[],
-  type: string,
-  reference_bills: boolean | string
-) {
-  // if (reference_bills === true) {
-  //   const invoices = data.filter((i): i is Invoice => 'payment' in i);
-
-  //   const filtered = invoices.filter(
-  //     (i) => !i.payment && i.reference && i.reference.trim() !== ''
-  //   );
-
-  //   const grouped = filtered.reduce(
-  //     (acc, inv) => {
-  //       const key = inv.reference as string;
-  //       acc[key] = (acc[key] || 0) + inv.total_price;
-  //       return acc;
-  //     },
-  //     {} as Record<string, number>
-  //   );
-
-  //   const finalData = Object.entries(grouped).map(([reference, total]) => ({
-  //     reference,
-  //     total_price: total
-  //   }));
-
-  //   return { filteredData: finalData };
-  // } else if (typeof reference_bills === 'string') {
-  //   const invoices = data.filter((i): i is Invoice => 'payment' in i);
-
-  //   const filteredData = invoices.filter(
-  //     (i) =>
-  //       !i.payment &&
-  //       i.reference &&
-  //       i.reference.trim() !== '' &&
-  //       i.reference.trim().toLowerCase() ===
-  //         reference_bills.trim().toLowerCase()
-  //   );
-
-  //   return { filteredData };
-  // } else {
+export function filterListingData(data: itemData[], type: string) {
   // Showcasing the use of search params cache in nested RSCs
   const search = searchParamsCache.get('q');
   const categories = searchParamsCache.get('categories')?.split('.') || []; // separate them using "." if multiple
@@ -139,5 +99,4 @@ export function filterListingData(
     return matchesSearch && matchesCategoryBrand;
   });
   return { filteredData };
-  // }
 }

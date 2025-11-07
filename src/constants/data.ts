@@ -55,15 +55,6 @@ export const navItems: NavItem[] = [
     isActive: false,
     group: 'Billing',
     items: [] // No child items
-  },
-  {
-    title: 'Reference Bills',
-    url: '/dashboard/reference-bills',
-    icon: 'referenceBills',
-    shortcut: ['g', 'rb'],
-    isActive: false,
-    group: 'Billing',
-    items: [] // No child items
   }
 ];
 

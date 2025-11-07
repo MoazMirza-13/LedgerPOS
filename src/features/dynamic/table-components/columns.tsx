@@ -2,26 +2,19 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { Invoice, itemData, itemTable, Product, Reference_bills } from 'types';
+import { itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
-import { usePathname } from 'next/navigation';
 
 type Entity = itemData;
 
 export const useColumns = <T extends Entity>(
   type: itemTable
 ): ColumnDef<T>[] => {
-  const pathname = usePathname();
   const currentRole = useRole();
 
   const baseColumns: ColumnDef<T>[] = [];
-
-  const reference_bills_path = pathname === '/dashboard/reference-bills';
-  const reference_detail_path =
-    pathname.startsWith('/dashboard/reference-bills/') &&
-    pathname !== '/dashboard/reference-bills';
 
   if (type === 'categories' || type === 'brands') {
     baseColumns.push(
@@ -123,7 +116,7 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (type === 'invoices' && (reference_detail_path || !reference_bills_path)) {
+  if (type === 'invoices') {
     baseColumns.push(
       { accessorKey: 'invoice_number', header: '#' },
       {
@@ -169,28 +162,7 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (type === 'invoices' && reference_bills_path) {
-    return [
-      {
-        accessorKey: 'reference',
-        header: 'REFERENCE NAME',
-        cell: ({ row }) => {
-          const invoiceRow = row.original as Reference_bills;
-          return (
-            <Link href={`/dashboard/reference-bills/${invoiceRow.reference}`}>
-              {invoiceRow.reference}
-            </Link>
-          );
-        }
-      },
-      {
-        header: 'TOTAL',
-        accessorFn: (row) => (row as Reference_bills).total_price
-      }
-    ];
-  }
-
-  if (currentRole === 'super_admin' && !reference_bills_path) {
+  if (currentRole === 'super_admin') {
     baseColumns.push({
       id: 'actions',
       cell: ({ row }) => <CellAction itemTable={type} itemData={row.original} />
