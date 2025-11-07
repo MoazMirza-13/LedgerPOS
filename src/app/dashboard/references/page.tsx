@@ -27,7 +27,7 @@ export default async function Page(props: pageProps) {
     <PageContainer scrollable={false}>
       <PageContent
         title='References'
-        description='Manage references'
+        description='Click on Reference name to open their Ledger'
         type='references'
         newLink='/dashboard/references/new'
         itemsData={items_data}

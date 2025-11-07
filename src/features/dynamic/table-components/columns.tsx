@@ -152,12 +152,29 @@ export const useColumns = <T extends Entity>(
         accessorKey: 'name',
         header: 'REFERENCE NAME',
         cell: ({ row }) => (
-          //todo link to reference ledger
-          <Link href={`/dashboard/${type}/will-check`}>
+          <Link href={`/dashboard/${type}/${row.original.id}`}>
             {row.getValue('name')}
           </Link>
         )
       },
+      { accessorKey: 'balance', header: 'BALANCE' }
+    );
+  }
+
+  if (type === 'references_ledger') {
+    baseColumns.push(
+      {
+        accessorKey: 'created_at',
+        header: 'DATE',
+        cell: ({ row }) => (
+          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
+        )
+      },
+      { accessorKey: 'name', header: 'NAME' },
+      { accessorKey: 'invoice_number', header: 'INVOICE #' },
+      { accessorKey: 'description', header: 'DESCRIPTION' },
+      { accessorKey: 'dr', header: 'DR' },
+      { accessorKey: 'cr', header: 'CR' },
       { accessorKey: 'balance', header: 'BALANCE' }
     );
   }

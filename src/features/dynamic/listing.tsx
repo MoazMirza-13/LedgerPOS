@@ -17,12 +17,17 @@ export default async function ListingPage({
 }: ListingPageProps) {
   // const updated = searchParams.updated === 'true';
 
-  const { filteredData } = filterListingData(data, type);
+  let tableData = data;
+
+  if (type !== 'references_ledger') {
+    const { filteredData } = filterListingData(data, type);
+    tableData = filteredData;
+  }
 
   return (
     <>
       {/* {updated && <RefetchKBar />} */}
-      <TableClientSide type={type} data={filteredData} />
+      <TableClientSide type={type} data={tableData} />
     </>
   );
 }

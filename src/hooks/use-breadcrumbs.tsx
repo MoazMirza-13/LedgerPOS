@@ -26,6 +26,10 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard/invoices': [
     { title: 'Dashboard', link: '/dashboard' },
     { title: 'Invoices', link: '/dashboard/invoices' }
+  ],
+  '/dashboard/references': [
+    { title: 'Dashboard', link: '/dashboard' },
+    { title: 'References', link: '/dashboard/references' }
   ]
 };
 
@@ -41,7 +45,13 @@ export function useBreadcrumbs() {
 
   // Memoized values to prevent unnecessary recalculations
   const { type, id, isDynamicRoute } = useMemo(() => {
-    const types = ['brands', 'products', 'categories', 'invoices'];
+    const types = [
+      'brands',
+      'products',
+      'categories',
+      'invoices',
+      'references'
+    ];
     const lastSegment = segments[segments.length - 1] || '';
     const type = types.find((t) => pathname.includes(`/${t}/`)) || '';
     const checkId = checkUUID(lastSegment);
@@ -71,6 +81,7 @@ export function useBreadcrumbs() {
           dynamicData?.title ||
           dynamicData?.product_code ||
           dynamicData?.customer_name ||
+          dynamicData?.name ||
           '';
         return {
           title: !isLoading && dynamicTitle,

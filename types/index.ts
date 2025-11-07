@@ -95,14 +95,31 @@ export type Reference = {
   id?: string;
 };
 
+export type References_ledger = {
+  id: string;
+  name: string;
+  invoice_number: number;
+  description: string;
+  dr: number;
+  cr: number;
+  balance: number;
+};
+
 export type itemTable =
   | 'categories'
   | 'products'
   | 'brands'
   | 'invoices'
-  | 'references';
+  | 'references'
+  | 'references_ledger';
 
-export type itemData = Product | Category | Brand | Invoice | Reference;
+export type itemData =
+  | Product
+  | Category
+  | Brand
+  | Invoice
+  | Reference
+  | References_ledger;
 
 export type nestedArray = {
   products: Product[];

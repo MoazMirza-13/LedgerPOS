@@ -11,7 +11,7 @@ import {
 } from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 
-export async function fetchListingData(type: itemTable) {
+export async function fetchListingData(type: itemTable, id?: string) {
   const supabase = await createClient();
   let data;
 
@@ -51,6 +51,13 @@ export async function fetchListingData(type: itemTable) {
       `);
 
     data = invoicesData;
+  } else if (type === 'references_ledger' && id) {
+    const { data: referencesLedgerData, error } = await supabase
+      .from(type)
+      .select('*')
+      .eq('reference_id', id);
+
+    data = referencesLedgerData;
   }
 
   const sortedData = Array.isArray(data)
