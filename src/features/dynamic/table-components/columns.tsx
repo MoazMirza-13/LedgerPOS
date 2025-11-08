@@ -122,6 +122,13 @@ export const useColumns = <T extends Entity>(
 
   if (type === 'invoices') {
     baseColumns.push(
+      {
+        accessorKey: 'created_at',
+        header: 'DATE',
+        cell: ({ row }) => (
+          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
+        )
+      },
       { accessorKey: 'invoice_number', header: '#' },
       {
         accessorKey: 'customer_name',
@@ -134,13 +141,6 @@ export const useColumns = <T extends Entity>(
       },
       { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
       { accessorKey: 'customer_address', header: 'CUSTOMER ADDRESS' },
-      {
-        accessorKey: 'created_at',
-        header: 'DATE',
-        cell: ({ row }) => (
-          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
-        )
-      },
       {
         header: 'REFERENCE',
         accessorFn: (row) =>

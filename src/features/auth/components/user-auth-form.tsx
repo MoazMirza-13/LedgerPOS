@@ -37,6 +37,7 @@ export default function UserAuthForm() {
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { isDirty } = form.formState;
 
   const handleSignIn = async (credentials: UserFormValue) => {
     const res = await signIn(credentials);
@@ -94,7 +95,11 @@ export default function UserAuthForm() {
             </FormItem>
           )}
         />
-        <Button disabled={isPending} className='w-full' type='submit'>
+        <Button
+          disabled={isPending || !isDirty}
+          className='w-full'
+          type='submit'
+        >
           {isPending ? (
             <div className='flex gap-2'>
               Signing in <LoaderCircle className='h-5 w-5 animate-spin' />
