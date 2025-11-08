@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
-import { itemTable } from 'types';
+import { itemData, itemTable } from 'types';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getSupabaseClient } from '@/lib/actions';
 
@@ -120,4 +120,24 @@ export function formatToPKTDate(utcDate: string | Date): string {
   } catch {
     return '';
   }
+}
+
+export function filterWithDate(
+  data: itemData[],
+  from: Date,
+  to: Date
+): itemData[] {
+  const start = new Date(from);
+  const end = new Date(to);
+
+  // normalize times for comparison
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  return data.filter(
+    (item) =>
+      item.created_at &&
+      new Date(item.created_at) >= start &&
+      new Date(item.created_at) <= end
+  );
 }

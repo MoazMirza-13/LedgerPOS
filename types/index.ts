@@ -74,7 +74,7 @@ export type Invoice = {
   customer_number?: string; // phone numbers can include "+92" etc
   total_price: number;
   invoice_items: Invoice_items[];
-  created_at?: string;
+  created_at: string;
   reference?: string;
   invoice_number?: number;
   references?: Reference;
@@ -93,6 +93,7 @@ export type Reference = {
   name: string;
   balance: number;
   id?: string;
+  created_at?: string;
 };
 
 export type References_ledger = {
@@ -104,6 +105,7 @@ export type References_ledger = {
   cr: number;
   balance?: number;
   reference_id: string;
+  created_at: string;
 };
 
 export type itemTable =

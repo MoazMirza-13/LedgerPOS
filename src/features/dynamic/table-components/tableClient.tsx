@@ -1,8 +1,12 @@
 'use client';
 
+import { useState, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { DataTable } from '@/components/ui/table/data-table';
 import { useColumns } from '@/features/dynamic/table-components/columns';
 import { itemData, itemTable } from 'types';
+import { filterWithDate } from '@/utils/utils';
 
 interface TableClientProps {
   data: itemData[];
@@ -10,5 +14,48 @@ interface TableClientProps {
 }
 
 export default function TableClientSide({ data, type }: TableClientProps) {
-  return <DataTable columns={useColumns(type)} data={data} />;
+  const pathname = usePathname();
+  const today = new Date().toISOString().split('T')[0];
+
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+    from: new Date(today),
+    to: new Date(today)
+  });
+
+  const tableData = useMemo(() => {
+    if (!pathname?.includes('/references/')) {
+      return data;
+    }
+
+    //  only filter on ledger screens
+    else {
+      const filteredData = filterWithDate(data, dateRange.from, dateRange.to);
+      return filteredData;
+    }
+  }, [data, dateRange, pathname]);
+
+  return (
+    <>
+      {pathname?.includes('/references/') && (
+        <div className='flex justify-center'>
+          <DateRangePicker
+            onUpdate={(values) => {
+              if (!values.range.from || !values.range.to) return;
+              setDateRange({
+                from: new Date(values.range.from),
+                to: new Date(values.range.to)
+              });
+            }}
+            initialDateFrom={today}
+            initialDateTo={today}
+            align='center'
+            locale='en-PK'
+            showCompare={false}
+          />
+        </div>
+      )}
+
+      <DataTable columns={useColumns(type)} data={tableData} />
+    </>
+  );
 }
