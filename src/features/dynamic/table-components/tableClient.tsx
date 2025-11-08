@@ -15,7 +15,11 @@ interface TableClientProps {
 
 export default function TableClientSide({ data, type }: TableClientProps) {
   const pathname = usePathname();
-  const today = new Date().toISOString().split('T')[0];
+
+  // don't use the date util here
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'Asia/Karachi'
+  });
 
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(today),

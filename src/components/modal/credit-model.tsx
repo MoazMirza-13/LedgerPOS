@@ -5,7 +5,7 @@ import type React from 'react';
 import { useState, useTransition } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus } from 'lucide-react';
+import { LoaderCircle, Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -55,6 +55,13 @@ export const CreditModal: React.FC<CreditModalProps> = ({ referenceData }) => {
         if (res?.success) {
           toast.success(toastMsg.addCredit);
           setOpen(false);
+          setFormData({
+            // do it before refresh
+            cr: null,
+            name: referenceData.name,
+            reference_id: referenceData.id,
+            description: ''
+          });
           router.refresh();
         } else {
           toast.error(toastMsg.error);
@@ -127,7 +134,14 @@ export const CreditModal: React.FC<CreditModalProps> = ({ referenceData }) => {
             onClick={handleSubmit}
             disabled={!isFormValid || isPending}
           >
-            {isPending ? 'Adding' : 'Add Credit'}
+            {isPending ? (
+              <div className='flex gap-2'>
+                Adding
+                <LoaderCircle className='h-5 w-5 animate-spin' />
+              </div>
+            ) : (
+              'Add Credit'
+            )}
           </Button>
         </div>
       </DialogContent>
