@@ -386,11 +386,7 @@ export default function InvoiceForm({
                                       totalPieces / itemsPerBox
                                     );
                                     const pieces = totalPieces % itemsPerBox;
-                                    if (
-                                      !productsLoaded &&
-                                      !items[index].product
-                                    )
-                                      return '';
+                                    if (!items[index].product) return '';
                                     if (!totalPieces) return '';
                                     return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
                                       boxes && pieces ? ' and ' : ''
@@ -607,7 +603,7 @@ export default function InvoiceForm({
             </div>
 
             {/* Buttons */}
-            <div className='pt-4'>
+            <div className='flex gap-4 pt-4'>
               <Button
                 type='submit'
                 disabled={!form.formState.isValid || isPending || !isDirty}
@@ -624,6 +620,23 @@ export default function InvoiceForm({
                   'Add Invoice'
                 )}
               </Button>
+              {initialData && (
+                <Button
+                  type='button'
+                  variant='outline'
+                  disabled={!productsLoaded}
+                  onClick={() => {
+                    const values = form.getValues();
+                    const printableInvoice = {
+                      ...initialData,
+                      invoice_items: values.invoice_items
+                    };
+                    printInvoice(printableInvoice, initialData.created_at);
+                  }}
+                >
+                  Print Invoice
+                </Button>
+              )}
             </div>
           </form>
         </Form>

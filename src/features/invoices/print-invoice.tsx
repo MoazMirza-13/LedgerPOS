@@ -4,8 +4,13 @@ import html2canvas from 'html2canvas';
 import { Invoice } from 'types';
 import { formatToPKTDate } from '@/utils/utils';
 
-export async function printInvoice(finalData: Invoice) {
-  const currentDate = formatToPKTDate(new Date());
+export async function printInvoice(finalData: Invoice, date?: string) {
+  let invoiceDate = '';
+  if (date) {
+    invoiceDate = formatToPKTDate(date);
+  } else {
+    invoiceDate = formatToPKTDate(new Date());
+  }
 
   const container = document.createElement('div');
   container.className = 'w-full max-w-4xl mx-auto bg-white text-[12px]';
@@ -29,7 +34,7 @@ export async function printInvoice(finalData: Invoice) {
           </div>
           <div class="text-right">
             <p class="text-teal-300 text-xs font-semibold tracking-widest">INVOICE# ${finalData.invoice_number}</p>
-            <p class="text-slate-400 text-sm mt-2">${currentDate}</p>
+            <p class="text-slate-400 text-sm mt-2">${invoiceDate}</p>
           </div>
         </div>
       </div>
@@ -103,7 +108,7 @@ export async function printInvoice(finalData: Invoice) {
     <div class="bg-slate-900 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
       <p class="text-sm font-medium m-0">Thank you for your business!</p>
       <p class="text-xs text-slate-400 m-0 mt-2">Kashmir Tiles | Contact: 03030550072</p>
-      <p class="text-xs text-slate-500 m-0 mt-3">Invoice generated on ${currentDate}</p>
+      <p class="text-xs text-slate-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
     </div>
 
   </div>
