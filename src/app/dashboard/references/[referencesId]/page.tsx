@@ -3,6 +3,7 @@ import PageContainer from '@/components/layout/page-container';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
 import { References_ledger } from 'types';
 import { PageContent } from '@/components/layout/page-content';
+import { getDataById } from '@/lib/actions';
 
 export const metadata = {
   title: 'Dashboard: References Ledger'
@@ -12,6 +13,8 @@ type PageProps = { params: Promise<{ referencesId: string }> };
 
 export default async function Page(props: PageProps) {
   const params = await props.params;
+
+  const referenceData = await getDataById('references', params.referencesId);
 
   const data = await fetchListingData('references_ledger', params.referencesId);
   const items_data: References_ledger[] = data ? data : [];
@@ -23,6 +26,7 @@ export default async function Page(props: PageProps) {
         description={`${items_data[0]?.name ? `Manage Ledger` : `Add new entries to view the Ledger`}`}
         type='references_ledger'
         itemsData={items_data}
+        referenceData={referenceData}
       />
     </PageContainer>
   );

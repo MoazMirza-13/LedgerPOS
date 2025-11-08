@@ -46,8 +46,17 @@ export function DataTable<TData, TValue>({
               <TableHeader className={`sticky top-0 z-10 bg-background`}>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
+                    {headerGroup.headers.map((header, index, headers) => (
+                      <TableHead
+                        key={header.id}
+                        className={
+                          index === headers.length - 1 &&
+                          !productsRoute &&
+                          currentRole === 'super_admin'
+                            ? 'pr-8 text-right'
+                            : ''
+                        }
+                      >
                         {header.isPlaceholder
                           ? null
                           : flexRender(

@@ -12,7 +12,8 @@ import {
   Invoice_items,
   itemData,
   Product,
-  Reference
+  Reference,
+  References_ledger
 } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -306,4 +307,15 @@ export async function ReferenceSubmit(values: Reference) {
   } catch (error: any) {
     return { error };
   }
+}
+
+export async function addCredit(values: References_ledger) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('handle_cr_amount_reference_ledger', {
+    p_reference_id: values.reference_id,
+    p_name: values.name,
+    p_description: values.description,
+    p_credit: values.cr
+  });
+  if (!error) return { success: true };
 }

@@ -6,6 +6,7 @@ import { itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
+import { usePathname } from 'next/navigation';
 
 type Entity = itemData;
 
@@ -13,6 +14,9 @@ export const useColumns = <T extends Entity>(
   type: itemTable
 ): ColumnDef<T>[] => {
   const currentRole = useRole();
+  const pathname = usePathname();
+
+  const referenceSubRoute = pathname.includes('/references/');
 
   const baseColumns: ColumnDef<T>[] = [];
 
@@ -179,7 +183,7 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (currentRole === 'super_admin') {
+  if (currentRole === 'super_admin' && !referenceSubRoute) {
     baseColumns.push({
       id: 'actions',
       cell: ({ row }) => <CellAction itemTable={type} itemData={row.original} />

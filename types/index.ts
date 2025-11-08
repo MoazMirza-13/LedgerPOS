@@ -96,13 +96,14 @@ export type Reference = {
 };
 
 export type References_ledger = {
-  id: string;
+  id?: string;
   name: string;
-  invoice_number: number;
+  invoice_number?: number;
   description: string;
-  dr: number;
+  dr?: number;
   cr: number;
-  balance: number;
+  balance?: number;
+  reference_id: string;
 };
 
 export type itemTable =

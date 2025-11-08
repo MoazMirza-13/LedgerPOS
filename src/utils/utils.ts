@@ -42,7 +42,8 @@ export const toastMsg = {
   deleteItem: 'Item has been deleted',
   newInvoice: 'New Invoice has been added',
   updateInvoice: 'Invoice has been updated',
-  newReference: 'New Reference has been added'
+  newReference: 'New Reference has been added',
+  addCredit: 'Credit has been added'
 };
 
 export const getImageUrl = async (img: string) => {

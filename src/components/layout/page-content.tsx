@@ -9,7 +9,8 @@ import { Suspense } from 'react';
 import ListingPage from '@/features/dynamic/listing';
 import TableAction from '@/features/dynamic/table-components/table-action';
 import RoleGate from '@/components/role-gate/RoleGateServer';
-import { itemData, itemTable } from 'types';
+import { itemData, itemTable, Reference } from 'types';
+import { CreditModal } from '../modal/credit-model';
 
 interface PageContentProps {
   title: string;
@@ -20,6 +21,7 @@ interface PageContentProps {
   searchParams?: any;
   pageKey?: string | number;
   extraTableProps?: Record<string, any>;
+  referenceData?: Reference;
 }
 
 export const PageContent: React.FC<PageContentProps> = ({
@@ -30,7 +32,8 @@ export const PageContent: React.FC<PageContentProps> = ({
   itemsData,
   searchParams,
   pageKey,
-  extraTableProps
+  extraTableProps,
+  referenceData
 }) => {
   return (
     <div className='flex flex-1 flex-col space-y-4'>
@@ -46,6 +49,7 @@ export const PageContent: React.FC<PageContentProps> = ({
             </Link>
           </RoleGate>
         )}
+        {referenceData && <CreditModal referenceData={referenceData} />}
       </div>
       <Separator />
       {searchParams && <TableAction {...extraTableProps} />}
