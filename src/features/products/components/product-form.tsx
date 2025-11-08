@@ -257,9 +257,11 @@ export default function ProductForm({
       // submit fn
       const { image, ...cleanValues } = values; // not using `image` in submit fn anymore
       const res = await productSubmit(cleanValues, initialData, imgPaths);
+      const entity = 'Product';
 
-      if (res?.successNew) toast.success(toastMsg.newProduct);
-      else if (res?.successUpdate) toast.success(toastMsg.updateProduct);
+      if (res?.successNew) toast.success(toastMsg.dynamicNew(entity));
+      else if (res?.successUpdate)
+        toast.success(toastMsg.dynamicUpdate(entity));
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {

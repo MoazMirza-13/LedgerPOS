@@ -139,10 +139,13 @@ export default function InvoiceForm({
       };
 
       const res = await invoiceSubmit(finalData, initialData);
+      const entity = 'Invoice';
+
       if (res?.successNew) {
-        toast.success(toastMsg.newInvoice);
+        toast.success(toastMsg.dynamicNew(entity));
         await printInvoice(finalData);
-      } else if (res?.successUpdate) toast.success(toastMsg.updateInvoice);
+      } else if (res?.successUpdate)
+        toast.success(toastMsg.dynamicUpdate(entity));
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {

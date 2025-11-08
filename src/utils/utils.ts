@@ -31,18 +31,12 @@ export function formatBytes(
 }
 
 export const toastMsg = {
-  //todo refactor
-  newProduct: 'New product has been added',
-  updateProduct: 'Product has been updated',
   dynamicNew: (type: string) => `New ${type} has been added`,
   dynamicUpdate: (type: string) => `${type} has been updated`,
   error: 'Something went wrong',
   imageUploadError: 'Image upload failed',
   signIn: 'Signed In Successfully!',
   deleteItem: 'Item has been deleted',
-  newInvoice: 'New Invoice has been added',
-  updateInvoice: 'Invoice has been updated',
-  newReference: 'New Reference has been added',
   addCredit: 'Credit has been added'
 };
 

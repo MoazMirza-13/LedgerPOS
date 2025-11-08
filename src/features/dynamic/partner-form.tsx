@@ -52,9 +52,9 @@ export default function PartnerForm({
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     startFormTransition(async () => {
       const res = await referenceSupplierSubmit(values, type);
+      const entity = type === 'references' ? 'Reference' : 'Supplier';
 
-      //todo: refactor toast msgs
-      if (res?.successNew) toast.success('success');
+      if (res?.successNew) toast.success(toastMsg.dynamicNew(entity));
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
