@@ -59,7 +59,7 @@ export type Category = {
   description: string;
 };
 
-// currently same, schema might get updated later
+// currently same as category, schema might get updated later
 export type Brand = {
   title: string;
   created_at: string;
@@ -96,6 +96,14 @@ export type Reference = {
   created_at?: string;
 };
 
+// currently same as reference, schema might get updated later
+export type Supplier = {
+  name: string;
+  balance: number;
+  id?: string;
+  created_at?: string;
+};
+
 export type References_ledger = {
   id?: string;
   name: string;
@@ -114,7 +122,8 @@ export type itemTable =
   | 'brands'
   | 'invoices'
   | 'references'
-  | 'references_ledger';
+  | 'references_ledger'
+  | 'suppliers';
 
 export type itemData =
   | Product
@@ -122,7 +131,8 @@ export type itemData =
   | Brand
   | Invoice
   | Reference
-  | References_ledger;
+  | References_ledger
+  | Supplier;
 
 export type nestedArray = {
   products: Product[];

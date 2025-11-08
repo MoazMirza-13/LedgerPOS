@@ -51,6 +51,10 @@ export default function AppSidebar({}: AppSidebarProps) {
             title='Billing'
             items={navItems.filter((item) => item.group === 'Billing')}
           />
+          <SidebarGroupSection
+            title='Purchasing'
+            items={navItems.filter((item) => item.group === 'Purchasing')}
+          />
         </RoleGate>
       </SidebarContent>
       <SidebarRail />

@@ -34,6 +34,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   const pathname = usePathname();
 
   const referenceRoute = pathname.includes('/references');
+  const supplierRoute = pathname.includes('/suppliers');
 
   const onConfirm = async () => {
     const error = await deleteContent(itemTable, itemData);
@@ -64,7 +65,7 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {!referenceRoute && (
+          {!referenceRoute && !supplierRoute && (
             <DropdownMenuItem
               onClick={() =>
                 router.push(`/dashboard/${itemTable}/${itemData.id}`)

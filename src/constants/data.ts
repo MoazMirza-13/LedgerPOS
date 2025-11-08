@@ -55,6 +55,15 @@ export const navItems: NavItem[] = [
     isActive: false,
     group: 'Billing',
     items: [] // No child items
+  },
+  {
+    title: 'Suppliers',
+    url: '/dashboard/suppliers',
+    icon: 'user',
+    shortcut: ['g', 's'],
+    isActive: false,
+    group: 'Purchasing',
+    items: [] // No child items
   }
 ];
 

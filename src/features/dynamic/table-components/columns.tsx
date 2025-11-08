@@ -150,12 +150,13 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (type === 'references') {
+  if (type === 'references' || type === 'suppliers') {
     baseColumns.push(
       {
         accessorKey: 'name',
-        header: 'REFERENCE NAME',
+        header: `${type === 'references' ? 'REFERENCE' : 'SUPPLIER'} NAME`,
         cell: ({ row }) => (
+          //! ledger screen for suppliers is under dev
           <Link href={`/dashboard/${type}/${row.original.id}`}>
             {row.getValue('name')}
           </Link>

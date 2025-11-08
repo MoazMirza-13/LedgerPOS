@@ -1,3 +1,4 @@
+// dynamic for references and suppliers
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { ReferenceSubmit } from '@/lib/actions';
+import { referenceSupplierSubmit } from '@/lib/actions';
 import { toastMsg } from '@/utils/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
@@ -19,9 +20,16 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { itemTable } from 'types';
 import * as z from 'zod';
 
-export default function ReferenceForm({ pageTitle }: { pageTitle: string }) {
+export default function PartnerForm({
+  pageTitle,
+  type
+}: {
+  pageTitle: string;
+  type: itemTable;
+}) {
   const formSchema = z.object({
     name: z.string().min(1, {
       message: `name is required`
@@ -43,13 +51,14 @@ export default function ReferenceForm({ pageTitle }: { pageTitle: string }) {
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     startFormTransition(async () => {
-      const res = await ReferenceSubmit(values);
+      const res = await referenceSupplierSubmit(values, type);
 
-      if (res?.successNew) toast.success(toastMsg.newReference);
+      //todo: refactor toast msgs
+      if (res?.successNew) toast.success('success');
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
-        router.push(`/dashboard/references`);
+        router.push(`/dashboard/${type}`);
       }
     });
   };
@@ -109,7 +118,7 @@ export default function ReferenceForm({ pageTitle }: { pageTitle: string }) {
                     <LoaderCircle className='h-5 w-5 animate-spin' />
                   </div>
                 ) : (
-                  'Add Reference'
+                  `Add ${type === 'references' ? 'Reference' : 'Supplier'} `
                 )}
               </Button>
             </form>

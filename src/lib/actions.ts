@@ -11,9 +11,11 @@ import {
   Invoice,
   Invoice_items,
   itemData,
+  itemTable,
   Product,
   Reference,
-  References_ledger
+  References_ledger,
+  Supplier
 } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -293,16 +295,19 @@ export const getMaxInvoiceNumber = async () => {
   }
 };
 
-export async function ReferenceSubmit(values: Reference) {
+export async function referenceSupplierSubmit(
+  values: Reference | Supplier,
+  type: itemTable
+) {
   try {
     const supabase = await createClient();
 
     const { error } = await supabase
-      .from('references')
+      .from(type)
       .insert([{ name: values.name, balance: values.balance }])
       .select();
     if (error) throw error;
-    revalidatePath(`/dashboard/references`);
+    revalidatePath(`/dashboard/${type}`);
     return { successNew: true };
   } catch (error: any) {
     return { error };

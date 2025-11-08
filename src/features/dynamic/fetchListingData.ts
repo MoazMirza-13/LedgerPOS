@@ -7,7 +7,8 @@ import {
   Category,
   Brand,
   Invoice,
-  Reference
+  Reference,
+  Supplier
 } from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 
@@ -15,7 +16,12 @@ export async function fetchListingData(type: itemTable, id?: string) {
   const supabase = await createClient();
   let data;
 
-  if (type === 'categories' || type === 'brands' || type === 'references') {
+  if (
+    type === 'categories' ||
+    type === 'brands' ||
+    type === 'references' ||
+    type === 'suppliers'
+  ) {
     const { data: fetchedData, error } = await supabase.from(type).select('*');
     data = fetchedData;
   } else if (type === 'products') {
@@ -89,9 +95,9 @@ export function filterListingData(data: itemData[], type: string) {
     } else if (type === 'invoices') {
       const invoice = item as Invoice;
       value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${invoice.created_at ? formatToPKTDate(invoice.created_at) : ''}`;
-    } else if (type === 'references') {
-      const reference = item as Reference;
-      value = `{${reference.name ?? ''}`;
+    } else if (type === 'references' || type === 'suppliers') {
+      const data = item as Reference | Supplier;
+      value = `{${data.name ?? ''}`;
     } else {
       const entry = item as Category | Brand;
       value = entry.title ?? '';

@@ -95,6 +95,10 @@ export const formatTitle = (text: string, type: itemTable) => {
       break;
     case 'references':
       formattedType = 'Reference';
+      break;
+    case 'suppliers':
+      formattedType = 'Supplier';
+      break;
   }
 
   return `${text} ${formattedType}`;

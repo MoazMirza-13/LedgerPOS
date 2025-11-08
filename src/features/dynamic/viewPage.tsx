@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { queryClientConfig } from '@/lib/tanStack-action';
 import InvoiceForm from '../invoices/invoice-form';
-import ReferenceForm from '../references/reference-form';
+import PartnerForm from './partner-form';
 
 type ViewPage = {
   type: itemTable;
@@ -46,7 +46,8 @@ export default async function ViewPage({ type, id }: ViewPage) {
             );
 
           case 'references':
-            return <ReferenceForm pageTitle={pageTitle} />;
+          case 'suppliers':
+            return <PartnerForm pageTitle={pageTitle} type={type} />;
 
           case 'products':
             return (
