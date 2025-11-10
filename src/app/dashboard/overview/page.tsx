@@ -1,7 +1,27 @@
 import { LowStockProducts } from '@/features/overview/low-stock-products';
 import PageContainer from '@/components/layout/page-container';
+import { getCategoriesBrandsData } from '@/lib/actions';
+import { Product } from 'types';
+import { getImageUrl, getTotalQuantity } from '@/utils/utils';
+import { fetchListingData } from '@/features/dynamic/fetchListingData';
 
-export default function Page() {
+export default async function Page() {
+  const products = await fetchListingData('products');
+
+  const categoryBrandData = await getCategoriesBrandsData();
+  const categories = categoryBrandData ? categoryBrandData[0].categories : [];
+  const brands = categoryBrandData ? categoryBrandData[0].brands : [];
+
+  const lowStockProducts =
+    products?.filter((p: Product) => getTotalQuantity(p) < p.min_quantity) ||
+    [];
+
+  const productsWithUrls = await Promise.all(
+    lowStockProducts.map(async (p) => ({
+      ...p,
+      img_url: await getImageUrl(p.img_url?.[0] || '')
+    }))
+  );
   return (
     <PageContainer scrollable>
       <div className='w-full'>
@@ -17,7 +37,11 @@ export default function Page() {
             </div>
 
             <div className='mx-auto grid grid-cols-1 gap-8 lg:grid-cols-1'>
-              <LowStockProducts />
+              <LowStockProducts
+                products={productsWithUrls}
+                categories={categories}
+                brands={brands}
+              />
             </div>
           </div>
         </main>

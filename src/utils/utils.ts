@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
-import { itemData, itemTable } from 'types';
+import { itemData, itemTable, Product } from 'types';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getSupabaseClient } from '@/lib/actions';
 
@@ -139,3 +139,11 @@ export function filterWithDate(
       new Date(item.created_at) <= end
   );
 }
+
+export const getTotalQuantity = (product: Product) =>
+  product.quantity_in_zafarwal +
+  product.quantity_in_ghaziwal +
+  product.quantity_in_lhr_road +
+  product.quantity_in_eidgah_road +
+  product.quantity_in_mandi_tile +
+  product.quantity_in_mandi_bond;

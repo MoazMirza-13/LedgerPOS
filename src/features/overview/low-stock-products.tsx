@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -7,58 +9,112 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { Product } from 'types';
-import { getSupabaseClient } from '@/lib/actions';
-import { getImageUrl } from '@/utils/utils';
 import Link from 'next/link';
+import { DataTableFilterBox } from '@/components/ui/table/data-table-filter-box';
+import { DataTableResetFilter } from '@/components/ui/table/data-table-reset-filter';
+import { useTableFilters } from '../dynamic/table-components/use-table-filters';
+import { Product, Category, Brand } from 'types';
+import { getTotalQuantity } from '@/utils/utils';
+import { useMemo } from 'react';
 
-export async function LowStockProducts() {
-  const supabase = await getSupabaseClient();
-  const { data: products, error } = await supabase.from('products').select('*');
+interface Props {
+  products: Product[];
+  categories: Category[];
+  brands: Brand[];
+}
 
-  const getTotalQuantity = (product: Product) =>
-    product.quantity_in_zafarwal +
-    product.quantity_in_ghaziwal +
-    product.quantity_in_lhr_road +
-    product.quantity_in_eidgah_road +
-    product.quantity_in_mandi_tile +
-    product.quantity_in_mandi_bond;
+export function LowStockProducts({ products, categories, brands }: Props) {
+  const {
+    categoriesFilter,
+    setCategoriesFilter,
+    brandsFilter,
+    setBrandsFilter,
+    isAnyFilterActive,
+    resetFilters
+  } = useTableFilters();
 
-  const lowStockProducts =
-    products?.filter((p: Product) => getTotalQuantity(p) < p.min_quantity) ||
-    [];
+  const filteredProducts = useMemo(() => {
+    if (!isAnyFilterActive) {
+      return products;
+    }
 
-  const productsWithUrls = await Promise.all(
-    lowStockProducts.map(async (p) => ({
-      ...p,
-      resolvedImgUrl: await getImageUrl(p.img_url?.[0] || '')
-    }))
-  );
+    return products.filter((product) => {
+      const hasSelectedCategory =
+        categoriesFilter.length === 0 ||
+        (product.categories?.title &&
+          categoriesFilter.includes(product.categories.title));
+
+      const hasSelectedBrand =
+        brandsFilter.length === 0 ||
+        (product.brands?.title && brandsFilter.includes(product.brands.title));
+
+      if (categoriesFilter.length > 0 && brandsFilter.length > 0) {
+        return hasSelectedCategory || hasSelectedBrand;
+      } else if (categoriesFilter.length > 0) {
+        return hasSelectedCategory;
+      } else if (brandsFilter.length > 0) {
+        return hasSelectedBrand;
+      }
+
+      return true;
+    });
+  }, [products, categoriesFilter, brandsFilter, isAnyFilterActive]);
 
   return (
     <Card className='flex h-[70vh] flex-col'>
       <CardHeader>
-        <CardTitle>Low Stock Products</CardTitle>
-        <CardDescription>Products with less quantity</CardDescription>
+        <div className='flex items-center gap-8'>
+          <div className='flex flex-col gap-[6px]'>
+            <CardTitle>Low Stock Products</CardTitle>
+            <CardDescription>Products with less quantity</CardDescription>
+          </div>
+          {/* Filters */}
+          <div className='flex flex-wrap gap-4'>
+            <DataTableFilterBox
+              filterKey='categories'
+              title='Categories'
+              options={categories}
+              setFilterValue={setCategoriesFilter}
+              filterValue={categoriesFilter}
+            />
+            <DataTableFilterBox
+              filterKey='brands'
+              title='Brands'
+              options={brands}
+              setFilterValue={setBrandsFilter}
+              filterValue={brandsFilter}
+            />
+            <DataTableResetFilter
+              isFilterActive={isAnyFilterActive}
+              onReset={resetFilters}
+            />
+          </div>
+        </div>
       </CardHeader>
-      {!error && (
+
+      {products.length > 0 && (
         <CardContent className='overflow-y-auto'>
           <div className='space-y-4'>
-            {productsWithUrls.length === 0 ? (
+            {/* Product List */}
+            {filteredProducts.length === 0 ? (
               <div className='py-8 text-center text-muted-foreground'>
-                No low-stock products
+                No low-stock products match the selected filters
               </div>
             ) : (
-              productsWithUrls.map((product) => (
+              filteredProducts.map((product) => (
                 <Link
                   key={product.id}
                   className='flex gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
                   href={`products/${product.id}`}
                 >
-                  {product.resolvedImgUrl && (
+                  {product.img_url && (
                     <div className='flex-shrink-0'>
                       <Image
-                        src={product.resolvedImgUrl}
+                        src={
+                          Array.isArray(product.img_url)
+                            ? (product.img_url[0] ?? '')
+                            : product.img_url
+                        }
                         alt='low_stock_product'
                         width={80}
                         height={80}
@@ -66,7 +122,6 @@ export async function LowStockProducts() {
                       />
                     </div>
                   )}
-
                   <div className='min-w-0 flex-1'>
                     <p className='text-sm text-muted-foreground'>
                       Product: {product.product_code}
