@@ -81,10 +81,11 @@ export async function fetchListingData(type: itemTable, id?: string) {
 }
 
 export function filterListingData(data: itemData[], type: string) {
-  // Showcasing the use of search params cache in nested RSCs
+  // use of search params cache in nested RSCs
   const search = searchParamsCache.get('q');
   const categories = searchParamsCache.get('categories')?.split('.') || []; // separate them using "." if multiple
   const brands = searchParamsCache.get('brands')?.split('.') || [];
+  const warehouses = searchParamsCache.get('warehouses')?.split('.') || [];
 
   const filteredData = data.filter((item) => {
     let value = '';
@@ -94,10 +95,12 @@ export function filterListingData(data: itemData[], type: string) {
       value = `${product.product_code ?? ''} ${product.title ?? ''}`;
     } else if (type === 'invoices') {
       const invoice = item as Invoice;
-      value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${invoice.created_at ? formatToPKTDate(invoice.created_at) : ''}`;
+      value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${
+        invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
+      }`;
     } else if (type === 'references' || type === 'suppliers') {
       const data = item as Reference | Supplier;
-      value = `{${data.name ?? ''}`;
+      value = `${data.name ?? ''}`;
     } else {
       const entry = item as Category | Brand;
       value = entry.title ?? '';
@@ -113,7 +116,31 @@ export function filterListingData(data: itemData[], type: string) {
           brands.includes(item.brands?.title || '')
         : true;
 
-    return matchesSearch && matchesCategoryBrand;
+    let matchesWarehouse = true;
+    if (warehouses.length && type === 'products') {
+      const product = item as Product;
+      matchesWarehouse = warehouses.some((wh) => {
+        switch (wh) {
+          case 'Ghaziwal':
+            return product.quantity_in_ghaziwal > 0;
+          case 'Zafarwal':
+            return product.quantity_in_zafarwal > 0;
+          case 'Lhr Road':
+            return product.quantity_in_lhr_road > 0;
+          case 'Eidgah Road':
+            return product.quantity_in_eidgah_road > 0;
+          case 'Mandi Tile':
+            return product.quantity_in_mandi_tile > 0;
+          case 'Mandi Bond':
+            return product.quantity_in_mandi_bond > 0;
+          default:
+            return false;
+        }
+      });
+    }
+
+    return matchesSearch && matchesCategoryBrand && matchesWarehouse;
   });
+
   return { filteredData };
 }

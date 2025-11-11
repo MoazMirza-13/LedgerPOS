@@ -10,17 +10,21 @@ import { usePathname } from 'next/navigation';
 type TableActionProps = {
   categories?: Category[];
   brands?: Brand[];
+  warehouses?: { key: string; label: string }[];
 };
 
 export default function TableAction({
   categories = [],
-  brands = []
+  brands = [],
+  warehouses = []
 }: TableActionProps) {
   const {
     categoriesFilter,
     setCategoriesFilter,
     brandsFilter,
     setBrandsFilter,
+    setWarehousesFilter,
+    warehousesFilter,
     isAnyFilterActive,
     resetFilters,
     searchQuery,
@@ -42,6 +46,11 @@ export default function TableAction({
   ) {
     searchKey = 'name';
   }
+
+  const warehousesOptions = warehouses.map((wh) => ({
+    key: wh.key,
+    title: wh.label
+  }));
 
   return (
     <div className='flex flex-wrap items-center gap-4'>
@@ -67,6 +76,13 @@ export default function TableAction({
             options={brands}
             setFilterValue={setBrandsFilter}
             filterValue={brandsFilter}
+          />
+          <DataTableFilterBox
+            filterKey='warehouses'
+            title='Warehouses'
+            options={warehousesOptions}
+            setFilterValue={setWarehousesFilter}
+            filterValue={warehousesFilter}
           />
         </>
       )}

@@ -22,6 +22,11 @@ export function useTableFilters() {
     searchParams.brands.withOptions({ shallow: false }).withDefault('')
   );
 
+  const [warehousesFilter, setWarehousesFilter] = useQueryState(
+    'warehouses',
+    searchParams.brands.withOptions({ shallow: false }).withDefault('')
+  );
+
   const [page, setPage] = useQueryState(
     'page',
     searchParams.page.withDefault(1)
@@ -31,12 +36,24 @@ export function useTableFilters() {
     setSearchQuery(null);
     setCategoriesFilter(null);
     setBrandsFilter(null);
+    setWarehousesFilter(null);
     setPage(1);
-  }, [setSearchQuery, setCategoriesFilter, setPage, setBrandsFilter]);
+  }, [
+    setSearchQuery,
+    setCategoriesFilter,
+    setPage,
+    setBrandsFilter,
+    setWarehousesFilter
+  ]);
 
   const isAnyFilterActive = useMemo(() => {
-    return !!searchQuery || !!categoriesFilter || !!brandsFilter;
-  }, [searchQuery, categoriesFilter, brandsFilter]);
+    return (
+      !!searchQuery ||
+      !!categoriesFilter ||
+      !!brandsFilter ||
+      !!warehousesFilter
+    );
+  }, [searchQuery, categoriesFilter, brandsFilter, warehousesFilter]);
 
   return {
     searchQuery,
@@ -48,6 +65,8 @@ export function useTableFilters() {
     categoriesFilter,
     setCategoriesFilter,
     brandsFilter,
-    setBrandsFilter
+    setBrandsFilter,
+    warehousesFilter,
+    setWarehousesFilter
   };
 }
