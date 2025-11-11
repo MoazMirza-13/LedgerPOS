@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { formatToPKTDate, getImageUrl } from '@/utils/utils';
+import { filterByWarehouse, formatToPKTDate, getImageUrl } from '@/utils/utils';
 import {
   itemTable,
   itemData,
@@ -119,24 +119,9 @@ export function filterListingData(data: itemData[], type: string) {
     let matchesWarehouse = true;
     if (warehouses.length && type === 'products') {
       const product = item as Product;
-      matchesWarehouse = warehouses.some((wh) => {
-        switch (wh) {
-          case 'Ghaziwal':
-            return product.quantity_in_ghaziwal > 0;
-          case 'Zafarwal':
-            return product.quantity_in_zafarwal > 0;
-          case 'Lhr Road':
-            return product.quantity_in_lhr_road > 0;
-          case 'Eidgah Road':
-            return product.quantity_in_eidgah_road > 0;
-          case 'Mandi Tile':
-            return product.quantity_in_mandi_tile > 0;
-          case 'Mandi Bond':
-            return product.quantity_in_mandi_bond > 0;
-          default:
-            return false;
-        }
-      });
+      matchesWarehouse = warehouses.some((wh) =>
+        filterByWarehouse(product, wh)
+      );
     }
 
     return matchesSearch && matchesCategoryBrand && matchesWarehouse;

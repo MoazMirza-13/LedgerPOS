@@ -4,19 +4,24 @@ import { DataTableFilterBox } from '@/components/ui/table/data-table-filter-box'
 import { DataTableResetFilter } from '@/components/ui/table/data-table-reset-filter';
 import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { useTableFilters } from './use-table-filters';
-import { Brand, Category } from 'types';
+import { Brand, Category, Product } from 'types';
 import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { filterByWarehouse } from '@/utils/utils';
+import { printWarehouseProducts } from '../print-warehouse-products';
 
 type TableActionProps = {
   categories?: Category[];
   brands?: Brand[];
   warehouses?: { key: string; label: string }[];
+  items_data?: Product[];
 };
 
 export default function TableAction({
   categories = [],
   brands = [],
-  warehouses = []
+  warehouses = [],
+  items_data = []
 }: TableActionProps) {
   const {
     categoriesFilter,
@@ -52,6 +57,14 @@ export default function TableAction({
     title: wh.label
   }));
 
+  // to prints products according to selected warehouse
+  const warehouseProducts =
+    warehousesFilter && warehousesFilter !== ''
+      ? items_data.filter((product) =>
+          filterByWarehouse(product, warehousesFilter)
+        )
+      : [];
+
   return (
     <div className='flex flex-wrap items-center gap-4'>
       <DataTableSearch
@@ -84,6 +97,16 @@ export default function TableAction({
             setFilterValue={setWarehousesFilter}
             filterValue={warehousesFilter}
           />
+          {warehousesFilter && warehousesFilter?.split('.').length === 1 && (
+            <Button
+              variant='outline'
+              onClick={() =>
+                printWarehouseProducts(warehouseProducts, warehousesFilter)
+              }
+            >
+              Print Products
+            </Button>
+          )}
         </>
       )}
 

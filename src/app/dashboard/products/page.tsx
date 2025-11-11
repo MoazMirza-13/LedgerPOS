@@ -39,7 +39,7 @@ export default async function Page(props: pageProps) {
         itemsData={items_data}
         searchParams={searchParams}
         pageKey={key}
-        extraTableProps={{ categories, brands, warehouses }}
+        extraTableProps={{ categories, brands, warehouses, items_data }}
       />
     </PageContainer>
   );

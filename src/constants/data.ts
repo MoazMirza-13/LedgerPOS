@@ -75,5 +75,3 @@ export const warehouses = [
   { key: 'MandiTile', label: 'Mandi Tile' },
   { key: 'MandiBond', label: 'Mandi Bond' }
 ];
-
-export const references = ['Haris', 'Hamza'];
