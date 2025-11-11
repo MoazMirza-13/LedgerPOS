@@ -129,22 +129,49 @@ export const useColumns = <T extends Entity>(
           <span>{formatToPKTDate(row.getValue('created_at'))}</span>
         )
       },
-      { accessorKey: 'invoice_number', header: '#' },
       {
-        accessorKey: 'customer_name',
-        header: 'CUSTOMER NAME',
+        accessorKey: 'invoice_number',
+        header: '#',
         cell: ({ row }) => (
           <Link href={`/dashboard/${type}/${row.original.id}`}>
-            {row.getValue('customer_name')}
+            {row.getValue('invoice_number')}
           </Link>
         )
       },
+      { accessorKey: 'customer_name', header: 'CUSTOMER NAME' },
       { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
       { accessorKey: 'customer_address', header: 'CUSTOMER ADDRESS' },
       {
         header: 'REFERENCE',
         accessorFn: (row) =>
           'references' in row ? row.references?.name || '' : ''
+      },
+      { accessorKey: 'total_price', header: 'TOTAL' }
+    );
+  }
+
+  if (type === 'purchasing_invoices') {
+    baseColumns.push(
+      {
+        accessorKey: 'created_at',
+        header: 'DATE',
+        cell: ({ row }) => (
+          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
+        )
+      },
+      {
+        accessorKey: 'invoice_number',
+        header: '#',
+        cell: ({ row }) => (
+          <Link href={`/dashboard/purchasing-invoices/${row.original.id}`}>
+            {row.getValue('invoice_number')}
+          </Link>
+        )
+      },
+      {
+        header: 'Supplier',
+        accessorFn: (row) =>
+          'suppliers' in row ? row.suppliers?.name || '' : ''
       },
       { accessorKey: 'total_price', header: 'TOTAL' }
     );

@@ -8,7 +8,8 @@ import {
   Brand,
   Invoice,
   Reference,
-  Supplier
+  Supplier,
+  PurchasingInvoice
 } from 'types';
 import { searchParamsCache } from '@/lib/searchparams';
 
@@ -64,6 +65,14 @@ export async function fetchListingData(type: itemTable, id?: string) {
       .eq('reference_id', id);
 
     data = referencesLedgerData;
+  } else if (type === 'purchasing_invoices') {
+    const { data: purchasingInvoicesData, error } = await supabase.from(type)
+      .select(`
+      *,
+      suppliers (name)
+      `);
+
+    data = purchasingInvoicesData;
   }
 
   const sortedData = Array.isArray(data)
@@ -96,6 +105,11 @@ export function filterListingData(data: itemData[], type: string) {
     } else if (type === 'invoices') {
       const invoice = item as Invoice;
       value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${
+        invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
+      }`;
+    } else if (type === 'purchasing_invoices') {
+      const invoice = item as PurchasingInvoice;
+      value = ` ${invoice.invoice_number ?? ''} ${
         invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
       }`;
     } else if (type === 'references' || type === 'suppliers') {

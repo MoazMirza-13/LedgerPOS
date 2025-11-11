@@ -3,6 +3,7 @@ import { useItemQuery } from '@/lib/tanStack-action';
 import { checkUUID } from '@/utils/utils';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
+import { itemTable } from 'types';
 
 type BreadcrumbItem = {
   title: string;
@@ -45,15 +46,17 @@ export function useBreadcrumbs() {
 
   // Memoized values to prevent unnecessary recalculations
   const { type, id, isDynamicRoute } = useMemo(() => {
-    const types = [
+    const types: itemTable[] = [
       'brands',
       'products',
       'categories',
       'invoices',
-      'references'
+      'references',
+      'purchasing_invoices'
     ];
     const lastSegment = segments[segments.length - 1] || '';
-    const type = types.find((t) => pathname.includes(`/${t}/`)) || '';
+    const type =
+      types.find((t) => pathname.includes(`/${t.replace('_', '-')}/`)) || '';
     const checkId = checkUUID(lastSegment);
 
     return {

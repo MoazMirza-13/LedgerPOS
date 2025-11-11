@@ -39,15 +39,6 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Invoices',
-    url: '/dashboard/invoices',
-    icon: 'invoice',
-    shortcut: ['g', 'i'],
-    isActive: false,
-    group: 'Billing',
-    items: [] // No child items
-  },
-  {
     title: 'References',
     url: '/dashboard/references',
     icon: 'user',
@@ -57,10 +48,28 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Invoices',
+    url: '/dashboard/invoices',
+    icon: 'invoice',
+    shortcut: ['g', 'i'],
+    isActive: false,
+    group: 'Billing',
+    items: [] // No child items
+  },
+  {
     title: 'Suppliers',
     url: '/dashboard/suppliers',
     icon: 'user',
     shortcut: ['g', 's'],
+    isActive: false,
+    group: 'Purchasing',
+    items: [] // No child items
+  },
+  {
+    title: 'Purchasing Invoices',
+    url: '/dashboard/purchasing-invoices',
+    icon: 'invoice',
+    shortcut: ['g', 'pi'],
     isActive: false,
     group: 'Purchasing',
     items: [] // No child items

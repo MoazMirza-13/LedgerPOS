@@ -13,6 +13,7 @@ import {
   itemData,
   itemTable,
   Product,
+  PurchasingInvoice,
   Reference,
   References_ledger,
   Supplier
@@ -279,10 +280,37 @@ export const invoiceSubmit = async (
   }
 };
 
-export const getMaxInvoiceNumber = async () => {
+export const purchasingInvoiceSubmit = async (values: PurchasingInvoice) => {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.rpc(
+      'create_purchasing_invoice_with_items',
+      {
+        supplier: values.supplier,
+        total_price: values.total_price,
+        invoice_number: values.invoice_number,
+        items: values.purchasing_invoice_items.map((item) => ({
+          product_code: item.product_code,
+          description: item.description,
+          price: item.price,
+          warehouse_distribution: item.warehouse_distribution
+        }))
+      }
+    );
+
+    if (error) console.log(error);
+    revalidatePath(`/dashboard/purchasing-invoices`);
+    return { success: true };
+  } catch (error: any) {
+    return { error };
+  }
+};
+
+export const getMaxInvoiceNumber = async (type: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('invoices')
+    .from(type)
     .select('invoice_number')
     .order('invoice_number', {
       ascending: false

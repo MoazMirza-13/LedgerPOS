@@ -128,7 +128,7 @@ export default function InvoiceForm({
 
       let newInvoiceNumber;
       if (!initialData) {
-        const maxInvoiceNumber = await getMaxInvoiceNumber();
+        const maxInvoiceNumber = await getMaxInvoiceNumber('invoices');
         newInvoiceNumber = maxInvoiceNumber + 1;
       }
 
@@ -559,6 +559,7 @@ export default function InvoiceForm({
                               <td></td>
                               <td></td>
                               <td></td>
+                              <td></td>
                             </>
                           )}
                           <td className='px-4 py-3 text-center'>
@@ -566,7 +567,7 @@ export default function InvoiceForm({
                               type='button'
                               onClick={() => remove(index)}
                               disabled={items.length === 1}
-                              className='rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
+                              className='cursor-pointer rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
                             >
                               <Trash2 className='h-4 w-4' />
                             </button>

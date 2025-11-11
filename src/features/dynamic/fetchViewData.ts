@@ -13,7 +13,9 @@ import {
   Invoice,
   Invoice_items,
   itemTable,
-  Product
+  Product,
+  PurchasingInvoice,
+  PurchasingInvoiceItems
 } from 'types';
 
 export async function fetchViewData(
@@ -29,6 +31,7 @@ export async function fetchViewData(
     let categories = null;
     let brands = null;
     let references = null;
+    let suppliers = null;
     let newProduct = type === 'products';
     let pageTitle = '';
 
@@ -47,7 +50,7 @@ export async function fetchViewData(
         });
 
         const fetchedData = queryClient.getQueryData<
-          Invoice | Product | Category | Brand
+          Invoice | Product | Category | Brand | PurchasingInvoice
         >([type, id]);
 
         if (!fetchedData) {
@@ -80,6 +83,20 @@ export async function fetchViewData(
             ...fetchedData,
             invoice_items: (invoice_items as Invoice_items[]) || []
           };
+        } else if (type === 'purchasing_invoices' && fetchedData) {
+          const supabase = await getSupabaseClient();
+          const { data: invoice_items, error } = await supabase
+            .from('purchasing_invoice_items')
+            .select('*')
+            .eq('purchasing_invoice_id', fetchedData.id);
+
+          if (error) throw error;
+
+          data = {
+            ...fetchedData,
+            purchasing_invoice_items:
+              (invoice_items as PurchasingInvoiceItems[]) || []
+          };
         } else {
           data = fetchedData as Category | Brand;
         }
@@ -106,7 +123,24 @@ export async function fetchViewData(
       }
     }
 
-    return { data, categories, brands, references, newProduct, pageTitle };
+    if (type === 'purchasing_invoices') {
+      const supabase = await getSupabaseClient();
+      const { data } = await supabase.from('suppliers').select('*');
+
+      if (data) {
+        suppliers = data;
+      }
+    }
+
+    return {
+      data,
+      categories,
+      brands,
+      references,
+      suppliers,
+      newProduct,
+      pageTitle
+    };
   } catch (error) {
     notFound();
   }

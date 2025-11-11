@@ -1,4 +1,5 @@
 import { Icons } from '@/components/icons';
+import { warehouses } from '@/constants/data';
 
 export interface NavItem {
   title: string;
@@ -89,6 +90,26 @@ export type Invoice_items = {
   warehouse: string;
 };
 
+export type PurchasingInvoice = {
+  id?: string;
+  total_price: number;
+  created_at?: string;
+  supplier: string;
+  invoice_number: number;
+  purchasing_invoice_items: PurchasingInvoiceItems[];
+  suppliers?: Supplier;
+};
+
+export type PurchasingInvoiceItems = {
+  product_code: string;
+  description?: string;
+  quantity?: number;
+  price: number;
+  warehouse_distribution: Partial<
+    Record<(typeof warehouses)[number]['key'], number>
+  >;
+};
+
 export type Reference = {
   name: string;
   balance: number;
@@ -123,7 +144,8 @@ export type itemTable =
   | 'invoices'
   | 'references'
   | 'references_ledger'
-  | 'suppliers';
+  | 'suppliers'
+  | 'purchasing_invoices';
 
 export type itemData =
   | Product
@@ -132,7 +154,8 @@ export type itemData =
   | Invoice
   | Reference
   | References_ledger
-  | Supplier;
+  | Supplier
+  | PurchasingInvoice;
 
 export type nestedArray = {
   products: Product[];
