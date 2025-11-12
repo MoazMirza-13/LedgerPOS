@@ -8,7 +8,7 @@ import { Brand, Category, Product } from 'types';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { filterByWarehouse } from '@/utils/utils';
-import { printWarehouseProducts } from '../print-warehouse-products';
+import { printWarehouseProducts } from '../../products/print-warehouse-products';
 
 type TableActionProps = {
   categories?: Category[];
