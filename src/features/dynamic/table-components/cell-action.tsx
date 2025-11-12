@@ -36,6 +36,8 @@ export const CellAction: React.FC<CellActionProps> = ({
   const referenceRoute = pathname.includes('/references');
   const supplierRoute = pathname.includes('/suppliers');
 
+  const forNavigatingURL = itemTable.replace(/_/g, '-');
+
   const onConfirm = async () => {
     const error = await deleteContent(itemTable, itemData);
     if (error) {
@@ -44,7 +46,7 @@ export const CellAction: React.FC<CellActionProps> = ({
       toast.success(toastMsg.deleteItem);
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ['nestedData'] });
-      router.push(`/dashboard/${itemTable}`);
+      router.push(`/dashboard/${forNavigatingURL}`);
     }
   };
 
@@ -68,7 +70,7 @@ export const CellAction: React.FC<CellActionProps> = ({
           {!referenceRoute && !supplierRoute && (
             <DropdownMenuItem
               onClick={() =>
-                router.push(`/dashboard/${itemTable}/${itemData.id}`)
+                router.push(`/dashboard/${forNavigatingURL}/${itemData.id}`)
               }
             >
               <Edit className='mr-2 h-4 w-4' /> Edit
