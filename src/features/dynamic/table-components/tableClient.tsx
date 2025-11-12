@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
@@ -7,6 +6,8 @@ import { DataTable } from '@/components/ui/table/data-table';
 import { useColumns } from '@/features/dynamic/table-components/columns';
 import { itemData, itemTable } from 'types';
 import { filterWithDate } from '@/utils/utils';
+import { filterListingData } from '../filterListingData';
+import { parseAsString, useQueryStates } from 'nuqs';
 
 interface TableClientProps {
   data: itemData[];
@@ -14,8 +15,6 @@ interface TableClientProps {
 }
 
 export default function TableClientSide({ data, type }: TableClientProps) {
-  const pathname = usePathname();
-
   // don't use the date util here
   const today = new Date().toLocaleDateString('en-CA', {
     timeZone: 'Asia/Karachi'
@@ -26,20 +25,28 @@ export default function TableClientSide({ data, type }: TableClientProps) {
     to: new Date(today)
   });
 
+  const parsers = {
+    q: parseAsString.withDefault(''),
+    categories: parseAsString.withDefault(''),
+    brands: parseAsString.withDefault(''),
+    warehouses: parseAsString.withDefault('')
+  };
+
+  const [searchParams] = useQueryStates(parsers);
+  const pathname = usePathname();
+
   const tableData = useMemo(() => {
     if (
       !pathname?.includes('/references/') &&
       !pathname?.includes('/suppliers/')
     ) {
-      return data;
-    }
-
-    //  only filter on ledger screens
-    else {
+      const { filteredData } = filterListingData(data, type, searchParams);
+      return filteredData;
+    } else {
       const filteredData = filterWithDate(data, dateRange.from, dateRange.to);
       return filteredData;
     }
-  }, [data, dateRange, pathname]);
+  }, [data, dateRange, pathname, type, searchParams]);
 
   return (
     <>
@@ -62,7 +69,6 @@ export default function TableClientSide({ data, type }: TableClientProps) {
           />
         </div>
       )}
-
       <DataTable columns={useColumns(type)} data={tableData} />
     </>
   );

@@ -1,17 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-import { filterByWarehouse, formatToPKTDate, getImageUrl } from '@/utils/utils';
-import {
-  itemTable,
-  itemData,
-  Product,
-  Category,
-  Brand,
-  Invoice,
-  Reference,
-  Supplier,
-  PurchasingInvoice
-} from 'types';
-import { searchParamsCache } from '@/lib/searchparams';
+import { getImageUrl } from '@/utils/utils';
+import { itemTable } from 'types';
 
 export async function fetchListingData(type: itemTable, id?: string) {
   const supabase = await createClient();
@@ -96,59 +85,4 @@ export async function fetchListingData(type: itemTable, id?: string) {
     : data;
 
   return sortedData;
-}
-
-export function filterListingData(data: itemData[], type: string) {
-  // use of search params cache in nested RSCs
-  const search = searchParamsCache.get('q');
-  const categories = searchParamsCache.get('categories')?.split('.') || []; // separate them using "." if multiple
-  const brands = searchParamsCache.get('brands')?.split('.') || [];
-  const warehouses = searchParamsCache.get('warehouses')?.split('.') || [];
-
-  const filteredData = data.filter((item) => {
-    let value = '';
-
-    if (type === 'products') {
-      const product = item as Product;
-      value = `${product.product_code ?? ''} ${product.title ?? ''}`;
-    } else if (type === 'invoices') {
-      const invoice = item as Invoice;
-      value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${
-        invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
-      }`;
-    } else if (type === 'purchasing_invoices') {
-      const invoice = item as PurchasingInvoice;
-      value = ` ${invoice.invoice_number ?? ''} ${
-        invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
-      }`;
-    } else if (type === 'references' || type === 'suppliers') {
-      const data = item as Reference | Supplier;
-      value = `${data.name ?? ''}`;
-    } else {
-      const entry = item as Category | Brand;
-      value = entry.title ?? '';
-    }
-
-    const text = value.toLowerCase();
-    const matchesSearch = search ? text.includes(search.toLowerCase()) : true;
-
-    const matchesCategoryBrand =
-      (categories.length || brands.length) &&
-      ('categories' in item || 'brands' in item)
-        ? categories.includes(item.categories?.title || '') ||
-          brands.includes(item.brands?.title || '')
-        : true;
-
-    let matchesWarehouse = true;
-    if (warehouses.length && type === 'products') {
-      const product = item as Product;
-      matchesWarehouse = warehouses.some((wh) =>
-        filterByWarehouse(product, wh)
-      );
-    }
-
-    return matchesSearch && matchesCategoryBrand && matchesWarehouse;
-  });
-
-  return { filteredData };
 }
