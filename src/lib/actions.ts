@@ -16,7 +16,8 @@ import {
   PurchasingInvoice,
   Reference,
   References_ledger,
-  Supplier
+  Supplier,
+  Suppliers_ledger
 } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -349,6 +350,17 @@ export async function addCredit(values: References_ledger) {
     p_name: values.name,
     p_description: values.description,
     p_credit: values.cr
+  });
+  if (!error) return { success: true };
+}
+
+export async function addDebit(values: Suppliers_ledger) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('handle_dr_amount_supplier_ledger', {
+    p_supplier_id: values.supplier_id,
+    p_name: values.name,
+    p_description: values.description,
+    p_debit: values.dr
   });
   if (!error) return { success: true };
 }

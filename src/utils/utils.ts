@@ -37,7 +37,8 @@ export const toastMsg = {
   imageUploadError: 'Image upload failed',
   signIn: 'Signed In Successfully!',
   deleteItem: 'Item has been deleted',
-  addCredit: 'Credit has been added'
+  addCredit: 'Credit has been added',
+  addDebit: 'Debit has been added'
 };
 
 export const getImageUrl = async (img: string) => {

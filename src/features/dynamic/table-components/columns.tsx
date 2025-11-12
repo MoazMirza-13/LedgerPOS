@@ -17,6 +17,7 @@ export const useColumns = <T extends Entity>(
   const pathname = usePathname();
 
   const referenceSubRoute = pathname.includes('/references/');
+  const supplierSubRoute = pathname.includes('/suppliers/');
 
   const baseColumns: ColumnDef<T>[] = [];
 
@@ -193,7 +194,7 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (type === 'references_ledger') {
+  if (type === 'references_ledger' || type === 'suppliers_ledger') {
     baseColumns.push(
       {
         accessorKey: 'created_at',
@@ -211,7 +212,11 @@ export const useColumns = <T extends Entity>(
     );
   }
 
-  if (currentRole === 'super_admin' && !referenceSubRoute) {
+  if (
+    currentRole === 'super_admin' &&
+    !referenceSubRoute &&
+    !supplierSubRoute
+  ) {
     baseColumns.push({
       id: 'actions',
       cell: ({ row }) => <CellAction itemTable={type} itemData={row.original} />

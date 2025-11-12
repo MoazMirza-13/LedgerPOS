@@ -19,7 +19,7 @@ export default async function ListingPage({
 
   let tableData = data;
 
-  if (type !== 'references_ledger') {
+  if (type !== 'references_ledger' && type !== 'suppliers_ledger') {
     const { filteredData } = filterListingData(data, type);
     tableData = filteredData;
   }

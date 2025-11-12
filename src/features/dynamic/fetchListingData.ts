@@ -73,6 +73,13 @@ export async function fetchListingData(type: itemTable, id?: string) {
       `);
 
     data = purchasingInvoicesData;
+  } else if (type === 'suppliers_ledger' && id) {
+    const { data: suppliersLedgerData, error } = await supabase
+      .from(type)
+      .select('*')
+      .eq('supplier_id', id);
+
+    data = suppliersLedgerData;
   }
 
   const sortedData = Array.isArray(data)
@@ -80,9 +87,11 @@ export async function fetchListingData(type: itemTable, id?: string) {
         const aTime = new Date(a.created_at).getTime();
         const bTime = new Date(b.created_at).getTime();
 
-        // if type is references_ledger => ascending (a - b)
+        // if ledger type => ascending (a - b)
         // otherwise => descending (b - a)
-        return type === 'references_ledger' ? aTime - bTime : bTime - aTime;
+        return type === 'references_ledger' || type === 'suppliers_ledger'
+          ? aTime - bTime
+          : bTime - aTime;
       })
     : data;
 

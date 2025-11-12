@@ -27,7 +27,10 @@ export default function TableClientSide({ data, type }: TableClientProps) {
   });
 
   const tableData = useMemo(() => {
-    if (!pathname?.includes('/references/')) {
+    if (
+      !pathname?.includes('/references/') &&
+      !pathname?.includes('/suppliers/')
+    ) {
       return data;
     }
 
@@ -40,7 +43,8 @@ export default function TableClientSide({ data, type }: TableClientProps) {
 
   return (
     <>
-      {pathname?.includes('/references/') && (
+      {(pathname?.includes('/references/') ||
+        pathname?.includes('/suppliers/')) && (
         <div className='flex justify-center'>
           <DateRangePicker
             onUpdate={(values) => {

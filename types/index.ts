@@ -137,6 +137,18 @@ export type References_ledger = {
   created_at: string;
 };
 
+export type Suppliers_ledger = {
+  id?: string;
+  name: string;
+  invoice_number?: number;
+  description: string;
+  dr?: number;
+  cr: number;
+  balance?: number;
+  supplier_id: string;
+  created_at: string;
+};
+
 export type itemTable =
   | 'categories'
   | 'products'
@@ -145,7 +157,8 @@ export type itemTable =
   | 'references'
   | 'references_ledger'
   | 'suppliers'
-  | 'purchasing_invoices';
+  | 'purchasing_invoices'
+  | 'suppliers_ledger';
 
 export type itemData =
   | Product
@@ -155,7 +168,8 @@ export type itemData =
   | Reference
   | References_ledger
   | Supplier
-  | PurchasingInvoice;
+  | PurchasingInvoice
+  | Suppliers_ledger;
 
 export type nestedArray = {
   products: Product[];

@@ -52,7 +52,8 @@ export function useBreadcrumbs() {
       'categories',
       'invoices',
       'references',
-      'purchasing_invoices'
+      'purchasing_invoices',
+      'suppliers'
     ];
     const lastSegment = segments[segments.length - 1] || '';
     const type =
