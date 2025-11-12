@@ -78,6 +78,8 @@ export const updateSession = async (request: NextRequest) => {
       );
     }
 
+    // keep them separate as might need to add complex logic in future
+
     if (
       request.nextUrl.pathname.includes('overview') &&
       !user.error &&
@@ -100,6 +102,16 @@ export const updateSession = async (request: NextRequest) => {
 
     if (
       request.nextUrl.pathname.includes('references') &&
+      !user.error &&
+      currentRole !== 'super_admin'
+    ) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
+    }
+
+    if (
+      request.nextUrl.pathname.includes('suppliers') &&
       !user.error &&
       currentRole !== 'super_admin'
     ) {
