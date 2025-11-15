@@ -147,7 +147,7 @@ export default function PurchasingInvoiceForm({
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
             {/* Supplier Info */}
-            <div className='w-[25%]'>
+            <div className='md:w-[50%] lg:w-[25%]'>
               <h2 className='mb-2 text-xl font-semibold text-foreground'>
                 Supplier
               </h2>
@@ -185,7 +185,7 @@ export default function PurchasingInvoiceForm({
             </div>
 
             {/* Items */}
-            <div>
+            <div className='grid'>
               <div className='mb-4 flex items-center justify-between'>
                 <h2 className='text-xl font-semibold text-foreground'>
                   Purchased Items
@@ -209,7 +209,7 @@ export default function PurchasingInvoiceForm({
 
               <div className='overflow-x-auto rounded-lg border'>
                 <fieldset disabled={!!initialData}>
-                  <table className='w-full'>
+                  <table className='w-max lg:w-full'>
                     <thead>
                       <tr className='border-b bg-muted'>
                         <th className='w-[15%] px-4 py-3 text-left text-sm font-semibold'>
@@ -250,7 +250,7 @@ export default function PurchasingInvoiceForm({
                             className='border-b hover:bg-muted/50'
                           >
                             <td className='px-4 py-3'>
-                              <div className='flex gap-2'>
+                              <div className='flex gap-2 lg:w-max'>
                                 <FormField
                                   control={control}
                                   name={`purchasing_items.${index}.product_code`}
@@ -291,7 +291,7 @@ export default function PurchasingInvoiceForm({
                                     control={control}
                                     name={`purchasing_items.${index}.description`}
                                     render={({ field }) => (
-                                      <FormItem>
+                                      <FormItem className='w-auto lg:w-max'>
                                         <FormControl>
                                           <Input
                                             placeholder='Description'
@@ -324,7 +324,7 @@ export default function PurchasingInvoiceForm({
                                     control={control}
                                     name={`purchasing_items.${index}.price`}
                                     render={({ field }) => (
-                                      <FormItem>
+                                      <FormItem className='w-auto lg:w-max'>
                                         <FormControl>
                                           <Input
                                             type='number'

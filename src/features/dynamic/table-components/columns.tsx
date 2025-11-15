@@ -127,7 +127,9 @@ export const useColumns = <T extends Entity>(
         accessorKey: 'created_at',
         header: 'DATE',
         cell: ({ row }) => (
-          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
+          <span className='block w-max'>
+            {formatToPKTDate(row.getValue('created_at'))}
+          </span>
         )
       },
       {

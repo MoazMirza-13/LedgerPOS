@@ -242,7 +242,7 @@ export default function InvoiceForm({
               </div>
             </div>
             {/* Invoice Items */}
-            <div>
+            <div className='grid'>
               <div className='mb-4 flex items-center justify-between'>
                 <h2 className='text-xl font-semibold text-foreground'>
                   Invoice Items
@@ -268,7 +268,7 @@ export default function InvoiceForm({
 
               <div className='overflow-x-auto rounded-lg border'>
                 <fieldset disabled={!!initialData}>
-                  <table className='w-full'>
+                  <table className='w-max lg:w-full'>
                     <thead>
                       <tr className='border-b bg-muted'>
                         <th className='w-[20%] px-4 py-3 text-left text-sm font-semibold'>
@@ -303,7 +303,11 @@ export default function InvoiceForm({
                           key={field.id}
                           className='border-b hover:bg-muted/50'
                         >
-                          <td className='flex gap-2 px-4 py-3'>
+                          <td
+                            className={`flex gap-2 px-4 py-3 ${
+                              items[index].product ? 'w-[160px]' : 'w-[12rem]'
+                            }`}
+                          >
                             <FormField
                               control={control}
                               name={`invoice_items.${index}.product_code`}
@@ -342,7 +346,7 @@ export default function InvoiceForm({
                                   control={control}
                                   name={`invoice_items.${index}.boxes`}
                                   render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
                                       <FormControl>
                                         <Input
                                           type='number'
@@ -381,7 +385,7 @@ export default function InvoiceForm({
                                   control={control}
                                   name={`invoice_items.${index}.quantity`}
                                   render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
                                       <FormControl>
                                         <Input
                                           type='number'
@@ -418,7 +422,7 @@ export default function InvoiceForm({
                               <td className='px-4 py-3 text-center'>
                                 <Input
                                   readOnly
-                                  className='w-max cursor-default select-none bg-muted/40 text-center font-medium text-muted-foreground'
+                                  className='w-full cursor-default select-none bg-muted/40 text-center font-medium text-muted-foreground md:w-max'
                                   value={(() => {
                                     const itemsPerBox =
                                       items[index].product?.boxes || 1;
@@ -437,12 +441,12 @@ export default function InvoiceForm({
                                   placeholder='Total Quantity'
                                 />
                               </td>
-                              <td className='w-[16%] px-4 py-3'>
+                              <td className='relative w-[16%] px-4 py-3'>
                                 <FormField
                                   control={form.control}
                                   name={`invoice_items.${index}.warehouse`}
                                   render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className='w-max'>
                                       <Select
                                         onValueChange={(value) =>
                                           field.onChange(
@@ -511,7 +515,7 @@ export default function InvoiceForm({
                                   control={control}
                                   name={`invoice_items.${index}.price`}
                                   render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
                                       <FormControl>
                                         <Input
                                           type='number'
