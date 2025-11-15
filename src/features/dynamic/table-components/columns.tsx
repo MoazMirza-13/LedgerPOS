@@ -108,8 +108,10 @@ export const useColumns = <T extends Entity>(
           const minQuantity = product.min_quantity;
           return quantity > minQuantity ? '✅' : '❌';
         }
-      },
-      {
+      }
+    );
+    if (currentRole === 'super_admin') {
+      baseColumns.push({
         header: 'TOTAL',
         cell: ({ row }) => {
           const product = row.original as Product;
@@ -117,8 +119,8 @@ export const useColumns = <T extends Entity>(
           const totalStock = quantity * product.cost_price;
           return totalStock;
         }
-      }
-    );
+      });
+    }
   }
 
   if (type === 'invoices') {
