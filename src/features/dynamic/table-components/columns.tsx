@@ -47,15 +47,16 @@ export const useColumns = <T extends Entity>(
             Array.isArray(urls) && urls.length > 0 ? urls[0] : null;
 
           return (
-            <div className='relative aspect-square'>
+            <div className='relative h-[110px] w-[110px]'>
               {firstUrl && (
                 <Image
                   src={firstUrl}
                   alt='Product image'
-                  priority
+                  loading='lazy'
                   fill
                   className='rounded-lg object-contain'
                   sizes='(max-width: 768px) 100vw, 110px'
+                  quality={35}
                 />
               )}
             </div>

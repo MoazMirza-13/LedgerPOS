@@ -119,33 +119,31 @@ export async function productSubmit(
       revalidatePath('/dashboard/products');
       return { successUpdate: true };
     } else {
-      if (imgPaths.length > 0) {
-        const { error } = await supabase
-          .from('products')
-          .insert([
-            {
-              product_code: values.product,
-              cost_price: values.costPrice,
-              selling_price: values.sellingPrice,
-              img_url: imgPaths,
-              category_id: values.category ? values.category : null,
-              brand_id: values.brand ? values.brand : null,
-              min_quantity: values.minQuantity,
-              boxes: values.boxes,
-              quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
-              quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
-              quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
-              quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
-              quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
-              quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
-            }
-          ])
-          .select();
+      const { error } = await supabase
+        .from('products')
+        .insert([
+          {
+            product_code: values.product,
+            cost_price: values.costPrice,
+            selling_price: values.sellingPrice,
+            img_url: imgPaths,
+            category_id: values.category ? values.category : null,
+            brand_id: values.brand ? values.brand : null,
+            min_quantity: values.minQuantity,
+            boxes: values.boxes,
+            quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+            quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+            quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+            quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+            quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+            quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
+          }
+        ])
+        .select();
 
-        if (error) throw error;
-        revalidatePath('/dashboard/products');
-        return { successNew: true };
-      }
+      if (error) throw error;
+      revalidatePath('/dashboard/products');
+      return { successNew: true };
     }
   } catch (error: any) {
     return { error };
@@ -300,7 +298,7 @@ export const purchasingInvoiceSubmit = async (values: PurchasingInvoice) => {
       }
     );
 
-    if (error) console.log(error);
+    if (error) throw error;
     revalidatePath(`/dashboard/purchasing-invoices`);
     return { success: true };
   } catch (error: any) {

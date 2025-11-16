@@ -72,7 +72,7 @@ export default function ProductForm({
     categories?.find((c) => c.title === category)?.id || '';
 
   const defaultValues = {
-    image: null,
+    image: undefined,
     category: category
       ? String(categoryIdFromURL)
       : initialData?.category_id || '',
@@ -93,43 +93,24 @@ export default function ProductForm({
   };
 
   // Conditional image validation
-  const imageValidation = initialData
-    ? z
-        .any()
-        .optional()
-        .refine(
-          (files) =>
-            !files ||
-            (Array.isArray(files) &&
-              files.length <= 4 &&
-              files.every(
-                (file) =>
-                  file.size <= MAX_FILE_SIZE &&
-                  ACCEPTED_IMAGE_TYPES.includes(file.type)
-              )),
-          {
-            message:
-              'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
-          }
-        )
-    : z
-        .array(z.any())
-        .nullable()
-        .refine(
-          (files) => files !== null && files.length > 0,
-          'Image is required.'
-        )
-        .refine(
-          (files) =>
-            files === null ||
-            (files.length <= 4 &&
-              files.every(
-                (file: File) =>
-                  file.size <= MAX_FILE_SIZE &&
-                  ACCEPTED_IMAGE_TYPES.includes(file.type)
-              )),
-          'Each image must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
-        );
+  const imageValidation = z
+    .array(z.instanceof(File))
+    .optional()
+    .refine(
+      (files) =>
+        !files ||
+        (Array.isArray(files) &&
+          files.length <= 4 &&
+          files.every(
+            (file) =>
+              file.size <= MAX_FILE_SIZE &&
+              ACCEPTED_IMAGE_TYPES.includes(file.type)
+          )),
+      {
+        message:
+          'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
+      }
+    );
 
   const formSchema = z.object({
     image: imageValidation,
@@ -212,14 +193,6 @@ export default function ProductForm({
   };
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (imageSlots.every((slot) => slot === null)) {
-      form.setError('image', {
-        type: 'manual',
-        message: 'Image is required.'
-      });
-      return;
-    }
-
     startTransition(async () => {
       // Handle images - only upload new files, keep existing URLs
       const imgPaths: string[] = [];
@@ -474,15 +447,6 @@ export default function ProductForm({
                         value={
                           field.value === 0 && !initialData ? '' : field.value
                         }
-                        onChange={(e) => {
-                          const newValue = Number(e.target.value);
-                          const cost = form.getValues('costPrice');
-                          if (newValue < cost) {
-                            field.onChange(cost); // auto-fix to costPrice
-                          } else {
-                            field.onChange(newValue);
-                          }
-                        }}
                       />
                     </FormControl>
                     <FormMessage />

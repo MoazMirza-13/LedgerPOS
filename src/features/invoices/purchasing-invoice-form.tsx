@@ -56,14 +56,18 @@ export default function PurchasingInvoiceForm({
   });
 
   const formSchema = z.object({
-    supplier: z.string().min(1, 'Supplier required'),
+    supplier: z
+      .string()
+      .transform((v) => (v === '' ? null : v))
+      .nullable()
+      .optional(),
     purchasing_items: z.array(itemSchema).min(1)
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      supplier: initialData?.supplier || '',
+      supplier: initialData?.supplier || null,
       purchasing_items: initialData?.purchasing_invoice_items || []
     }
   });
@@ -117,7 +121,7 @@ export default function PurchasingInvoiceForm({
       const newInvoiceNumber = maxNum + 1;
 
       const payload = {
-        supplier: values.supplier,
+        supplier: values.supplier || null,
         total_price: totalPrice,
         invoice_number: newInvoiceNumber,
         purchasing_invoice_items: values.purchasing_items.map((item) => ({
@@ -159,7 +163,7 @@ export default function PurchasingInvoiceForm({
                     <Select
                       disabled={!!initialData}
                       onValueChange={field.onChange}
-                      value={field.value}
+                      value={field.value || ''}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -250,7 +254,7 @@ export default function PurchasingInvoiceForm({
                             className='border-b hover:bg-muted/50'
                           >
                             <td className='px-4 py-3'>
-                              <div className='flex gap-2 lg:w-max'>
+                              <div className='flex gap-2 lg:w-[125px]'>
                                 <FormField
                                   control={control}
                                   name={`purchasing_items.${index}.product_code`}
@@ -291,7 +295,7 @@ export default function PurchasingInvoiceForm({
                                     control={control}
                                     name={`purchasing_items.${index}.description`}
                                     render={({ field }) => (
-                                      <FormItem className='w-auto lg:w-max'>
+                                      <FormItem className='w-auto lg:w-[115px]'>
                                         <FormControl>
                                           <Input
                                             placeholder='Description'
@@ -324,7 +328,7 @@ export default function PurchasingInvoiceForm({
                                     control={control}
                                     name={`purchasing_items.${index}.price`}
                                     render={({ field }) => (
-                                      <FormItem className='w-auto lg:w-max'>
+                                      <FormItem className='w-auto lg:w-[70px]'>
                                         <FormControl>
                                           <Input
                                             type='number'

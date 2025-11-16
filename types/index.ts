@@ -94,7 +94,7 @@ export type PurchasingInvoice = {
   id?: string;
   total_price: number;
   created_at?: string;
-  supplier: string;
+  supplier?: string | null;
   invoice_number: number;
   purchasing_invoice_items: PurchasingInvoiceItems[];
   suppliers?: Supplier;
