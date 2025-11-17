@@ -102,11 +102,12 @@ export type PurchasingInvoice = {
 };
 
 export type PurchasingInvoiceItems = {
-  product_code: string;
+  product_code?: string;
   description?: string;
   quantity?: number;
   price: number;
-  warehouse_distribution: Partial<
+  optional_item?: string;
+  warehouse_distribution?: Partial<
     Record<(typeof warehouses)[number]['key'], number>
   >;
 };

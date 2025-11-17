@@ -48,11 +48,13 @@ export default function PurchasingInvoiceForm({
   const warehouseQtySchema = z.record(z.string(), z.coerce.number().min(0));
 
   const itemSchema = z.object({
-    product_code: z.string().min(1, 'Product code required'),
+    type: z.enum(['product', 'optional']).default('product'),
+    product_code: z.string().optional(),
     description: z.string().optional(),
     price: z.coerce.number().min(1),
-    warehouse_distribution: warehouseQtySchema,
-    product: z.any().optional()
+    warehouse_distribution: warehouseQtySchema.optional(),
+    product: z.any().optional(),
+    optional_item: z.string().optional()
   });
 
   const formSchema = z.object({
@@ -82,15 +84,19 @@ export default function PurchasingInvoiceForm({
 
   const calculateTotal = () => {
     return items.reduce((sum, item) => {
-      const totalQty = Object.values(item.warehouse_distribution || {}).reduce(
-        (a, b) => a + (Number(b) || 0),
-        0
-      );
-      return sum + totalQty * (item.price || 0);
+      const totalQty = item.warehouse_distribution
+        ? Object.values(item.warehouse_distribution).reduce(
+            (a, b) => a + (Number(b) || 0),
+            0
+          )
+        : 1; // optional items count as 1
+
+      return sum + totalQty * (Number(item.price) || 0);
     }, 0);
   };
 
   const handleGetProduct = async (index: number) => {
+    if (!items[index].product_code) return;
     const product = await getProductByCode(items[index].product_code);
     if (!product) {
       toast.error('Product not found');
@@ -128,7 +134,8 @@ export default function PurchasingInvoiceForm({
           product_code: item.product_code,
           description: item.description,
           price: item.price,
-          warehouse_distribution: item.warehouse_distribution
+          warehouse_distribution: item.warehouse_distribution,
+          optional_item: item.optional_item
         }))
       };
 
@@ -194,21 +201,44 @@ export default function PurchasingInvoiceForm({
                 <h2 className='text-xl font-semibold text-foreground'>
                   Purchased Items
                 </h2>
-                <Button
-                  type='button'
-                  disabled={!!initialData}
-                  onClick={() =>
-                    append({
-                      product_code: '',
-                      description: '',
-                      price: 0,
-                      warehouse_distribution: {}
-                    })
-                  }
-                  className='cursor-pointer gap-2'
-                >
-                  <Plus className='h-4 w-4' /> Add Item
-                </Button>
+                <div className='flex gap-2'>
+                  {/* Add Optional Item */}
+                  <Button
+                    type='button'
+                    disabled={!!initialData}
+                    onClick={() =>
+                      append({
+                        type: 'optional',
+                        optional_item: '',
+                        description: '',
+                        price: 0
+                      })
+                    }
+                    variant='outline'
+                    className='gap-2'
+                  >
+                    <Plus className='h-4 w-4' />
+                    Add Optional Item
+                  </Button>
+                  {/* Add Product Item */}
+                  <Button
+                    type='button'
+                    disabled={!!initialData}
+                    onClick={() =>
+                      append({
+                        type: 'product',
+                        product_code: '',
+                        description: '',
+                        price: 0,
+                        warehouse_distribution: {}
+                      })
+                    }
+                    className='gap-2'
+                  >
+                    <Plus className='h-4 w-4' />
+                    Add Item
+                  </Button>
+                </div>
               </div>
 
               <div className='overflow-x-auto rounded-lg border'>
@@ -255,40 +285,72 @@ export default function PurchasingInvoiceForm({
                           >
                             <td className='px-4 py-3'>
                               <div className='flex gap-2 lg:w-[125px]'>
-                                <FormField
-                                  control={control}
-                                  name={`purchasing_items.${index}.product_code`}
-                                  render={({ field }) => (
-                                    <FormItem className='w-full'>
-                                      <FormControl>
-                                        <Input
-                                          placeholder='Product'
-                                          disabled={items[index].product}
-                                          {...field}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                              e.preventDefault();
-                                              handleGetProduct(index);
-                                            }
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
-                                {!items[index].product && !initialData && (
-                                  <Button
-                                    type='button'
-                                    onClick={() => handleGetProduct(index)}
-                                    className='px-2'
-                                  >
-                                    GET
-                                  </Button>
+                                {/* type product */}
+                                {(items[index].type === 'product' ||
+                                  items[index].product_code) && (
+                                  <>
+                                    <FormField
+                                      control={control}
+                                      name={`purchasing_items.${index}.product_code`}
+                                      render={({ field }) => (
+                                        <FormItem className='w-full'>
+                                          <FormControl>
+                                            <Input
+                                              placeholder='Product'
+                                              disabled={items[index].product}
+                                              {...field}
+                                              onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                  e.preventDefault();
+                                                  handleGetProduct(index);
+                                                }
+                                              }}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </>
                                 )}
+
+                                {/* type optional */}
+                                {(items[index].type === 'optional' ||
+                                  items[index].optional_item) && (
+                                  <FormField
+                                    control={control}
+                                    name={`purchasing_items.${index}.optional_item`}
+                                    render={({ field }) => (
+                                      <FormItem className='w-full'>
+                                        <FormControl>
+                                          <Input
+                                            placeholder='Optional'
+                                            disabled={items[index].product}
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
+
+                                {items[index].type === 'product' &&
+                                  !items[index].product &&
+                                  !initialData && (
+                                    <Button
+                                      type='button'
+                                      onClick={() => handleGetProduct(index)}
+                                      className='px-2'
+                                    >
+                                      GET
+                                    </Button>
+                                  )}
                               </div>
                             </td>
 
-                            {items[index].product || initialData ? (
+                            {(items[index].type === 'product' &&
+                              items[index].product &&
+                              !initialData) ||
+                            (initialData && items[index].product_code) ? (
                               <>
                                 <td className='px-4 py-3'>
                                   <FormField
@@ -345,6 +407,54 @@ export default function PurchasingInvoiceForm({
                                   {(
                                     totalQty * (items[index].price || 0)
                                   ).toLocaleString()}
+                                </td>
+                              </>
+                            ) : items[index].type === 'optional' ||
+                              (initialData && items[index].optional_item) ? (
+                              <>
+                                {/* OPTIONAL ITEM UI */}
+                                <td className='px-4 py-3'>
+                                  <FormField
+                                    control={control}
+                                    name={`purchasing_items.${index}.description`}
+                                    render={({ field }) => (
+                                      <FormItem className='w-auto lg:w-[115px]'>
+                                        <FormControl>
+                                          <Input
+                                            placeholder='Description'
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td className='px-4 py-3 text-right'>
+                                  <FormField
+                                    control={control}
+                                    name={`purchasing_items.${index}.price`}
+                                    render={({ field }) => (
+                                      <FormItem className='w-auto lg:w-[70px]'>
+                                        <FormControl>
+                                          <Input
+                                            type='number'
+                                            min='0'
+                                            {...field}
+                                            className='text-right'
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </td>
+                                <td className='px-4 py-3 text-right font-semibold'>
+                                  {(items[index].price || 0).toLocaleString()}
                                 </td>
                               </>
                             ) : (

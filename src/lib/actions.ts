@@ -295,7 +295,8 @@ export const purchasingInvoiceSubmit = async (values: PurchasingInvoice) => {
           product_code: item.product_code,
           description: item.description,
           price: item.price,
-          warehouse_distribution: item.warehouse_distribution
+          warehouse_distribution: item.warehouse_distribution,
+          optional_item: item.optional_item
         }))
       }
     );
