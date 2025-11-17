@@ -250,11 +250,13 @@ export const invoiceSubmit = async (
             quantity: item.quantity,
             boxes: item.boxes,
             price: item.price,
-            warehouse: item.warehouse
+            warehouse: item.warehouse,
+            optional_item: item.optional_item
           })),
           ...(values.reference !== '' ? { reference: values.reference } : {})
         }
       );
+
       if (error) throw error;
       revalidatePath(`/dashboard/invoices`);
       return { successNew: true };

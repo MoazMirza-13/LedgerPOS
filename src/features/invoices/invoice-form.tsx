@@ -49,16 +49,29 @@ export default function InvoiceForm({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const invoiceItemSchema = z.object({
-    product_code: z.string().min(1, {
-      message: 'Product code is required'
-    }),
-    quantity: z.coerce.number().min(1),
-    boxes: z.coerce.number().optional(),
-    price: z.coerce.number().min(1),
-    warehouse: z.string().min(1, 'Warehouse is required'),
-    product: z.any().optional()
-  });
+  const invoiceItemSchema = z
+    .object({
+      type: z.enum(['product', 'optional']).default('product'),
+      product_code: z.string().optional(),
+      optional_item: z.string().optional(),
+      quantity: z.coerce.number().min(1),
+      boxes: z.coerce.number().optional(),
+      price: z.coerce.number().min(1),
+      warehouse: z.string().optional(),
+      product: z.any().optional()
+    })
+    .refine(
+      (item) => {
+        if (item.type === 'product') {
+          return !!item.warehouse; // required
+        }
+        return true; // optional item doesn't need warehouse
+      },
+      {
+        message: 'Warehouse is required for product items',
+        path: ['warehouse']
+      }
+    );
 
   const formSchema = z.object({
     customer_name: z.string().min(1, 'Customer name is required'),
@@ -75,7 +88,12 @@ export default function InvoiceForm({
       customer_number: initialData?.customer_number || '',
       customer_address: initialData?.customer_address || '',
       reference: initialData?.reference || '',
-      invoice_items: initialData?.invoice_items || []
+      invoice_items:
+        initialData?.invoice_items?.map((item) => ({
+          ...item,
+          type: item.product_code ? 'product' : 'optional',
+          product: undefined // will be loaded later
+        })) || []
     }
   });
 
@@ -97,19 +115,21 @@ export default function InvoiceForm({
       const duplicates: { code: string; warehouse: string }[] = [];
 
       for (const item of values.invoice_items) {
-        if (item.price < item.product?.cost_price) {
-          toast.error(toastMsg.error);
-          return;
-        }
+        if (item.type === 'product') {
+          if (item.price < item.product?.cost_price) {
+            toast.error(toastMsg.error);
+            return;
+          }
 
-        const key = `${item.product_code}_${item.warehouse}`;
-        if (seen.has(key)) {
-          duplicates.push({
-            code: item.product_code,
-            warehouse: item.warehouse
-          });
-        } else {
-          seen.add(key);
+          const key = `${item.product_code}_${item.warehouse}`;
+          if (seen.has(key)) {
+            duplicates.push({
+              code: item.product_code!,
+              warehouse: item.warehouse!
+            });
+          } else {
+            seen.add(key);
+          }
         }
       }
 
@@ -155,8 +175,9 @@ export default function InvoiceForm({
   };
 
   const handleGetProduct = async (index: number) => {
-    const product = await getProductByCode(items[index].product_code);
+    if (!items[index].product_code) return;
 
+    const product = await getProductByCode(items[index].product_code);
     if (!product) {
       toast.error('Product not found');
       return;
@@ -170,9 +191,9 @@ export default function InvoiceForm({
     const loadProductsForInitialData = async () => {
       if (initialData && initialData.invoice_items) {
         for (let i = 0; i < initialData.invoice_items.length; i++) {
-          const product = await getProductByCode(
-            initialData.invoice_items[i].product_code
-          );
+          const code = initialData.invoice_items[i].product_code;
+          if (!code) continue;
+          const product = await getProductByCode(code);
           if (product) {
             form.setValue(`invoice_items.${i}.product`, product);
           }
@@ -247,23 +268,46 @@ export default function InvoiceForm({
                 <h2 className='text-xl font-semibold text-foreground'>
                   Invoice Items
                 </h2>
-                <Button
-                  type='button'
-                  disabled={!!initialData}
-                  onClick={() =>
-                    append({
-                      product_code: '',
-                      quantity: 0,
-                      boxes: 0,
-                      price: 0,
-                      warehouse: ''
-                    })
-                  }
-                  className='gap-2'
-                >
-                  <Plus className='h-4 w-4' />
-                  Add Item
-                </Button>
+
+                <div className='flex gap-2'>
+                  {/* Add Optional Item */}
+                  <Button
+                    type='button'
+                    disabled={!!initialData}
+                    onClick={() =>
+                      append({
+                        type: 'optional',
+                        optional_item: '',
+                        quantity: 1,
+                        price: 0
+                      })
+                    }
+                    variant='outline'
+                    className='gap-2'
+                  >
+                    <Plus className='h-4 w-4' />
+                    Add Optional Item
+                  </Button>
+                  {/* Add Product Item */}
+                  <Button
+                    type='button'
+                    disabled={!!initialData}
+                    onClick={() =>
+                      append({
+                        type: 'product',
+                        product_code: '',
+                        quantity: 0,
+                        boxes: 0,
+                        price: 0,
+                        warehouse: ''
+                      })
+                    }
+                    className='gap-2'
+                  >
+                    <Plus className='h-4 w-4' />
+                    Add Item
+                  </Button>
+                </div>
               </div>
 
               <div className='overflow-x-auto rounded-lg border'>
@@ -308,38 +352,63 @@ export default function InvoiceForm({
                               items[index].product ? 'w-[160px]' : 'w-[12rem]'
                             }`}
                           >
-                            <FormField
-                              control={control}
-                              name={`invoice_items.${index}.product_code`}
-                              render={({ field }) => (
-                                <FormItem className='w-full'>
-                                  <FormControl>
-                                    <Input
-                                      placeholder='Product Code'
-                                      {...field}
-                                      disabled={items[index].product}
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          e.preventDefault();
-                                          handleGetProduct(index);
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            {!items[index].product && !initialData && (
-                              <Button
-                                type='button'
-                                onClick={() => handleGetProduct(index)}
-                                className='px-2'
-                              >
-                                GET
-                              </Button>
+                            {items[index].type === 'product' && (
+                              <FormField
+                                control={control}
+                                name={`invoice_items.${index}.product_code`}
+                                render={({ field }) => (
+                                  <FormItem className='w-full'>
+                                    <FormControl>
+                                      <Input
+                                        placeholder='Product Code'
+                                        {...field}
+                                        disabled={items[index].product}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleGetProduct(index);
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
                             )}
+                            {/* optional item field */}
+                            {items[index].type === 'optional' && (
+                              <FormField
+                                control={control}
+                                name={`invoice_items.${index}.optional_item`}
+                                render={({ field }) => (
+                                  <FormItem className='w-full'>
+                                    <FormControl>
+                                      <Input
+                                        placeholder='Optional Item'
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+
+                            {items[index].type === 'product' &&
+                              !items[index].product &&
+                              !initialData && (
+                                <Button
+                                  type='button'
+                                  onClick={() => handleGetProduct(index)}
+                                  className='px-2'
+                                >
+                                  GET
+                                </Button>
+                              )}
                           </td>
-                          {items[index].product || initialData ? (
+
+                          {(items[index].type === 'product' &&
+                            items[index].product) ||
+                          (initialData && items[index].type === 'product') ? (
                             <>
                               <td className='px-4 py-3'>
                                 <FormField
@@ -530,12 +599,16 @@ export default function InvoiceForm({
                                             const value = Number(
                                               e.target.value
                                             );
-                                            const minPrice =
-                                              items[index].product
-                                                ?.cost_price ?? 0;
 
-                                            if (value < minPrice) {
-                                              field.onChange(minPrice);
+                                            if (
+                                              items[index].type === 'product'
+                                            ) {
+                                              const minPrice =
+                                                items[index].product
+                                                  ?.cost_price ?? 0;
+                                              field.onChange(
+                                                Math.max(value, minPrice)
+                                              );
                                             } else {
                                               field.onChange(value);
                                             }
@@ -556,6 +629,59 @@ export default function InvoiceForm({
                                 })}
                               </td>
                             </>
+                          ) : items[index].type === 'optional' ? (
+                            <>
+                              <td></td>
+                              {/* OPTIONAL ITEM UI */}
+                              <td className='flex justify-center px-4 py-3'>
+                                <FormField
+                                  control={control}
+                                  name={`invoice_items.${index}.quantity`}
+                                  render={({ field }) => (
+                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
+                                      <FormControl>
+                                        <Input
+                                          type='number'
+                                          min='0'
+                                          className='text-center'
+                                          {...field}
+                                          placeholder='Qty'
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+
+                              <td></td>
+                              <td></td>
+
+                              <td className='px-4 py-3'>
+                                <FormField
+                                  control={control}
+                                  name={`invoice_items.${index}.price`}
+                                  render={({ field }) => (
+                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
+                                      <FormControl>
+                                        <Input
+                                          type='number'
+                                          min='0'
+                                          className='text-right'
+                                          {...field}
+                                          placeholder='Price'
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </td>
+
+                              <td className='px-4 py-3 text-right font-semibold'>
+                                {(
+                                  items[index].quantity * items[index].price
+                                ).toLocaleString()}
+                              </td>
+                            </>
                           ) : (
                             <>
                               <td></td>
@@ -566,6 +692,7 @@ export default function InvoiceForm({
                               <td></td>
                             </>
                           )}
+
                           <td className='px-4 py-3 text-center'>
                             <button
                               type='button'
@@ -653,7 +780,11 @@ export default function InvoiceForm({
             <div className='flex gap-4 pt-4'>
               <Button
                 type='submit'
-                disabled={!form.formState.isValid || isPending || !isDirty}
+                disabled={
+                  isPending ||
+                  !isDirty ||
+                  (!initialData && !form.formState.isValid)
+                }
                 className='bg-primary text-primary-foreground hover:bg-primary/90'
               >
                 {isPending ? (

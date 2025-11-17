@@ -55,7 +55,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
           <thead>
             <tr class="bg-teal-50 border-b-2 border-teal-500">
               <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Product</th>
-                <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Box</th>
+              <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Box</th>
               <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Piece</th>
               <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Total Quantity</th>
               <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Warehouse</th>
@@ -68,8 +68,10 @@ export async function printInvoice(finalData: Invoice, date?: string) {
               .map(
                 (item: any) => `
                 <tr class="border-b border-slate-200 hover:bg-slate-50">
-                  <td class="px-4 py-3 text-sm font-medium text-slate-900">${item.product_code}</td>
-                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.boxes}</td>
+                  <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                    ${item.product_code ? item.product_code : item.optional_item}
+                  </td>
+                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.product_code ? item.boxes : ''}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.quantity}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-center">
                   ${(() => {
@@ -77,13 +79,14 @@ export async function printInvoice(finalData: Invoice, date?: string) {
                     const totalPieces = item.quantity || 0;
                     const boxes = Math.floor(totalPieces / itemsPerBox);
                     const pieces = totalPieces % itemsPerBox;
-                    if (!totalPieces) return '-';
+                    if (!totalPieces) return '';
+                    if (!item.product_code) return '';
                     return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
                       boxes && pieces ? ' and ' : ''
                     }${pieces ? pieces + ' Piece' + (pieces > 1 ? 's' : '') : ''}`;
                   })()}
                 </td>
-                  <td class="px-4 py-3 text-sm text-slate-600">${item.warehouse}</td>
+                  <td class="px-4 py-3 text-sm text-slate-600">${item.product_code ? item.warehouse : ''}</td>
                   <td class="px-4 py-3 text-sm text-slate-700 text-right">Rs. ${item.price}</td>
                   <td class="px-4 py-3 text-sm font-semibold text-slate-900 text-right">
                     Rs. ${item.quantity * item.price}
