@@ -52,12 +52,12 @@ export default function InvoiceForm({
   const invoiceItemSchema = z
     .object({
       type: z.enum(['product', 'optional']).default('product'),
-      product_code: z.string().optional(),
-      optional_item: z.string().optional(),
+      product_code: z.string().optional().nullable(),
+      optional_item: z.string().optional().nullable(),
       quantity: z.coerce.number().min(1),
-      boxes: z.coerce.number().optional(),
+      boxes: z.coerce.number().optional().nullable(),
       price: z.coerce.number().min(1),
-      warehouse: z.string().optional(),
+      warehouse: z.string().optional().nullable(),
       product: z.any().optional()
     })
     .refine(
@@ -362,6 +362,7 @@ export default function InvoiceForm({
                                       <Input
                                         placeholder='Product Code'
                                         {...field}
+                                        value={field.value ?? ''}
                                         disabled={items[index].product}
                                         onKeyDown={(e) => {
                                           if (e.key === 'Enter') {
@@ -386,6 +387,7 @@ export default function InvoiceForm({
                                       <Input
                                         placeholder='Optional Item'
                                         {...field}
+                                        value={field.value ?? ''}
                                       />
                                     </FormControl>
                                   </FormItem>
@@ -425,7 +427,7 @@ export default function InvoiceForm({
                                           value={
                                             field.value === 0 && !initialData
                                               ? ''
-                                              : field.value
+                                              : (field.value ?? '')
                                           }
                                           placeholder='Add Box'
                                           onChange={(e) => {

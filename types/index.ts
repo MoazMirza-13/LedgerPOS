@@ -82,13 +82,13 @@ export type Invoice = {
 };
 
 export type Invoice_items = {
-  product_code?: string;
-  description?: string;
+  product_code?: string | null;
+  description?: string | null;
   quantity: number;
   price: number;
-  boxes?: number;
-  warehouse?: string;
-  optional_item?: string;
+  boxes?: number | null;
+  warehouse?: string | null;
+  optional_item?: string | null;
 };
 
 export type PurchasingInvoice = {
