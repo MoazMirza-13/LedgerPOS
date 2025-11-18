@@ -57,6 +57,13 @@ export async function signOut() {
   redirect('/');
 }
 
+export async function forceLogoutAllUsers() {
+  const supabase = await createClient();
+  await supabase.rpc('force_logout_all_users');
+  (await cookies()).delete('currentRole');
+  redirect('/');
+}
+
 export async function getUserSession() {
   const supabase = await createClient();
   const { data: user, error } = await supabase.auth.getUser();
