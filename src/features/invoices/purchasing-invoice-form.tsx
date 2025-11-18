@@ -201,7 +201,7 @@ export default function PurchasingInvoiceForm({
                 <h2 className='text-xl font-semibold text-foreground'>
                   Purchased Items
                 </h2>
-                <div className='flex gap-2'>
+                <div className='flex flex-col gap-2 md:flex-row'>
                   {/* Add Optional Item */}
                   <Button
                     type='button'
@@ -373,7 +373,7 @@ export default function PurchasingInvoiceForm({
                                     <Input
                                       type='number'
                                       min='0'
-                                      className='text-center'
+                                      className='w-auto text-center lg:w-[75px]'
                                       value={dist[wh.key] || ''}
                                       onChange={(e) => {
                                         const val = Number(e.target.value) || 0;
@@ -390,7 +390,7 @@ export default function PurchasingInvoiceForm({
                                     control={control}
                                     name={`purchasing_items.${index}.price`}
                                     render={({ field }) => (
-                                      <FormItem className='w-auto lg:w-[70px]'>
+                                      <FormItem className='w-auto lg:w-[75px]'>
                                         <FormControl>
                                           <Input
                                             type='number'
