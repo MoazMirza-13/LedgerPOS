@@ -268,17 +268,27 @@ export const invoiceSubmit = async (
       revalidatePath(`/dashboard/invoices`);
       return { successNew: true };
     } else {
-      const { error } = await supabase
-        .from('invoices')
-        .update([
-          {
-            customer_name: values.customer_name,
-            customer_number: values.customer_number,
-            customer_address: values.customer_address
-          }
-        ])
-        .eq('id', initialData.id)
-        .select();
+      const { error } = await supabase.rpc(
+        'update_invoice_with_items_warehouse',
+        {
+          p_invoice_id: initialData.id,
+          p_customer_name: values.customer_name,
+          p_customer_number: values.customer_number,
+          p_customer_address: values.customer_address,
+          p_total_price: values.total_price,
+          p_reference: values.reference,
+          p_items: values.invoice_items.map((item) => ({
+            product_code: item.product_code,
+            description: item.description,
+            quantity: item.quantity,
+            boxes: item.boxes,
+            price: item.price,
+            warehouse: item.warehouse,
+            optional_item: item.optional_item
+          }))
+        }
+      );
+
       if (error) throw error;
       revalidatePath(`/dashboard/invoices`);
       return { successUpdate: true };

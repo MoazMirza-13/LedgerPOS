@@ -46,6 +46,9 @@ export default function InvoiceForm({
   references: Reference[] | null;
 }) {
   const [productsLoaded, setProductsLoaded] = useState(!initialData);
+  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
+  const [adminPass, setAdminPass] = useState('');
+
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -206,112 +209,159 @@ export default function InvoiceForm({
   }, [form, initialData]);
 
   return (
-    <Card className='mx-auto w-full'>
-      <CardHeader>
-        <CardTitle className='mb-4 text-left text-2xl font-bold'>
-          {pageTitle}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
-            {/* Customer Information */}
-            <div>
-              <h2 className='mb-4 text-xl font-semibold text-foreground'>
-                Customer Information
-              </h2>
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-                <FormField
-                  control={control}
-                  name='customer_name'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Customer Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter customer name' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name='customer_number'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter phone number' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name='customer_address'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter address' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+    <>
+      {showPasswordPopup && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
+          <div className='w-80 space-y-4 rounded-lg bg-white p-6 shadow-lg'>
+            <h2 className='text-lg font-semibold'>Super Admin Password</h2>
+            <Input
+              type='password'
+              placeholder='Enter Password'
+              value={adminPass}
+              onChange={(e) => setAdminPass(e.target.value)}
+            />
+            <div className='flex justify-end gap-2'>
+              <Button
+                variant='outline'
+                onClick={() => {
+                  setShowPasswordPopup(false);
+                  setAdminPass('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (adminPass === 'super123') {
+                    setShowPasswordPopup(false);
+                    handleSubmit(onSubmit)();
+                  } else {
+                    toast.error(toastMsg.error);
+                  }
+                }}
+              >
+                Submit
+              </Button>
             </div>
-            {/* Invoice Items */}
-            <div className='grid'>
-              <div className='mb-4 flex items-center justify-between'>
-                <h2 className='text-xl font-semibold text-foreground'>
-                  Invoice Items
-                </h2>
+          </div>
+        </div>
+      )}
 
-                <div className='flex gap-2'>
-                  {/* Add Optional Item */}
-                  <Button
-                    type='button'
-                    disabled={!!initialData}
-                    onClick={() =>
-                      append({
-                        type: 'optional',
-                        optional_item: '',
-                        quantity: 1,
-                        price: 0
-                      })
-                    }
-                    variant='outline'
-                    className='gap-2'
-                  >
-                    <Plus className='h-4 w-4' />
-                    Add Optional Item
-                  </Button>
-                  {/* Add Product Item */}
-                  <Button
-                    type='button'
-                    disabled={!!initialData}
-                    onClick={() =>
-                      append({
-                        type: 'product',
-                        product_code: '',
-                        quantity: 0,
-                        boxes: 0,
-                        price: 0,
-                        warehouse: ''
-                      })
-                    }
-                    className='gap-2'
-                  >
-                    <Plus className='h-4 w-4' />
-                    Add Item
-                  </Button>
+      <Card className='mx-auto w-full'>
+        <CardHeader>
+          <CardTitle className='mb-4 text-left text-2xl font-bold'>
+            {pageTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+
+                if (initialData) {
+                  setShowPasswordPopup(true);
+                  return;
+                }
+
+                handleSubmit(onSubmit)();
+              }}
+              className='space-y-8'
+            >
+              {/* Customer Information */}
+              <div>
+                <h2 className='mb-4 text-xl font-semibold text-foreground'>
+                  Customer Information
+                </h2>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                  <FormField
+                    control={control}
+                    name='customer_name'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder='Enter customer name' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={control}
+                    name='customer_number'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder='Enter phone number' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={control}
+                    name='customer_address'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder='Enter address' {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
+              {/* Invoice Items */}
+              <div className='grid'>
+                <div className='mb-4 flex items-center justify-between'>
+                  <h2 className='text-xl font-semibold text-foreground'>
+                    Invoice Items
+                  </h2>
 
-              <div className='overflow-x-auto rounded-lg border'>
-                <fieldset disabled={!!initialData}>
+                  <div className='flex gap-2'>
+                    {/* Add Optional Item */}
+                    <Button
+                      type='button'
+                      onClick={() =>
+                        append({
+                          type: 'optional',
+                          optional_item: '',
+                          quantity: 1,
+                          price: 0
+                        })
+                      }
+                      variant='outline'
+                      className='gap-2'
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Optional Item
+                    </Button>
+                    {/* Add Product Item */}
+                    <Button
+                      type='button'
+                      onClick={() =>
+                        append({
+                          type: 'product',
+                          product_code: '',
+                          quantity: 0,
+                          boxes: 0,
+                          price: 0,
+                          warehouse: ''
+                        })
+                      }
+                      className='gap-2'
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Item
+                    </Button>
+                  </div>
+                </div>
+
+                <div className='overflow-x-auto rounded-lg border'>
                   <table className='w-max lg:w-full'>
                     <thead>
                       <tr className='border-b bg-muted'>
@@ -363,7 +413,11 @@ export default function InvoiceForm({
                                         placeholder='Product Code'
                                         {...field}
                                         value={field.value ?? ''}
-                                        disabled={items[index].product}
+                                        disabled={
+                                          items[index].product ||
+                                          !!initialData?.invoice_items[index]
+                                            ?.product_code
+                                        }
                                         onKeyDown={(e) => {
                                           if (e.key === 'Enter') {
                                             e.preventDefault();
@@ -397,7 +451,8 @@ export default function InvoiceForm({
 
                             {items[index].type === 'product' &&
                               !items[index].product &&
-                              !initialData && (
+                              !initialData?.invoice_items[index]
+                                ?.product_code && (
                                 <Button
                                   type='button'
                                   onClick={() => handleGetProduct(index)}
@@ -410,7 +465,8 @@ export default function InvoiceForm({
 
                           {(items[index].type === 'product' &&
                             items[index].product) ||
-                          (initialData && items[index].type === 'product') ? (
+                          (initialData?.invoice_items[index]?.product_code &&
+                            items[index].type === 'product') ? (
                             <>
                               <td className='px-4 py-3'>
                                 <FormField
@@ -567,11 +623,9 @@ export default function InvoiceForm({
                                                 className='flex cursor-pointer justify-between'
                                               >
                                                 <span>{warehouse.label} </span>
-                                                {!initialData && (
-                                                  <span className='text-sm text-muted-foreground'>
-                                                    ({qty})
-                                                  </span>
-                                                )}
+                                                <span className='text-sm text-muted-foreground'>
+                                                  ({qty})
+                                                </span>
                                               </SelectItem>
                                             );
                                           })}
@@ -709,118 +763,118 @@ export default function InvoiceForm({
                       ))}
                     </tbody>
                   </table>
-                </fieldset>
-              </div>
-            </div>
-
-            {/* Summary Section */}
-            <div className='flex flex-col justify-end gap-4'>
-              <div className='w-full space-y-4 rounded-lg bg-muted p-6 md:w-80'>
-                <div className='flex items-center justify-between'>
-                  <span className='font-medium'>Subtotal:</span>
-                  <span className='font-semibold'>
-                    {/* $ */}
-                    {calculateTotal().toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2
-                    })}
-                  </span>
                 </div>
-                <div className='border-t pt-4'>
+              </div>
+
+              {/* Summary Section */}
+              <div className='flex flex-col justify-end gap-4'>
+                <div className='w-full space-y-4 rounded-lg bg-muted p-6 md:w-80'>
                   <div className='flex items-center justify-between'>
-                    <span className='text-lg font-bold'>Total:</span>
-                    <span className='text-lg font-bold text-primary'>
-                      {/* $*/}
+                    <span className='font-medium'>Subtotal:</span>
+                    <span className='font-semibold'>
+                      {/* $ */}
                       {calculateTotal().toLocaleString(undefined, {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 2
                       })}
                     </span>
                   </div>
+                  <div className='border-t pt-4'>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-lg font-bold'>Total:</span>
+                      <span className='text-lg font-bold text-primary'>
+                        {/* $*/}
+                        {calculateTotal().toLocaleString(undefined, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
+                  <FormField
+                    control={form.control}
+                    name={`reference`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(value === 'null' ? '' : value)
+                          }
+                          value={field.value ? String(field.value) : ''}
+                          disabled={!!initialData}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Reference' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className='max-h-60 overflow-y-auto'>
+                            <SelectItem value='null'>None</SelectItem>
+                            <SelectGroup>
+                              {references?.map((reference) => (
+                                <SelectItem
+                                  key={reference.id}
+                                  value={String(reference.id)}
+                                  className='cursor-pointer'
+                                >
+                                  {reference.name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-                <FormField
-                  control={form.control}
-                  name={`reference`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(value === 'null' ? '' : value)
-                        }
-                        value={field.value ? String(field.value) : ''}
-                        disabled={!!initialData}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Reference' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className='max-h-60 overflow-y-auto'>
-                          <SelectItem value='null'>None</SelectItem>
-                          <SelectGroup>
-                            {references?.map((reference) => (
-                              <SelectItem
-                                key={reference.id}
-                                value={String(reference.id)}
-                                className='cursor-pointer'
-                              >
-                                {reference.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
 
-            {/* Buttons */}
-            <div className='flex gap-4 pt-4'>
-              <Button
-                type='submit'
-                disabled={
-                  isPending ||
-                  !isDirty ||
-                  (!initialData && !form.formState.isValid)
-                }
-                className='bg-primary text-primary-foreground hover:bg-primary/90'
-              >
-                {isPending ? (
-                  <div className='flex gap-2'>
-                    {initialData ? 'Editing' : 'Adding'}
-                    <LoaderCircle className='h-5 w-5 animate-spin' />
-                  </div>
-                ) : initialData ? (
-                  'Edit Invoice'
-                ) : (
-                  'Add Invoice'
-                )}
-              </Button>
-              {initialData && (
+              {/* Buttons */}
+              <div className='flex gap-4 pt-4'>
                 <Button
-                  type='button'
-                  variant='outline'
-                  disabled={!productsLoaded}
-                  onClick={() => {
-                    const values = form.getValues();
-                    const printableInvoice = {
-                      ...initialData,
-                      invoice_items: values.invoice_items
-                    };
-                    printInvoice(printableInvoice, initialData.created_at);
-                  }}
+                  type='submit'
+                  disabled={
+                    isPending ||
+                    !isDirty ||
+                    (!initialData && !form.formState.isValid)
+                  }
+                  className='bg-primary text-primary-foreground hover:bg-primary/90'
                 >
-                  Print Invoice
+                  {isPending ? (
+                    <div className='flex gap-2'>
+                      {initialData ? 'Editing' : 'Adding'}
+                      <LoaderCircle className='h-5 w-5 animate-spin' />
+                    </div>
+                  ) : initialData ? (
+                    'Edit Invoice'
+                  ) : (
+                    'Add Invoice'
+                  )}
                 </Button>
-              )}
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                {initialData && (
+                  <Button
+                    type='button'
+                    variant='outline'
+                    disabled={!productsLoaded}
+                    onClick={() => {
+                      const values = form.getValues();
+                      const printableInvoice = {
+                        ...initialData,
+                        invoice_items: values.invoice_items
+                      };
+                      printInvoice(printableInvoice, initialData.created_at);
+                    }}
+                  >
+                    Print Invoice
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </>
   );
 }
