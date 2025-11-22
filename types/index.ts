@@ -79,6 +79,7 @@ export type Invoice = {
   reference?: string;
   invoice_number?: number;
   references?: Reference;
+  edited?: boolean;
 };
 
 export type Invoice_items = {

@@ -150,7 +150,17 @@ export default function InvoiceForm({
       const totalPrice = calculateTotal();
 
       let newInvoiceNumber;
-      if (!initialData) {
+      if (initialData) {
+        // Editing existing invoice
+        const maxInvoiceNumber = await getMaxInvoiceNumber('invoices');
+
+        if (initialData.invoice_number !== maxInvoiceNumber) {
+          //only recent invoice is editable
+          toast.error(toastMsg.error);
+          return;
+        }
+      } else {
+        // Creating new invoice
         const maxInvoiceNumber = await getMaxInvoiceNumber('invoices');
         newInvoiceNumber = maxInvoiceNumber + 1;
       }

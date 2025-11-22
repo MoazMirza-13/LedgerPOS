@@ -2,7 +2,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
-import { itemData, itemTable, Product } from 'types';
+import { Invoice, itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
 import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
@@ -138,11 +138,22 @@ export const useColumns = <T extends Entity>(
       {
         accessorKey: 'invoice_number',
         header: '#',
-        cell: ({ row }) => (
-          <Link href={`/dashboard/${type}/${row.original.id}`}>
-            {row.getValue('invoice_number')}
-          </Link>
-        )
+        cell: ({ row }) => {
+          const invoice = row.original as Invoice;
+          return (
+            <Link
+              href={`/dashboard/${type}/${invoice.id}`}
+              className='flex items-center gap-1'
+            >
+              {row.getValue('invoice_number')}
+              {invoice.edited && (
+                <span className='rounded bg-gray-400 px-1 text-xs font-bold text-white'>
+                  E
+                </span>
+              )}
+            </Link>
+          );
+        }
       },
       { accessorKey: 'customer_name', header: 'CUSTOMER NAME' },
       { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
