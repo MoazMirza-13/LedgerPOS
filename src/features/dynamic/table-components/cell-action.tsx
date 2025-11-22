@@ -35,6 +35,7 @@ export const CellAction: React.FC<CellActionProps> = ({
 
   const referenceRoute = pathname.includes('/references');
   const supplierRoute = pathname.includes('/suppliers');
+  const invoicesRoute = pathname.includes('invoices');
 
   const forNavigatingURL = itemTable.replace(/_/g, '-');
 
@@ -76,9 +77,11 @@ export const CellAction: React.FC<CellActionProps> = ({
               <Edit className='mr-2 h-4 w-4' /> Edit
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className='mr-2 h-4 w-4' /> Delete
-          </DropdownMenuItem>
+          {!invoicesRoute && (
+            <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Trash className='mr-2 h-4 w-4' /> Delete
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
