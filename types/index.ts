@@ -89,6 +89,8 @@ export type Invoice_items = {
   boxes?: number | null;
   warehouse?: string | null;
   optional_item?: string | null;
+  invoice_id?: string;
+  product_id?: string;
 };
 
 export type PurchasingInvoice = {
@@ -150,6 +152,23 @@ export type Suppliers_ledger = {
   supplier_id: string;
   created_at: string;
 };
+
+export interface ProfitData {
+  invoiceId: string;
+  invoiceNumber: number;
+  customerName: string;
+  date: string;
+  reference: string;
+  referenceName: string;
+  items: {
+    productCode: string;
+    quantity: number;
+    sellingPrice: number;
+    costPrice: number;
+    profit: number;
+  }[];
+  totalProfit: number;
+}
 
 export type itemTable =
   | 'categories'

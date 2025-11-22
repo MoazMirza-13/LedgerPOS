@@ -15,6 +15,12 @@ export const navItems: NavItem[] = [
         url: '/dashboard/overview/low-stock-products',
         isActive: false,
         group: 'Overview'
+      },
+      {
+        title: 'Profit',
+        url: '/dashboard/overview/profit',
+        isActive: false,
+        group: 'Overview'
       }
     ]
   },
