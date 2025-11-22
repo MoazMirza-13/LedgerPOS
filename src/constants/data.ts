@@ -9,7 +9,14 @@ export const navItems: NavItem[] = [
     shortcut: ['g', 'd'],
     isActive: false,
     group: 'Overview',
-    items: [] // Empty array as there are no child items for Dashboard
+    items: [
+      {
+        title: 'Low Stock Products',
+        url: '/dashboard/overview/low-stock-products',
+        isActive: false,
+        group: 'Overview'
+      }
+    ]
   },
   {
     title: 'Products',
