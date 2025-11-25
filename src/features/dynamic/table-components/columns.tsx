@@ -102,7 +102,7 @@ export const useColumns = <T extends Entity>(
       },
       { accessorKey: 'selling_price', header: 'SELLING' },
       {
-        header: 'Stock',
+        header: 'STOCK',
         cell: ({ row }) => {
           const product = row.original as Product;
           const quantity = row.getValue('QUANTITY') as number;
@@ -114,12 +114,19 @@ export const useColumns = <T extends Entity>(
     if (currentRole === 'super_admin') {
       baseColumns.push({
         header: 'TOTAL',
-        cell: ({ row }) => {
-          const product = row.original as Product;
-          const quantity = row.getValue('QUANTITY') as number;
-          const totalStock = quantity * product.cost_price;
-          return totalStock;
-        }
+        accessorFn: (row) => {
+          const product = row as Product;
+          const quantity =
+            (product.quantity_in_zafarwal || 0) +
+            (product.quantity_in_ghaziwal || 0) +
+            (product.quantity_in_lhr_road || 0) +
+            (product.quantity_in_eidgah_road || 0) +
+            (product.quantity_in_mandi_tile || 0) +
+            (product.quantity_in_mandi_bond || 0);
+
+          return quantity * product.cost_price;
+        },
+        cell: ({ getValue }) => getValue()
       });
     }
   }

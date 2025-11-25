@@ -37,79 +37,90 @@ export function DataTable<TData, TValue>({
 
   const currentRole = useRole();
 
+  const totalSum = productsRoute
+    ? table
+        .getRowModel()
+        .rows.reduce((acc, row) => acc + Number(row.getValue('TOTAL') || 0), 0)
+    : 0;
+
   return (
-    <div className='flex flex-1 flex-col space-y-4'>
-      <div className='relative flex flex-1'>
-        <div className='absolute bottom-0 left-0 right-0 top-0 flex overflow-scroll rounded-md border md:overflow-auto'>
-          <ScrollArea className='flex-1'>
-            <Table className='relative'>
-              <TableHeader className={`sticky top-0 z-10 bg-background`}>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header, index, headers) => (
-                      <TableHead
-                        key={header.id}
-                        className={
-                          index === headers.length - 1 &&
-                          !productsRoute &&
-                          currentRole === 'super_admin'
-                            ? 'pr-8 text-right'
-                            : ''
-                        }
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && 'selected'}
-                    >
-                      {row.getVisibleCells().map((cell, index, cells) => (
-                        <TableCell
-                          key={cell.id}
+    <>
+      <div className='flex flex-1 flex-col space-y-4'>
+        <div className='relative flex flex-1'>
+          <div className='absolute bottom-0 left-0 right-0 top-0 flex overflow-scroll rounded-md border md:overflow-auto'>
+            <ScrollArea className='flex-1'>
+              <Table className='relative'>
+                <TableHeader className={`sticky top-0 z-10 bg-background`}>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header, index, headers) => (
+                        <TableHead
+                          key={header.id}
                           className={
-                            index === cells.length - 1 &&
+                            index === headers.length - 1 &&
                             !productsRoute &&
                             currentRole === 'super_admin'
                               ? 'pr-8 text-right'
                               : ''
                           }
                         >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
                       ))}
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className='h-24 text-center'
-                    >
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation='horizontal' />
-          </ScrollArea>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && 'selected'}
+                      >
+                        {row.getVisibleCells().map((cell, index, cells) => (
+                          <TableCell
+                            key={cell.id}
+                            className={
+                              index === cells.length - 1 &&
+                              !productsRoute &&
+                              currentRole === 'super_admin'
+                                ? 'pr-8 text-right'
+                                : ''
+                            }
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className='h-24 text-center'
+                      >
+                        No results.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation='horizontal' />
+            </ScrollArea>
+          </div>
         </div>
       </div>
-    </div>
+      {productsRoute && (
+        <div className='text-right text-lg font-bold'>Total: {totalSum}</div>
+      )}
+    </>
   );
 }
