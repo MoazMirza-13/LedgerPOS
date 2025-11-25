@@ -31,6 +31,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
     data,
     categories,
     brands,
+    products,
     references,
     suppliers,
     newProduct,
@@ -57,6 +58,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
                 initialData={data as Invoice}
                 pageTitle={pageTitle}
                 references={references}
+                products={products}
               />
             );
           case 'purchasing_invoices':
@@ -65,6 +67,7 @@ export default async function ViewPage({ type, id }: ViewPage) {
                 initialData={data as PurchasingInvoice}
                 pageTitle={pageTitle}
                 suppliers={suppliers}
+                products={products}
               />
             );
 

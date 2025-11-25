@@ -30,7 +30,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { warehouses } from '@/constants/data';
-import { Invoice, Reference } from 'types';
+import { Invoice, Product, Reference } from 'types';
 import { toast } from 'sonner';
 import { toastMsg } from '@/utils/utils';
 import { useRouter } from 'next/navigation';
@@ -39,15 +39,20 @@ import { printInvoice } from './print-invoice';
 export default function InvoiceForm({
   initialData,
   pageTitle,
-  references
+  references,
+  products
 }: {
   initialData: Invoice | null;
   pageTitle: string;
   references: Reference[] | null;
+  products: Product[] | null;
 }) {
   const [productsLoaded, setProductsLoaded] = useState(!initialData);
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const [adminPass, setAdminPass] = useState('');
+  const [openDropdownIndex, setOpenDropdownIndex] = useState<number | null>(
+    null
+  );
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -187,6 +192,7 @@ export default function InvoiceForm({
     });
   };
 
+  //todo: refactor and remove `handleGetProduct` logic as now we are getting all products
   const handleGetProduct = async (index: number) => {
     if (!items[index].product_code) return;
 
@@ -419,22 +425,80 @@ export default function InvoiceForm({
                                 render={({ field }) => (
                                   <FormItem className='w-full'>
                                     <FormControl>
-                                      <Input
-                                        placeholder='Product Code'
-                                        {...field}
-                                        value={field.value ?? ''}
-                                        disabled={
-                                          items[index].product ||
-                                          !!initialData?.invoice_items[index]
-                                            ?.product_code
-                                        }
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleGetProduct(index);
+                                      <div className='relative'>
+                                        <Input
+                                          placeholder='Product Code'
+                                          {...field}
+                                          value={field.value ?? ''}
+                                          disabled={
+                                            items[index].product ||
+                                            !!initialData?.invoice_items[index]
+                                              ?.product_code
                                           }
-                                        }}
-                                      />
+                                          onChange={(e) => {
+                                            field.onChange(e.target.value);
+
+                                            // open dropdown on typing
+                                            setOpenDropdownIndex(index);
+                                          }}
+                                          onFocus={() =>
+                                            setOpenDropdownIndex(index)
+                                          }
+                                          onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                              e.preventDefault();
+                                              handleGetProduct(index);
+                                            }
+                                          }}
+                                        />
+
+                                        {openDropdownIndex === index && (
+                                          <div className='relative z-50 mt-1 h-[200px] w-full overflow-y-auto overflow-x-hidden rounded-md border shadow'>
+                                            {products
+                                              ?.filter((p) =>
+                                                p.product_code
+                                                  ?.toLowerCase()
+                                                  .includes(
+                                                    (
+                                                      field.value ?? ''
+                                                    ).toLowerCase()
+                                                  )
+                                              )
+                                              .slice(-5)
+                                              .map((p) => (
+                                                <div
+                                                  key={p.id}
+                                                  className='cursor-pointer px-3 py-2 hover:opacity-60'
+                                                  onClick={() => {
+                                                    field.onChange(
+                                                      p.product_code
+                                                    );
+                                                    setOpenDropdownIndex(null);
+                                                    handleGetProduct(index); // existing logic
+                                                  }}
+                                                >
+                                                  {p.product_code}
+                                                </div>
+                                              ))}
+
+                                            {/* No results */}
+                                            {products &&
+                                              products.filter((p) =>
+                                                p.product_code
+                                                  ?.toLowerCase()
+                                                  .includes(
+                                                    (
+                                                      field.value ?? ''
+                                                    ).toLowerCase()
+                                                  )
+                                              ).length === 0 && (
+                                                <div className='px-3 py-2 text-sm text-gray-500'>
+                                                  No results
+                                                </div>
+                                              )}
+                                          </div>
+                                        )}
+                                      </div>
                                     </FormControl>
                                   </FormItem>
                                 )}
@@ -763,7 +827,7 @@ export default function InvoiceForm({
                             <button
                               type='button'
                               onClick={() => remove(index)}
-                              disabled={items.length === 1}
+                              // disabled={items.length === 1}
                               className='cursor-pointer rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
                             >
                               <Trash2 className='h-4 w-4' />

@@ -30,6 +30,7 @@ export async function fetchViewData(
     let data = null;
     let categories = null;
     let brands = null;
+    let products = null;
     let references = null;
     let suppliers = null;
     let newProduct = type === 'products';
@@ -114,6 +115,15 @@ export async function fetchViewData(
       }
     }
 
+    if (type === 'invoices' || type === 'purchasing_invoices') {
+      const supabase = await getSupabaseClient();
+      const { data } = await supabase.from('products').select('*');
+
+      if (data) {
+        products = data;
+      }
+    }
+
     if (type === 'invoices') {
       const supabase = await getSupabaseClient();
       const { data } = await supabase.from('references').select('*');
@@ -136,6 +146,7 @@ export async function fetchViewData(
       data,
       categories,
       brands,
+      products,
       references,
       suppliers,
       newProduct,
