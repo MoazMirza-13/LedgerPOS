@@ -1,13 +1,14 @@
-import KBar from '@/components/kbar';
-import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
+// import KBar from '@/components/kbar';
+import AppSidebar from '@/components/sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { RoleProvider } from '@/context/RoleContext';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-  title: 'NS | Dashboard',
-  description: 'Admin panel for NS.'
+  title: 'Kashmir Tiles | Dashboard',
+  description: 'Admin panel for Kashmir Tiles.'
 };
 
 export default async function DashboardLayout({
@@ -18,8 +19,12 @@ export default async function DashboardLayout({
   // Persisting the sidebar state in the cookie.
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get('sidebar:state')?.value === 'true';
+
+  const currentRole = cookieStore.get('currentRole')?.value || '';
+
   return (
-    <KBar>
+    <RoleProvider value={currentRole}>
+      {/* <KBar> */}
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
         <SidebarInset>
@@ -29,6 +34,7 @@ export default async function DashboardLayout({
           {/* page main content ends */}
         </SidebarInset>
       </SidebarProvider>
-    </KBar>
+      {/* </KBar> */}
+    </RoleProvider>
   );
 }

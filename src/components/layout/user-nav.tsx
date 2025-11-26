@@ -10,7 +10,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { signOut } from '@/lib/actions';
+import { signOut, forceLogoutAllUsers } from '@/lib/actions';
 
 interface UserNavProps {
   user?: {
@@ -46,6 +46,9 @@ export function UserNav({ user }: UserNavProps) {
         <DropdownMenuItem onClick={signOut}>
           Sign out
           <DropdownMenuShortcut>⇧ S + O</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={forceLogoutAllUsers}>
+          Sign out from all
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

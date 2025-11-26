@@ -1,11 +1,12 @@
 import { navItems } from '@/constants/data';
 import { signOut } from '@/lib/actions';
-import { formatTitle } from '@/lib/utils';
+import { formatTitle } from '@/utils/utils';
 import { itemTable, nestedArray } from 'types';
 
 export function kbarActions(
   navigateTo: (url: string) => void,
-  apiData: nestedArray
+  apiData: nestedArray,
+  currentRole: string
 ) {
   const navigationActions = navItems.flatMap((navItem) => {
     const baseAction =
@@ -73,7 +74,7 @@ export function kbarActions(
     apiData.products?.map((product) => ({
       id: `${product.title.toLowerCase()}Action`,
       name: product.title,
-      keywords: product.title.toLowerCase(),
+      keywords: product.title.toLowerCase() && product.product_code,
       section: 'Products',
       subtitle: `View this product`,
       imgUrl: product.img_url,
@@ -102,7 +103,7 @@ export function kbarActions(
 
   return [
     ...navigationActions,
-    ...newActions,
+    ...(currentRole === 'super_admin' ? newActions : []),
     ...productActions,
     ...brandActions,
     ...categoryActions,

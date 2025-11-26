@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { categoryBrandSubmit } from '@/lib/actions';
-import { toastMsg } from '@/lib/utils';
+import { toastMsg } from '@/utils/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -27,6 +27,8 @@ import AddProductButton from '../../components/ui/add-product';
 import Link from 'next/link';
 import TableClientSide from './table-components/tableClient';
 import { getProducts } from '../products/get-products';
+import { useRole } from '@/context/RoleContext';
+import RoleGate from '@/components/role-gate/RoleGateClient';
 
 export default function DynamicForm({
   initialData,
@@ -85,6 +87,8 @@ export default function DynamicForm({
     null
   );
 
+  const currentRole = useRole();
+
   return (
     <>
       <Card className='mx-auto w-full'>
@@ -92,11 +96,13 @@ export default function DynamicForm({
           <CardTitle className='text-left text-2xl font-bold'>
             {pageTitle}
           </CardTitle>
-          {!newPath && (
-            <Link href={newLink}>
-              <AddProductButton />
-            </Link>
-          )}
+          <RoleGate allow='super_admin'>
+            {!newPath && (
+              <Link href={newLink}>
+                <AddProductButton />
+              </Link>
+            )}
+          </RoleGate>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -108,6 +114,7 @@ export default function DynamicForm({
                 <FormField
                   control={form.control}
                   name='title'
+                  disabled={currentRole !== 'super_admin'}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{`${title} Name`}</FormLabel>
@@ -122,6 +129,7 @@ export default function DynamicForm({
               <FormField
                 control={form.control}
                 name='description'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
@@ -136,53 +144,56 @@ export default function DynamicForm({
                   </FormItem>
                 )}
               />
-              <Button type='submit' disabled={isPending || !isDirty}>
-                {isPending ? (
-                  <div className='flex gap-2'>
-                    {initialData ? `Editing ` : `Adding`}
-                    <LoaderCircle className='h-5 w-5 animate-spin' />
-                  </div>
-                ) : initialData ? (
-                  `Edit ${title}`
-                ) : (
-                  `Add ${title}`
-                )}
-              </Button>
+              <RoleGate allow='super_admin'>
+                <Button type='submit' disabled={isPending || !isDirty}>
+                  {isPending ? (
+                    <div className='flex gap-2'>
+                      {initialData ? `Editing ` : `Adding`}
+                      <LoaderCircle className='h-5 w-5 animate-spin' />
+                    </div>
+                  ) : initialData ? (
+                    `Edit ${title}`
+                  ) : (
+                    `Add ${title}`
+                  )}
+                </Button>
+              </RoleGate>
             </form>
           </Form>
         </CardContent>
       </Card>
 
       {/* table */}
-      {!newPath &&
-        (productsRes ? (
-          <div
-            className='flex flex-1 flex-col space-y-4'
-            style={{ minHeight: '600px' }}
-          >
-            <TableClientSide
-              type={'products'}
-              data={productsRes as Product[]}
-              total={productsRes?.length as number}
-            />
-          </div>
-        ) : (
-          <Button
-            className='flex w-44 gap-2'
-            disabled={productsIsPending}
-            onClick={() => {
-              startTransition(() => {
-                productsAction();
-              });
-            }}
-            variant={'secondary'}
-          >
-            View Products
-            {productsIsPending && (
-              <LoaderCircle className='h-5 w-5 animate-spin' />
-            )}
-          </Button>
-        ))}
+      <RoleGate allow='super_admin'>
+        {!newPath &&
+          (productsRes ? (
+            <div
+              className='flex flex-1 flex-col space-y-4'
+              style={{ minHeight: '600px' }}
+            >
+              <TableClientSide
+                type={'products'}
+                data={productsRes as Product[]}
+              />
+            </div>
+          ) : (
+            <Button
+              className='flex w-44 gap-2'
+              disabled={productsIsPending}
+              onClick={() => {
+                startTransition(() => {
+                  productsAction();
+                });
+              }}
+              variant={'secondary'}
+            >
+              View Products
+              {productsIsPending && (
+                <LoaderCircle className='h-5 w-5 animate-spin' />
+              )}
+            </Button>
+          ))}
+      </RoleGate>
     </>
   );
 }

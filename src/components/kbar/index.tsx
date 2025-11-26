@@ -13,9 +13,11 @@ import useThemeSwitching from './use-theme-switching';
 import { kbarActions } from './kbar-actions';
 import { useQuery } from '@tanstack/react-query';
 import { getNestedData } from '@/lib/get-data-actions';
+import { useRole } from '@/context/RoleContext';
 
 export default function KBar({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const currentRole = useRole();
 
   const navigateTo = useCallback(
     (url: string) => {
@@ -31,8 +33,8 @@ export default function KBar({ children }: { children: React.ReactNode }) {
 
   // These action are for the navigation, account features, search
   const actions = useMemo(
-    () => kbarActions(navigateTo, apiData || []),
-    [navigateTo, apiData]
+    () => kbarActions(navigateTo, apiData || [], currentRole),
+    [navigateTo, apiData, currentRole]
   );
 
   return (

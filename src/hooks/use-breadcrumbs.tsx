@@ -1,8 +1,9 @@
 'use client';
 import { useItemQuery } from '@/lib/tanStack-action';
-import { checkUUID } from '@/lib/utils';
+import { checkUUID } from '@/utils/utils';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
+import { itemTable } from 'types';
 
 type BreadcrumbItem = {
   title: string;
@@ -22,6 +23,14 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard/brands': [
     { title: 'Dashboard', link: '/dashboard' },
     { title: 'Brands', link: '/dashboard/brands' }
+  ],
+  '/dashboard/invoices': [
+    { title: 'Dashboard', link: '/dashboard' },
+    { title: 'Invoices', link: '/dashboard/invoices' }
+  ],
+  '/dashboard/references': [
+    { title: 'Dashboard', link: '/dashboard' },
+    { title: 'References', link: '/dashboard/references' }
   ]
 };
 
@@ -37,9 +46,18 @@ export function useBreadcrumbs() {
 
   // Memoized values to prevent unnecessary recalculations
   const { type, id, isDynamicRoute } = useMemo(() => {
-    const types = ['brands', 'products', 'categories'];
+    const types: itemTable[] = [
+      'brands',
+      'products',
+      'categories',
+      'invoices',
+      'references',
+      'purchasing_invoices',
+      'suppliers'
+    ];
     const lastSegment = segments[segments.length - 1] || '';
-    const type = types.find((t) => pathname.includes(`/${t}/`)) || '';
+    const type =
+      types.find((t) => pathname.includes(`/${t.replace('_', '-')}/`)) || '';
     const checkId = checkUUID(lastSegment);
 
     return {
@@ -63,11 +81,14 @@ export function useBreadcrumbs() {
 
       // Handle dynamic segment replacement
       if (isLast && isDynamicRoute) {
+        const dynamicTitle =
+          dynamicData?.title ||
+          dynamicData?.product_code ||
+          dynamicData?.invoice_number ||
+          dynamicData?.name ||
+          '';
         return {
-          title:
-            !isLoading && dynamicData?.title && !checkUUID(dynamicData.title)
-              ? dynamicData.title
-              : '',
+          title: !isLoading && dynamicTitle,
           link: fullPath
         };
       }
@@ -77,7 +98,7 @@ export function useBreadcrumbs() {
         link: fullPath
       };
     });
-  }, [pathname, segments, isDynamicRoute, dynamicData]);
+  }, [pathname, segments, isDynamicRoute, dynamicData, isLoading]);
 
   return {
     breadcrumbs

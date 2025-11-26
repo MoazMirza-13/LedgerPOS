@@ -17,7 +17,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { CheckIcon } from 'lucide-react';
 import { Options } from 'nuqs';
@@ -110,7 +110,7 @@ export function DataTableFilterBox({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
-              {options.map((option) => (
+              {options?.map((option) => (
                 <CommandItem
                   key={option.title}
                   onSelect={() => handleSelect(option.title)}

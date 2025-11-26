@@ -1,7 +1,7 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/utils';
 import { Options } from 'nuqs';
 import { useTransition } from 'react';
 
@@ -55,7 +55,7 @@ export function DataTableSearch({
 
   return (
     <Input
-      placeholder={`Search ${searchKey}...`}
+      placeholder={`Search by ${searchKey}...`}
       value={searchQuery ?? ''}
       onChange={(e) => handleSearch(e.target.value)}
       className={cn('w-full md:max-w-sm', isLoading && 'animate-pulse')}

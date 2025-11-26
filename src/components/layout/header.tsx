@@ -2,7 +2,7 @@ import React from 'react';
 import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
 import { Breadcrumbs } from '../breadcrumbs';
-import SearchInput from '../search-input';
+// import SearchInput from '../search-input';
 import { UserNav } from './user-nav';
 import ThemeToggle from './ThemeToggle/theme-toggle';
 import { getUserSession } from '@/lib/actions';
@@ -20,9 +20,9 @@ export default async function Header() {
       </div>
 
       <div className='flex items-center gap-2 px-4'>
-        <div className='hidden md:flex'>
+        {/* <div className='hidden md:flex'>
           <SearchInput />
-        </div>
+        </div> */}
         <UserNav user={user} />
         <ThemeToggle />
       </div>

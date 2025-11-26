@@ -1,10 +1,24 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { createClient } from '../utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import { Brand, Category, itemData, Product } from 'types';
+import {
+  Brand,
+  Category,
+  Invoice,
+  Invoice_items,
+  itemData,
+  itemTable,
+  Product,
+  PurchasingInvoice,
+  Reference,
+  References_ledger,
+  Supplier,
+  Suppliers_ledger
+} from 'types';
 
 export const getSupabaseClient = async () => {
   // for util functions
@@ -14,8 +28,22 @@ export const getSupabaseClient = async () => {
 export async function signIn(credentials: { email: string; password: string }) {
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword(credentials);
-    if (error) throw error;
+    const { data, error } = await supabase.auth.signInWithPassword(credentials);
+
+    const { data: userRole, error: urError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', data.user?.id)
+      .single();
+
+    if (error || urError) throw error;
+
+    const currentRole = userRole?.role;
+    const cookieStore = await cookies();
+    cookieStore.set('currentRole', currentRole || '', {
+      maxAge: 60 * 60 * 24 * 30 * 13
+    });
+
     return { success: true };
   } catch (error: any) {
     return { error: error.message };
@@ -25,6 +53,14 @@ export async function signIn(credentials: { email: string; password: string }) {
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  (await cookies()).delete('currentRole');
+  redirect('/');
+}
+
+export async function forceLogoutAllUsers() {
+  const supabase = await createClient();
+  await supabase.rpc('force_logout_all_users');
+  (await cookies()).delete('currentRole');
   redirect('/');
 }
 
@@ -42,13 +78,21 @@ export async function getUserSession() {
 
 export async function productSubmit(
   values: {
-    name: string;
+    product: string;
     category: string | null;
     brand: string | null;
-    price: number;
-    description?: string;
-    productVariants?: string[];
-    inStock: boolean;
+    costPrice: number;
+    sellingPrice: number;
+    minQuantity: number;
+    boxes: number;
+    quantityInWarehouses: {
+      Zafarwal: number;
+      Ghaziwal: number;
+      EidgahRoad: number;
+      LhrRoad: number;
+      MandiBond: number;
+      MandiTile: number;
+    };
   },
   initialData: Product | null,
   imgPaths: string[]
@@ -60,14 +104,20 @@ export async function productSubmit(
       const { error } = await supabase
         .from('products')
         .update({
-          title: values.name,
-          price: values.price,
-          description: values.description,
+          product_code: values.product,
+          cost_price: values.costPrice,
+          selling_price: values.sellingPrice,
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
+          min_quantity: values.minQuantity,
+          boxes: values.boxes,
           img_url: imgPaths,
-          variants: values.productVariants,
-          in_stock: values.inStock
+          quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+          quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+          quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+          quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+          quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+          quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
         })
         .eq('id', initialData.id)
         .select();
@@ -76,27 +126,31 @@ export async function productSubmit(
       revalidatePath('/dashboard/products');
       return { successUpdate: true };
     } else {
-      if (imgPaths.length > 0) {
-        const { error } = await supabase
-          .from('products')
-          .insert([
-            {
-              title: values.name,
-              price: values.price,
-              description: values.description,
-              img_url: imgPaths,
-              category_id: values.category ? values.category : null,
-              brand_id: values.brand ? values.brand : null,
-              variants: values.productVariants,
-              in_stock: values.inStock
-            }
-          ])
-          .select();
+      const { error } = await supabase
+        .from('products')
+        .insert([
+          {
+            product_code: values.product,
+            cost_price: values.costPrice,
+            selling_price: values.sellingPrice,
+            img_url: imgPaths,
+            category_id: values.category ? values.category : null,
+            brand_id: values.brand ? values.brand : null,
+            min_quantity: values.minQuantity,
+            boxes: values.boxes,
+            quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
+            quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
+            quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
+            quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
+            quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
+            quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
+          }
+        ])
+        .select();
 
-        if (error) throw error;
-        revalidatePath('/dashboard/products');
-        return { successNew: true };
-      }
+      if (error) throw error;
+      revalidatePath('/dashboard/products');
+      return { successNew: true };
     }
   } catch (error: any) {
     return { error };
@@ -160,6 +214,18 @@ export const getDataById = async (type: string, id: string) => {
   return data;
 };
 
+export const getProductByCode = async (code: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('product_code', code)
+    .single();
+
+  if (error) return null;
+  return data;
+};
+
 export const getCategoriesBrandsData = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -169,3 +235,150 @@ export const getCategoriesBrandsData = cache(async () => {
   if (error) throw error;
   return data;
 });
+
+export const invoiceSubmit = async (
+  values: Invoice,
+  initialData: Invoice | null
+) => {
+  try {
+    const supabase = await createClient();
+    if (!initialData) {
+      const { error } = await supabase.rpc(
+        'create_invoice_with_items_warehouse',
+        {
+          customer_name: values.customer_name,
+          customer_number: values.customer_number,
+          customer_address: values.customer_address,
+          total_price: values.total_price,
+          invoice_number: values.invoice_number,
+          items: values.invoice_items.map((item: Invoice_items) => ({
+            product_code: item.product_code,
+            description: item.description,
+            quantity: item.quantity,
+            boxes: item.boxes,
+            price: item.price,
+            warehouse: item.warehouse,
+            optional_item: item.optional_item
+          })),
+          ...(values.reference !== '' ? { reference: values.reference } : {})
+        }
+      );
+
+      if (error) throw error;
+      revalidatePath(`/dashboard/invoices`);
+      return { successNew: true };
+    } else {
+      const { error } = await supabase.rpc(
+        'update_invoice_with_items_warehouse',
+        {
+          p_invoice_id: initialData.id,
+          p_customer_name: values.customer_name,
+          p_customer_number: values.customer_number,
+          p_customer_address: values.customer_address,
+          p_total_price: values.total_price,
+          p_reference: values.reference,
+          p_items: values.invoice_items.map((item) => ({
+            product_code: item.product_code,
+            description: item.description,
+            quantity: item.quantity,
+            boxes: item.boxes,
+            price: item.price,
+            warehouse: item.warehouse,
+            optional_item: item.optional_item
+          }))
+        }
+      );
+
+      if (error) throw error;
+      revalidatePath(`/dashboard/invoices`);
+      return { successUpdate: true };
+    }
+  } catch (error: any) {
+    return { error };
+  }
+};
+
+export const purchasingInvoiceSubmit = async (values: PurchasingInvoice) => {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.rpc(
+      'create_purchasing_invoice_with_items',
+      {
+        supplier: values.supplier,
+        total_price: values.total_price,
+        invoice_number: values.invoice_number,
+        items: values.purchasing_invoice_items.map((item) => ({
+          product_code: item.product_code,
+          description: item.description,
+          price: item.price,
+          warehouse_distribution: item.warehouse_distribution,
+          optional_item: item.optional_item
+        }))
+      }
+    );
+
+    if (error) throw error;
+    revalidatePath(`/dashboard/purchasing-invoices`);
+    return { success: true };
+  } catch (error: any) {
+    return { error };
+  }
+};
+
+export const getMaxInvoiceNumber = async (type: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from(type)
+    .select('invoice_number')
+    .order('invoice_number', {
+      ascending: false
+    })
+    .limit(1);
+
+  if (!error) {
+    const maxInvoiceNumber = data.length ? data[0].invoice_number : null;
+    return maxInvoiceNumber;
+  }
+};
+
+export async function referenceSupplierSubmit(
+  values: Reference | Supplier,
+  type: itemTable
+) {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from(type)
+      .insert([{ name: values.name, balance: values.balance }])
+      .select();
+    if (error) throw error;
+    revalidatePath(`/dashboard/${type}`);
+    return { successNew: true };
+  } catch (error: any) {
+    return { error };
+  }
+}
+
+export async function addCredit(values: References_ledger) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('handle_cr_amount_reference_ledger', {
+    p_reference_id: values.reference_id,
+    p_name: values.name,
+    p_description: values.description,
+    p_credit: values.cr
+  });
+  if (!error) return { success: true };
+}
+
+export async function addDebit(values: Suppliers_ledger) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('handle_dr_amount_supplier_ledger', {
+    p_supplier_id: values.supplier_id,
+    p_name: values.name,
+    p_description: values.description,
+    p_debit: values.dr
+  });
+  if (!error) return { success: true };
+}

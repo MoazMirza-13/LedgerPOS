@@ -1,6 +1,13 @@
 import ProductForm from '@/features/products/components/product-form';
 import DynamicForm from './dynamic-form';
-import { Brand, Category, itemTable, Product } from 'types';
+import {
+  Brand,
+  Category,
+  Invoice,
+  itemTable,
+  Product,
+  PurchasingInvoice
+} from 'types';
 import { fetchViewData } from './fetchViewData';
 import {
   dehydrate,
@@ -8,6 +15,9 @@ import {
   QueryClient
 } from '@tanstack/react-query';
 import { queryClientConfig } from '@/lib/tanStack-action';
+import InvoiceForm from '../invoices/invoice-form';
+import PartnerForm from './partner-form';
+import PurchasingInvoiceForm from '../invoices/purchasing-invoice-form';
 
 type ViewPage = {
   type: itemTable;
@@ -17,26 +27,66 @@ type ViewPage = {
 export default async function ViewPage({ type, id }: ViewPage) {
   const queryClient = new QueryClient(queryClientConfig);
 
-  const { data, categories, brands, newProduct, pageTitle } =
-    await fetchViewData(queryClient, type, id);
+  const {
+    data,
+    categories,
+    brands,
+    products,
+    references,
+    suppliers,
+    newProduct,
+    pageTitle
+  } = await fetchViewData(queryClient, type, id);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {type === 'categories' || type === 'brands' ? (
-        <DynamicForm
-          type={type}
-          initialData={data as Category | Brand}
-          pageTitle={pageTitle}
-        />
-      ) : (
-        <ProductForm
-          newProduct={newProduct}
-          categories={categories}
-          brands={brands}
-          initialData={data as Product}
-          pageTitle={pageTitle}
-        />
-      )}
+      {(() => {
+        switch (type) {
+          case 'categories':
+          case 'brands':
+            return (
+              <DynamicForm
+                type={type}
+                initialData={data as Category | Brand}
+                pageTitle={pageTitle}
+              />
+            );
+
+          case 'invoices':
+            return (
+              <InvoiceForm
+                initialData={data as Invoice}
+                pageTitle={pageTitle}
+                references={references}
+                products={products}
+              />
+            );
+          case 'purchasing_invoices':
+            return (
+              <PurchasingInvoiceForm
+                initialData={data as PurchasingInvoice}
+                pageTitle={pageTitle}
+                suppliers={suppliers}
+                products={products}
+              />
+            );
+
+          case 'references':
+          case 'suppliers':
+            return <PartnerForm pageTitle={pageTitle} type={type} />;
+
+          case 'products':
+            return (
+              <ProductForm
+                newProduct={newProduct}
+                categories={categories}
+                brands={brands}
+                initialData={data as Product}
+                pageTitle={pageTitle}
+              />
+            );
+        }
+      })()}
     </HydrationBoundary>
   );
 }

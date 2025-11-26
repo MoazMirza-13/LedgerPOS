@@ -18,21 +18,21 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { ProductVariants } from './product-variants';
 import { productSubmit } from '@/lib/actions';
 import { LoaderCircle, X, Upload } from 'lucide-react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
-import { imageUpload, toastMsg } from '@/lib/utils';
+import { imageUpload, toastMsg } from '@/utils/utils';
 import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import Image from 'next/image';
 import { useRef } from 'react';
-import { Switch } from '@/components/ui/switch';
+import RoleGate from '@/components/role-gate/RoleGateClient';
+import { useRole } from '@/context/RoleContext';
+import { warehouses } from '@/constants/data';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -72,68 +72,65 @@ export default function ProductForm({
     categories?.find((c) => c.title === category)?.id || '';
 
   const defaultValues = {
-    image: null,
-    name: initialData?.title || '',
+    image: undefined,
     category: category
       ? String(categoryIdFromURL)
       : initialData?.category_id || '',
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
-    price: initialData?.price || 0,
-    description: initialData?.description || '',
-    productVariants: initialData?.variants || [],
-    inStock: initialData?.in_stock || false
+    costPrice: initialData?.cost_price || 0,
+    sellingPrice: initialData?.selling_price || 0,
+    product: initialData?.product_code || '', // for KT product_code column will be used instead of name || title
+    minQuantity: initialData?.min_quantity || 0,
+    boxes: initialData?.boxes || 0,
+    quantityInWarehouses: {
+      Ghaziwal: initialData?.quantity_in_ghaziwal || 0,
+      Zafarwal: initialData?.quantity_in_zafarwal || 0,
+      LhrRoad: initialData?.quantity_in_lhr_road || 0,
+      EidgahRoad: initialData?.quantity_in_eidgah_road || 0,
+      MandiTile: initialData?.quantity_in_mandi_tile || 0,
+      MandiBond: initialData?.quantity_in_mandi_bond || 0
+    }
   };
 
   // Conditional image validation
-  const imageValidation = initialData
-    ? z
-        .any()
-        .optional()
-        .refine(
-          (files) =>
-            !files ||
-            (Array.isArray(files) &&
-              files.length <= 4 &&
-              files.every(
-                (file) =>
-                  file.size <= MAX_FILE_SIZE &&
-                  ACCEPTED_IMAGE_TYPES.includes(file.type)
-              )),
-          {
-            message:
-              'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
-          }
-        )
-    : z
-        .array(z.any())
-        .nullable()
-        .refine(
-          (files) => files !== null && files.length > 0,
-          'Image is required.'
-        )
-        .refine(
-          (files) =>
-            files === null ||
-            (files.length <= 4 &&
-              files.every(
-                (file: File) =>
-                  file.size <= MAX_FILE_SIZE &&
-                  ACCEPTED_IMAGE_TYPES.includes(file.type)
-              )),
-          'Each image must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
-        );
+  const imageValidation = z
+    .array(z.instanceof(File))
+    .optional()
+    .refine(
+      (files) =>
+        !files ||
+        (Array.isArray(files) &&
+          files.length <= 4 &&
+          files.every(
+            (file) =>
+              file.size <= MAX_FILE_SIZE &&
+              ACCEPTED_IMAGE_TYPES.includes(file.type)
+          )),
+      {
+        message:
+          'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
+      }
+    );
 
   const formSchema = z.object({
     image: imageValidation,
-    name: z.string().min(1, {
-      message: 'Product name is required'
-    }),
     category: z.string().nullable(),
     brand: z.string().nullable(),
-    price: z.coerce.number(),
-    description: z.string().optional(),
-    productVariants: z.array(z.string()).optional(),
-    inStock: z.boolean()
+    costPrice: z.coerce.number(),
+    sellingPrice: z.coerce.number(),
+    product: z.string().min(1, {
+      message: 'Product is required'
+    }),
+    minQuantity: z.coerce.number(),
+    boxes: z.coerce.number(),
+    quantityInWarehouses: z.object({
+      Ghaziwal: z.coerce.number().default(0),
+      Zafarwal: z.coerce.number().default(0),
+      LhrRoad: z.coerce.number().default(0),
+      EidgahRoad: z.coerce.number().default(0),
+      MandiTile: z.coerce.number().default(0),
+      MandiBond: z.coerce.number().default(0)
+    })
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -143,6 +140,7 @@ export default function ProductForm({
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const currentRole = useRole();
   const { isDirty } = form.formState;
 
   const [imageSlots, setImageSlots] = useState<(string | File | null)[]>(() => {
@@ -195,14 +193,6 @@ export default function ProductForm({
   };
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (imageSlots.every((slot) => slot === null)) {
-      form.setError('image', {
-        type: 'manual',
-        message: 'Image is required.'
-      });
-      return;
-    }
-
     startTransition(async () => {
       // Handle images - only upload new files, keep existing URLs
       const imgPaths: string[] = [];
@@ -232,12 +222,19 @@ export default function ProductForm({
         return;
       }
 
+      if (values.costPrice > values.sellingPrice) {
+        toast.error(toastMsg.error);
+        return;
+      }
+
       // submit fn
       const { image, ...cleanValues } = values; // not using `image` in submit fn anymore
       const res = await productSubmit(cleanValues, initialData, imgPaths);
+      const entity = 'Product';
 
-      if (res?.successNew) toast.success(toastMsg.newProduct);
-      else if (res?.successUpdate) toast.success(toastMsg.updateProduct);
+      if (res?.successNew) toast.success(toastMsg.dynamicNew(entity));
+      else if (res?.successUpdate)
+        toast.success(toastMsg.dynamicUpdate(entity));
       else if (res?.error) toast.error(toastMsg.error);
 
       if (!res?.error) {
@@ -265,11 +262,11 @@ export default function ProductForm({
               render={({ field }) => (
                 <div className='space-y-6'>
                   <FormItem className='w-full'>
-                    <FormLabel>Images</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
                       <div className='space-y-4'>
                         <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
-                          {Array.from({ length: 4 }).map((_, index) => (
+                          {Array.from({ length: 1 }).map((_, index) => (
                             <Card key={index} className='relative aspect-[1.5]'>
                               <input
                                 ref={(el) => {
@@ -295,29 +292,33 @@ export default function ProductForm({
                                     alt={`Product image ${index + 1}`}
                                     fill
                                     className='rounded-lg object-contain'
+                                    sizes='(max-width: 768px) 100vw, 110px'
+                                    priority
                                   />
-                                  <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
-                                    <Button
-                                      type='button'
-                                      size='sm'
-                                      variant='secondary'
-                                      onClick={() =>
-                                        handleIndividualImageReplace(index)
-                                      }
-                                    >
-                                      <Upload className='h-4 w-4' />
-                                    </Button>
-                                    <Button
-                                      type='button'
-                                      size='sm'
-                                      variant='destructive'
-                                      onClick={() =>
-                                        handleIndividualImageRemove(index)
-                                      }
-                                    >
-                                      <X className='h-4 w-4' />
-                                    </Button>
-                                  </div>
+                                  <RoleGate allow='super_admin'>
+                                    <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                                      <Button
+                                        type='button'
+                                        size='sm'
+                                        variant='secondary'
+                                        onClick={() =>
+                                          handleIndividualImageReplace(index)
+                                        }
+                                      >
+                                        <Upload className='h-4 w-4' />
+                                      </Button>
+                                      <Button
+                                        type='button'
+                                        size='sm'
+                                        variant='destructive'
+                                        onClick={() =>
+                                          handleIndividualImageRemove(index)
+                                        }
+                                      >
+                                        <X className='h-4 w-4' />
+                                      </Button>
+                                    </div>
+                                  </RoleGate>
 
                                   {/* Show indicator for new vs existing */}
                                   {!newProduct && (
@@ -335,9 +336,10 @@ export default function ProductForm({
                               ) : (
                                 <CardContent
                                   className='flex h-full cursor-pointer flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
-                                  onClick={() =>
-                                    fileInputRefs.current[index]?.click()
-                                  }
+                                  onClick={() => {
+                                    if (currentRole === 'super_admin')
+                                      fileInputRefs.current[index]?.click();
+                                  }}
                                 >
                                   <Upload className='mb-2 h-8 w-8 text-gray-400' />
                                   <p className='text-center text-sm text-gray-500'>
@@ -362,12 +364,90 @@ export default function ProductForm({
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name='name'
+                name='product'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product Name</FormLabel>
+                    <FormLabel>Product</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter product name' {...field} />
+                      <Input placeholder='Enter product' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <RoleGate allow='super_admin'>
+                <FormField
+                  control={form.control}
+                  name='costPrice'
+                  disabled={currentRole !== 'super_admin'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cost Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0'
+                          placeholder='Enter cost price'
+                          {...field}
+                          value={
+                            field.value === 0 && !initialData ? '' : field.value
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </RoleGate>
+              <FormField
+                control={form.control}
+                name='brand'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brand</FormLabel>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === 'null' ? null : value)
+                      }
+                      value={field.value ? String(field.value) : ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
+                          <SelectValue placeholder='Select brands' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className='max-h-60 overflow-y-auto'>
+                        <SelectItem value='null'>None</SelectItem>
+                        {brands?.map((brand) => (
+                          <SelectItem key={brand.id} value={String(brand.id)}>
+                            {brand.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='sellingPrice'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Selling Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter selling price'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -386,7 +466,7 @@ export default function ProductForm({
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
                           <SelectValue placeholder='Select categories' />
                         </SelectTrigger>
                       </FormControl>
@@ -408,16 +488,20 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='price'
+                name='minQuantity'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Min Quantity</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
                         step='0'
-                        placeholder='Enter price'
+                        placeholder='Enter min quantity'
                         {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -426,99 +510,77 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='brand'
+                name='boxes'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
-                    <Select
-                      onValueChange={(value) =>
-                        field.onChange(value === 'null' ? null : value)
-                      }
-                      value={field.value ? String(field.value) : ''}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select brands' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='max-h-60 overflow-y-auto'>
-                        <SelectItem value='null'>None</SelectItem>
-                        {brands?.map((brand) => (
-                          <SelectItem key={brand.id} value={String(brand.id)}>
-                            {brand.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='productVariants'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Product Variants</FormLabel>
-                    <ProductVariants name={field.name} />
+                    <FormLabel>Quantity per Box</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter quantity per box'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name='inStock'
-              render={({ field }) => (
-                <FormItem className='!mt-2'>
-                  <FormLabel>Stock Status</FormLabel>
-                  <div className='flex items-center gap-3'>
-                    <span className='text-2xl'>
-                      {field.value ? '✅' : '❌'}
-                    </span>
-                    <Switch
-                      id='stockStatus'
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      className='data-[state=checked]:bg-green-600'
-                    />
-                    <span className='text-sm text-gray-400'>
-                      {field.value ? 'In Stock' : 'Out of Stock'}
-                    </span>
+            {/* quantity */}
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              {warehouses.map((w) => (
+                <FormField
+                  key={w.key}
+                  control={form.control}
+                  name={
+                    `quantityInWarehouses.${w.key}` as
+                      | 'quantityInWarehouses.Ghaziwal'
+                      | 'quantityInWarehouses.Zafarwal'
+                      | 'quantityInWarehouses.LhrRoad'
+                      | 'quantityInWarehouses.EidgahRoad'
+                      | 'quantityInWarehouses.MandiTile'
+                      | 'quantityInWarehouses.MandiBond'
+                  }
+                  disabled={currentRole !== 'super_admin'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity in {w.label}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          step='0'
+                          placeholder={`Enter Quantity for ${w.label}`}
+                          {...field}
+                          value={
+                            field.value === 0 && !initialData ? '' : field.value
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+            <RoleGate allow='super_admin'>
+              <Button type='submit' disabled={isPending || !isDirty}>
+                {isPending ? (
+                  <div className='flex gap-2'>
+                    {initialData ? 'Editing' : 'Adding'}
+                    <LoaderCircle className='h-5 w-5 animate-spin' />
                   </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder='Enter product description'
-                      className='resize-none'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type='submit' disabled={isPending || !isDirty}>
-              {isPending ? (
-                <div className='flex gap-2'>
-                  {initialData ? 'Editing' : 'Adding'}
-                  <LoaderCircle className='h-5 w-5 animate-spin' />
-                </div>
-              ) : initialData ? (
-                'Edit Product'
-              ) : (
-                'Add Product'
-              )}
-            </Button>
+                ) : initialData ? (
+                  'Edit Product'
+                ) : (
+                  'Add Product'
+                )}
+              </Button>
+            </RoleGate>
           </form>
         </Form>
       </CardContent>
