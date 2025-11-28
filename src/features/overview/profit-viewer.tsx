@@ -10,13 +10,6 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import {
   Table,
   TableBody,
   TableCell,
@@ -24,8 +17,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Invoice, Invoice_items, Product, ProfitData, Reference } from 'types';
+import { Invoice, Invoice_items, Product, ProfitData } from 'types';
 import { DateRangePicker } from '@/components/ui/date-range-picker-mini';
 import { filterWithDate, formatToPKTDate } from '@/utils/utils';
 
@@ -33,26 +25,21 @@ interface ProfitViewerProps {
   invoices: Invoice[];
   invoiceItems: Invoice_items[];
   products: Product[];
-  references: Reference[];
 }
 
 export function ProfitViewer({
   invoices,
   invoiceItems,
-  products,
-  references
+  products
 }: ProfitViewerProps) {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: new Date(new Date().setDate(new Date().getDate() - 7)),
     to: new Date()
   });
-  const [selectedReference, setSelectedReference] = React.useState<
-    string | 'all'
-  >('all');
 
   // Calculate profit data based on filters
   const profitData = React.useMemo(() => {
-    // Filter invoices by date range and reference
+    // Filter invoices by date range
     const filteredInvoices = invoices.filter((invoice) => {
       // Date filtering using your util
       const dateMatch =
@@ -63,11 +50,7 @@ export function ProfitViewer({
           dateRange.to ?? dateRange.from
         ).length > 0;
 
-      // Reference filter
-      const referenceMatch =
-        selectedReference === 'all' || invoice.reference === selectedReference;
-
-      return dateMatch && referenceMatch;
+      return dateMatch && invoice.payment === true;
     });
 
     // Calculate profit for each invoice
@@ -103,15 +86,13 @@ export function ProfitViewer({
         invoiceNumber: invoice.invoice_number ?? 0,
         customerName: invoice.customer_name,
         date: invoice.created_at,
-        reference: invoice.reference ?? '',
-        referenceName: invoice.references?.name ?? '',
         items: itemsWithProfit,
         totalProfit
       };
     });
 
     return profitResults;
-  }, [invoices, invoiceItems, products, dateRange, selectedReference]);
+  }, [invoices, invoiceItems, products, dateRange]);
 
   // Calculate overall totals
   const overallProfit = profitData.reduce(
@@ -126,9 +107,7 @@ export function ProfitViewer({
       <Card>
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <CardDescription>
-            Filter profit data by date range and reference
-          </CardDescription>
+          <CardDescription>Filter profit data by date range</CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
           <div className='grid gap-4 md:grid-cols-2'>
@@ -138,25 +117,6 @@ export function ProfitViewer({
                 dateRange={dateRange}
                 onDateRangeChange={setDateRange}
               />
-            </div>
-            <div className='space-y-2'>
-              <label className='text-sm font-medium'>Reference</label>
-              <Select
-                value={selectedReference}
-                onValueChange={setSelectedReference}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select reference' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='all'>All References</SelectItem>
-                  {references.map((ref) => (
-                    <SelectItem key={ref.id} value={ref.id ?? ''}>
-                      {ref.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </CardContent>
@@ -220,7 +180,6 @@ export function ProfitViewer({
                     <TableHead>Invoice #</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Reference</TableHead>
                     <TableHead className='text-right'>Items</TableHead>
                     <TableHead className='text-right'>Total Profit</TableHead>
                   </TableRow>
@@ -234,11 +193,6 @@ export function ProfitViewer({
                         </TableCell>
                         <TableCell>{invoice.customerName}</TableCell>
                         <TableCell>{formatToPKTDate(invoice.date)}</TableCell>
-                        <TableCell>
-                          <Badge variant='secondary'>
-                            {invoice.referenceName}
-                          </Badge>
-                        </TableCell>
                         <TableCell className='text-right'>
                           {invoice.items.length}
                         </TableCell>

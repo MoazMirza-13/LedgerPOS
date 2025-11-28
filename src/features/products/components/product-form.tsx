@@ -32,7 +32,9 @@ import Image from 'next/image';
 import { useRef } from 'react';
 import RoleGate from '@/components/role-gate/RoleGateClient';
 import { useRole } from '@/context/RoleContext';
-import { warehouses } from '@/constants/data';
+import { Textarea } from '@/components/ui/textarea';
+import { ProductVariants } from './product-variants';
+import { Switch } from '@/components/ui/switch';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -79,17 +81,13 @@ export default function ProductForm({
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
     costPrice: initialData?.cost_price || 0,
     sellingPrice: initialData?.selling_price || 0,
-    product: initialData?.product_code || '', // for KT product_code column will be used instead of name || title
+    productCode: initialData?.product_code || '',
+    productTitle: initialData?.title || '',
     minQuantity: initialData?.min_quantity || 0,
-    boxes: initialData?.boxes || 0,
-    quantityInWarehouses: {
-      Ghaziwal: initialData?.quantity_in_ghaziwal || 0,
-      Zafarwal: initialData?.quantity_in_zafarwal || 0,
-      LhrRoad: initialData?.quantity_in_lhr_road || 0,
-      EidgahRoad: initialData?.quantity_in_eidgah_road || 0,
-      MandiTile: initialData?.quantity_in_mandi_tile || 0,
-      MandiBond: initialData?.quantity_in_mandi_bond || 0
-    }
+    quantity: initialData?.quantity || 0,
+    productVariants: initialData?.variants || [],
+    inStock: initialData?.in_stock || false,
+    description: initialData?.description || ''
   };
 
   // Conditional image validation
@@ -118,19 +116,17 @@ export default function ProductForm({
     brand: z.string().nullable(),
     costPrice: z.coerce.number(),
     sellingPrice: z.coerce.number(),
-    product: z.string().min(1, {
-      message: 'Product is required'
+    productTitle: z.string().min(1, {
+      message: 'Product Title is required'
+    }),
+    productCode: z.string().min(1, {
+      message: 'Product Code is required'
     }),
     minQuantity: z.coerce.number(),
-    boxes: z.coerce.number(),
-    quantityInWarehouses: z.object({
-      Ghaziwal: z.coerce.number().default(0),
-      Zafarwal: z.coerce.number().default(0),
-      LhrRoad: z.coerce.number().default(0),
-      EidgahRoad: z.coerce.number().default(0),
-      MandiTile: z.coerce.number().default(0),
-      MandiBond: z.coerce.number().default(0)
-    })
+    quantity: z.coerce.number(),
+    productVariants: z.array(z.string()).optional(),
+    inStock: z.boolean(),
+    description: z.string()
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -266,7 +262,7 @@ export default function ProductForm({
                     <FormControl>
                       <div className='space-y-4'>
                         <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
-                          {Array.from({ length: 1 }).map((_, index) => (
+                          {Array.from({ length: 4 }).map((_, index) => (
                             <Card key={index} className='relative aspect-[1.5]'>
                               <input
                                 ref={(el) => {
@@ -364,13 +360,27 @@ export default function ProductForm({
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name='product'
+                name='productTitle'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Product</FormLabel>
+                    <FormLabel>Product Title</FormLabel>
                     <FormControl>
-                      <Input placeholder='Enter product' {...field} />
+                      <Input placeholder='Enter product title' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='productCode'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder='Enter product code' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -402,6 +412,28 @@ export default function ProductForm({
               </RoleGate>
               <FormField
                 control={form.control}
+                name='sellingPrice'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Selling Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter selling price'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name='brand'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
@@ -427,28 +459,6 @@ export default function ProductForm({
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='sellingPrice'
-                disabled={currentRole !== 'super_admin'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Selling Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0'
-                        placeholder='Enter selling price'
-                        {...field}
-                        value={
-                          field.value === 0 && !initialData ? '' : field.value
-                        }
-                      />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -486,6 +496,30 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
+            </div>
+            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+              <FormField
+                control={form.control}
+                name='quantity'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter quantity'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name='minQuantity'
@@ -510,63 +544,59 @@ export default function ProductForm({
               />
               <FormField
                 control={form.control}
-                name='boxes'
-                disabled={currentRole !== 'super_admin'}
+                name='productVariants'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quantity per Box</FormLabel>
-                    <FormControl>
-                      <Input
-                        type='number'
-                        step='0'
-                        placeholder='Enter quantity per box'
-                        {...field}
-                        value={
-                          field.value === 0 && !initialData ? '' : field.value
-                        }
-                      />
-                    </FormControl>
+                    <FormLabel>Product Variants</FormLabel>
+                    <ProductVariants name={field.name} />
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            {/* quantity */}
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-              {warehouses.map((w) => (
-                <FormField
-                  key={w.key}
-                  control={form.control}
-                  name={
-                    `quantityInWarehouses.${w.key}` as
-                      | 'quantityInWarehouses.Ghaziwal'
-                      | 'quantityInWarehouses.Zafarwal'
-                      | 'quantityInWarehouses.LhrRoad'
-                      | 'quantityInWarehouses.EidgahRoad'
-                      | 'quantityInWarehouses.MandiTile'
-                      | 'quantityInWarehouses.MandiBond'
-                  }
-                  disabled={currentRole !== 'super_admin'}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Quantity in {w.label}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          step='0'
-                          placeholder={`Enter Quantity for ${w.label}`}
-                          {...field}
-                          value={
-                            field.value === 0 && !initialData ? '' : field.value
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
+            <FormField
+              control={form.control}
+              name='inStock'
+              render={({ field }) => (
+                <FormItem className='!mt-3'>
+                  <FormLabel>In-Stock Status</FormLabel>
+                  <div className='flex items-center gap-3'>
+                    <span className='text-2xl'>
+                      {field.value ? '✅' : '❌'}
+                    </span>
+                    <Switch
+                      id='stockStatus'
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={currentRole !== 'super_admin'}
+                      className='data-[state=checked]:bg-green-600'
+                    />
+                    <span className='text-sm text-gray-400'>
+                      {field.value ? 'In Stock' : 'Out of Stock'}
+                    </span>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='description'
+              disabled={currentRole !== 'super_admin'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='Enter product description'
+                      className='resize-none'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <RoleGate allow='super_admin'>
               <Button type='submit' disabled={isPending || !isDirty}>
                 {isPending ? (

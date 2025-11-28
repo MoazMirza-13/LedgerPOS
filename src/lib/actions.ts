@@ -11,13 +11,7 @@ import {
   Invoice,
   Invoice_items,
   itemData,
-  itemTable,
-  Product,
-  PurchasingInvoice,
-  Reference,
-  References_ledger,
-  Supplier,
-  Suppliers_ledger
+  Product
 } from 'types';
 
 export const getSupabaseClient = async () => {
@@ -78,21 +72,17 @@ export async function getUserSession() {
 
 export async function productSubmit(
   values: {
-    product: string;
+    productTitle: string;
+    productCode: string;
     category: string | null;
     brand: string | null;
     costPrice: number;
     sellingPrice: number;
     minQuantity: number;
-    boxes: number;
-    quantityInWarehouses: {
-      Zafarwal: number;
-      Ghaziwal: number;
-      EidgahRoad: number;
-      LhrRoad: number;
-      MandiBond: number;
-      MandiTile: number;
-    };
+    quantity: number;
+    productVariants?: string[];
+    inStock: boolean;
+    description: string;
   },
   initialData: Product | null,
   imgPaths: string[]
@@ -104,20 +94,18 @@ export async function productSubmit(
       const { error } = await supabase
         .from('products')
         .update({
-          product_code: values.product,
+          product_code: values.productCode,
+          title: values.productTitle,
           cost_price: values.costPrice,
           selling_price: values.sellingPrice,
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
           min_quantity: values.minQuantity,
-          boxes: values.boxes,
+          quantity: values.quantity,
           img_url: imgPaths,
-          quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
-          quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
-          quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
-          quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
-          quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
-          quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
+          variants: values.productVariants,
+          in_stock: values.inStock,
+          description: values.description
         })
         .eq('id', initialData.id)
         .select();
@@ -130,20 +118,18 @@ export async function productSubmit(
         .from('products')
         .insert([
           {
-            product_code: values.product,
+            product_code: values.productCode,
+            title: values.productTitle,
             cost_price: values.costPrice,
             selling_price: values.sellingPrice,
             img_url: imgPaths,
             category_id: values.category ? values.category : null,
             brand_id: values.brand ? values.brand : null,
             min_quantity: values.minQuantity,
-            boxes: values.boxes,
-            quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
-            quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
-            quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,
-            quantity_in_eidgah_road: values.quantityInWarehouses.EidgahRoad,
-            quantity_in_mandi_tile: values.quantityInWarehouses.MandiTile,
-            quantity_in_mandi_bond: values.quantityInWarehouses.MandiBond
+            quantity: values.quantity,
+            variants: values.productVariants,
+            in_stock: values.inStock,
+            description: values.description
           }
         ])
         .select();
@@ -243,84 +229,66 @@ export const invoiceSubmit = async (
   try {
     const supabase = await createClient();
     if (!initialData) {
-      const { error } = await supabase.rpc(
-        'create_invoice_with_items_warehouse',
-        {
-          customer_name: values.customer_name,
-          customer_number: values.customer_number,
-          customer_address: values.customer_address,
-          total_price: values.total_price,
-          invoice_number: values.invoice_number,
-          items: values.invoice_items.map((item: Invoice_items) => ({
-            product_code: item.product_code,
-            description: item.description,
-            quantity: item.quantity,
-            boxes: item.boxes,
-            price: item.price,
-            warehouse: item.warehouse,
-            optional_item: item.optional_item
-          })),
-          ...(values.reference !== '' ? { reference: values.reference } : {})
-        }
-      );
+      const { error } = await supabase.rpc('create_invoice_with_items_ns', {
+        customer_name: values.customer_name,
+        customer_number: values.customer_number,
+        customer_address: values.customer_address,
+        total_price: values.total_price,
+        invoice_number: values.invoice_number,
+        payment: values.payment,
+        items: values.invoice_items.map((item: Invoice_items) => ({
+          product_code: item.product_code,
+          description: item.description,
+          quantity: item.quantity,
+          price: item.price,
+          optional_item: item.optional_item
+        }))
+      });
 
       if (error) throw error;
       revalidatePath(`/dashboard/invoices`);
       return { successNew: true };
     } else {
-      const { error } = await supabase.rpc(
-        'update_invoice_with_items_warehouse',
-        {
-          p_invoice_id: initialData.id,
-          p_customer_name: values.customer_name,
-          p_customer_number: values.customer_number,
-          p_customer_address: values.customer_address,
-          p_total_price: values.total_price,
-          p_reference: values.reference,
-          p_items: values.invoice_items.map((item) => ({
-            product_code: item.product_code,
-            description: item.description,
-            quantity: item.quantity,
-            boxes: item.boxes,
-            price: item.price,
-            warehouse: item.warehouse,
-            optional_item: item.optional_item
-          }))
-        }
-      );
+      const isCustomerSame =
+        values.customer_name === initialData.customer_name &&
+        values.customer_number === initialData.customer_number &&
+        values.customer_address === initialData.customer_address;
 
-      if (error) throw error;
+      if (isCustomerSame) {
+        {
+          const { error } = await supabase
+            .from('invoices')
+            .update([
+              {
+                payment: values.payment
+              }
+            ])
+            .eq('id', initialData.id)
+            .select();
+
+          if (error) throw error;
+        }
+      } else {
+        const { error } = await supabase
+          .from('invoices')
+          .update([
+            {
+              customer_name: values.customer_name,
+              customer_number: values.customer_number,
+              customer_address: values.customer_address,
+              payment: values.payment,
+              edited: true
+            }
+          ])
+          .eq('id', initialData.id)
+          .select();
+
+        if (error) throw error;
+      }
+
       revalidatePath(`/dashboard/invoices`);
       return { successUpdate: true };
     }
-  } catch (error: any) {
-    return { error };
-  }
-};
-
-export const purchasingInvoiceSubmit = async (values: PurchasingInvoice) => {
-  try {
-    const supabase = await createClient();
-
-    const { error } = await supabase.rpc(
-      'create_purchasing_invoice_with_items',
-      {
-        supplier: values.supplier,
-        total_price: values.total_price,
-        invoice_number: values.invoice_number,
-        items: values.purchasing_invoice_items.map((item) => ({
-          product_code: item.product_code,
-          description: item.description,
-          price: item.price,
-          warehouse_distribution: item.warehouse_distribution,
-          optional_item: item.optional_item
-        }))
-      }
-    );
-
-    if (error) throw error;
-    revalidatePath(`/dashboard/purchasing-invoices`);
-    return { success: true };
   } catch (error: any) {
     return { error };
   }
@@ -341,44 +309,3 @@ export const getMaxInvoiceNumber = async (type: string) => {
     return maxInvoiceNumber;
   }
 };
-
-export async function referenceSupplierSubmit(
-  values: Reference | Supplier,
-  type: itemTable
-) {
-  try {
-    const supabase = await createClient();
-
-    const { error } = await supabase
-      .from(type)
-      .insert([{ name: values.name, balance: values.balance }])
-      .select();
-    if (error) throw error;
-    revalidatePath(`/dashboard/${type}`);
-    return { successNew: true };
-  } catch (error: any) {
-    return { error };
-  }
-}
-
-export async function addCredit(values: References_ledger) {
-  const supabase = await createClient();
-  const { error } = await supabase.rpc('handle_cr_amount_reference_ledger', {
-    p_reference_id: values.reference_id,
-    p_name: values.name,
-    p_description: values.description,
-    p_credit: values.cr
-  });
-  if (!error) return { success: true };
-}
-
-export async function addDebit(values: Suppliers_ledger) {
-  const supabase = await createClient();
-  const { error } = await supabase.rpc('handle_dr_amount_supplier_ledger', {
-    p_supplier_id: values.supplier_id,
-    p_name: values.name,
-    p_description: values.description,
-    p_debit: values.dr
-  });
-  if (!error) return { success: true };
-}

@@ -88,15 +88,6 @@ export const formatTitle = (text: string, type: itemTable) => {
     case 'invoices':
       formattedType = 'Invoice';
       break;
-    case 'references':
-      formattedType = 'Reference';
-      break;
-    case 'suppliers':
-      formattedType = 'Supplier';
-      break;
-    case 'purchasing_invoices':
-      formattedType = 'Purchasing Invoice';
-      break;
   }
 
   return `${text} ${formattedType}`;
@@ -142,38 +133,4 @@ export function filterWithDate(
       new Date(item.created_at) >= start &&
       new Date(item.created_at) <= end
   );
-}
-
-export const getTotalQuantity = (product: Product) =>
-  product.quantity_in_zafarwal +
-  product.quantity_in_ghaziwal +
-  product.quantity_in_lhr_road +
-  product.quantity_in_eidgah_road +
-  product.quantity_in_mandi_tile +
-  product.quantity_in_mandi_bond;
-
-export function filterByWarehouse(
-  product: Product,
-  warehouseKey: string
-): boolean {
-  switch (warehouseKey) {
-    case 'Zafarwal':
-      return product.quantity_in_zafarwal > 0;
-    case 'Ghaziwal':
-      return product.quantity_in_ghaziwal > 0;
-    case 'Lhr Road':
-    case 'LhrRoad':
-      return product.quantity_in_lhr_road > 0;
-    case 'Eidgah Road':
-    case 'EidgahRoad':
-      return product.quantity_in_eidgah_road > 0;
-    case 'Mandi Tile':
-    case 'MandiTile':
-      return product.quantity_in_mandi_tile > 0;
-    case 'Mandi Bond':
-    case 'MandiBond':
-      return product.quantity_in_mandi_bond > 0;
-    default:
-      return false;
-  }
 }

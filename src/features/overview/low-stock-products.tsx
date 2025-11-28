@@ -14,7 +14,6 @@ import { DataTableFilterBox } from '@/components/ui/table/data-table-filter-box'
 import { DataTableResetFilter } from '@/components/ui/table/data-table-reset-filter';
 import { useTableFilters } from '../dynamic/table-components/use-table-filters';
 import { Product, Category, Brand } from 'types';
-import { getTotalQuantity } from '@/utils/utils';
 import { useMemo } from 'react';
 
 interface Props {
@@ -105,7 +104,7 @@ export function LowStockProducts({ products, categories, brands }: Props) {
                 <Link
                   key={product.id}
                   className='flex gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
-                  href={`products/${product.id}`}
+                  href={`/dashboard/products/${product.id}`}
                 >
                   {product.img_url && (
                     <div className='flex-shrink-0'>
@@ -128,7 +127,7 @@ export function LowStockProducts({ products, categories, brands }: Props) {
                     </p>
                     <div className='mt-2 flex items-center gap-2'>
                       <Badge variant='destructive'>
-                        Qty: {getTotalQuantity(product)}
+                        Qty: {product.quantity}
                       </Badge>
                     </div>
                   </div>

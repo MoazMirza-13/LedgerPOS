@@ -4,7 +4,6 @@ import { createClient } from '@/utils/supabase/server';
 
 export default async function page() {
   const invoices = await fetchListingData('invoices');
-  const references = await fetchListingData('references');
   const products = await fetchListingData('products');
 
   // ---- fetch invoice items  ----
@@ -29,7 +28,6 @@ export default async function page() {
           invoices={invoices || []}
           invoiceItems={invoiceItems || []}
           products={products || []}
-          references={references || []}
         />
       </div>
     </main>

@@ -13,13 +13,17 @@ export default function page() {
                 Dashboard
               </h1>
               <p className='text-muted-foreground'>
-                Monitor product stock levels and your profit reports below
+                Monitor product stock levels, unpaid invoices and your profit
+                reports below
               </p>
             </div>
 
             <div className='flex min-h-[50vh] flex-col items-center justify-center gap-4'>
               <Link href={`/dashboard/overview/low-stock-products`}>
                 <Button>View Low Stock Products</Button>
+              </Link>
+              <Link href={`/dashboard/overview/unpaid-invoices`}>
+                <Button>View Unpaid Invoices</Button>
               </Link>
               <Link href={`/dashboard/overview/profit`}>
                 <Button>View Profit</Button>

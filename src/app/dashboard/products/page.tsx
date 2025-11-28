@@ -4,7 +4,6 @@ import { fetchListingData } from '@/features/dynamic/fetchListingData';
 import { itemData } from 'types';
 import { getCategoriesBrandsData } from '@/lib/actions';
 import { PageContent } from '@/components/layout/page-content';
-import { warehouses } from '@/constants/data';
 
 export const metadata = {
   title: 'Dashboard: Products'
@@ -39,7 +38,7 @@ export default async function Page(props: pageProps) {
         itemsData={items_data}
         searchParams={searchParams}
         pageKey={key}
-        extraTableProps={{ categories, brands, warehouses, items_data }}
+        extraTableProps={{ categories, brands, items_data }}
       />
     </PageContainer>
   );

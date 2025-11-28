@@ -2,7 +2,7 @@ import { LowStockProducts } from '@/features/overview/low-stock-products';
 import PageContainer from '@/components/layout/page-container';
 import { getCategoriesBrandsData } from '@/lib/actions';
 import { Product } from 'types';
-import { getImageUrl, getTotalQuantity } from '@/utils/utils';
+import { getImageUrl } from '@/utils/utils';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
 
 export default async function Page() {
@@ -13,8 +13,7 @@ export default async function Page() {
   const brands = categoryBrandData ? categoryBrandData[0].brands : [];
 
   const lowStockProducts =
-    products?.filter((p: Product) => getTotalQuantity(p) < p.min_quantity) ||
-    [];
+    products?.filter((p: Product) => p.quantity < p.min_quantity) || [];
 
   const productsWithUrls = await Promise.all(
     lowStockProducts.map(async (p) => ({

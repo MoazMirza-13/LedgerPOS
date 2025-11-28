@@ -64,8 +64,17 @@ export const useColumns = <T extends Entity>(
         }
       },
       {
+        accessorKey: 'title',
+        header: 'PRODUCT',
+        cell: ({ row }) => (
+          <Link href={`/dashboard/${type}/${row.original.id}`}>
+            {row.getValue('title')}
+          </Link>
+        )
+      },
+      {
         accessorKey: 'product_code',
-        header: 'Product',
+        header: 'CODE',
         cell: ({ row }) => (
           <Link href={`/dashboard/${type}/${row.original.id}`}>
             {row.getValue('product_code')}
@@ -86,49 +95,22 @@ export const useColumns = <T extends Entity>(
       baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
     }
     baseColumns.push(
+      { accessorKey: 'selling_price', header: 'SELLING' },
       {
         header: 'QUANTITY',
-        accessorFn: (row) => {
-          const product = row as Product;
-          const totalQuantity =
-            (product.quantity_in_zafarwal || 0) +
-            (product.quantity_in_ghaziwal || 0) +
-            (product.quantity_in_lhr_road || 0) +
-            (product.quantity_in_eidgah_road || 0) +
-            (product.quantity_in_mandi_tile || 0) +
-            (product.quantity_in_mandi_bond || 0);
-          return totalQuantity;
-        }
+        accessorKey: 'quantity'
       },
-      { accessorKey: 'selling_price', header: 'SELLING' },
+      { accessorKey: 'description', header: 'DESCRIPTION' },
       {
         header: 'STOCK',
         cell: ({ row }) => {
           const product = row.original as Product;
-          const quantity = row.getValue('QUANTITY') as number;
+          const quantity = row.getValue('quantity') as number;
           const minQuantity = product.min_quantity;
           return quantity > minQuantity ? '✅' : '❌';
         }
       }
     );
-    if (currentRole === 'super_admin') {
-      baseColumns.push({
-        header: 'TOTAL',
-        accessorFn: (row) => {
-          const product = row as Product;
-          const quantity =
-            (product.quantity_in_zafarwal || 0) +
-            (product.quantity_in_ghaziwal || 0) +
-            (product.quantity_in_lhr_road || 0) +
-            (product.quantity_in_eidgah_road || 0) +
-            (product.quantity_in_mandi_tile || 0) +
-            (product.quantity_in_mandi_bond || 0);
-
-          return quantity * product.cost_price;
-        },
-        cell: ({ getValue }) => getValue()
-      });
-    }
   }
 
   if (type === 'invoices') {
@@ -165,73 +147,15 @@ export const useColumns = <T extends Entity>(
       { accessorKey: 'customer_name', header: 'CUSTOMER NAME' },
       { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
       { accessorKey: 'customer_address', header: 'CUSTOMER ADDRESS' },
+      { accessorKey: 'total_price', header: 'TOTAL' },
       {
-        header: 'REFERENCE',
-        accessorFn: (row) =>
-          'references' in row ? row.references?.name || '' : ''
-      },
-      { accessorKey: 'total_price', header: 'TOTAL' }
-    );
-  }
-
-  if (type === 'purchasing_invoices') {
-    baseColumns.push(
-      {
-        accessorKey: 'created_at',
-        header: 'DATE',
-        cell: ({ row }) => (
-          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
-        )
-      },
-      {
-        accessorKey: 'invoice_number',
-        header: '#',
-        cell: ({ row }) => (
-          <Link href={`/dashboard/purchasing-invoices/${row.original.id}`}>
-            {row.getValue('invoice_number')}
-          </Link>
-        )
-      },
-      {
-        header: 'Supplier',
-        accessorFn: (row) =>
-          'suppliers' in row ? row.suppliers?.name || '' : ''
-      },
-      { accessorKey: 'total_price', header: 'TOTAL' }
-    );
-  }
-
-  if (type === 'references' || type === 'suppliers') {
-    baseColumns.push(
-      {
-        accessorKey: 'name',
-        header: `${type === 'references' ? 'REFERENCE' : 'SUPPLIER'} NAME`,
-        cell: ({ row }) => (
-          //! ledger screen for suppliers is under dev
-          <Link href={`/dashboard/${type}/${row.original.id}`}>
-            {row.getValue('name')}
-          </Link>
-        )
-      },
-      { accessorKey: 'balance', header: 'BALANCE' }
-    );
-  }
-
-  if (type === 'references_ledger' || type === 'suppliers_ledger') {
-    baseColumns.push(
-      {
-        accessorKey: 'created_at',
-        header: 'DATE',
-        cell: ({ row }) => (
-          <span>{formatToPKTDate(row.getValue('created_at'))}</span>
-        )
-      },
-      { accessorKey: 'name', header: 'NAME' },
-      { accessorKey: 'invoice_number', header: 'INVOICE #' },
-      { accessorKey: 'description', header: 'DESCRIPTION' },
-      { accessorKey: 'dr', header: 'DR' },
-      { accessorKey: 'cr', header: 'CR' },
-      { accessorKey: 'balance', header: 'BALANCE' }
+        accessorKey: 'payment',
+        header: 'PAYMENT',
+        cell: ({ row }) => {
+          const invoice = row.original as Invoice;
+          return invoice.payment ? '✅' : '❌';
+        }
+      }
     );
   }
 

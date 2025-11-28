@@ -2,16 +2,11 @@ import { createClient } from '@/utils/supabase/server';
 import { getImageUrl } from '@/utils/utils';
 import { itemTable } from 'types';
 
-export async function fetchListingData(type: itemTable, id?: string) {
+export async function fetchListingData(type: itemTable) {
   const supabase = await createClient();
   let data;
 
-  if (
-    type === 'categories' ||
-    type === 'brands' ||
-    type === 'references' ||
-    type === 'suppliers'
-  ) {
+  if (type === 'categories' || type === 'brands') {
     const { data: fetchedData, error } = await supabase.from(type).select('*');
     data = fetchedData;
   } else if (type === 'products') {
@@ -42,33 +37,10 @@ export async function fetchListingData(type: itemTable, id?: string) {
     data = productsWithImg;
   } else if (type === 'invoices') {
     const { data: invoicesData, error } = await supabase.from(type).select(`
-      *,
-      references (name)
+      *
       `);
 
     data = invoicesData;
-  } else if (type === 'references_ledger' && id) {
-    const { data: referencesLedgerData, error } = await supabase
-      .from(type)
-      .select('*')
-      .eq('reference_id', id);
-
-    data = referencesLedgerData;
-  } else if (type === 'purchasing_invoices') {
-    const { data: purchasingInvoicesData, error } = await supabase.from(type)
-      .select(`
-      *,
-      suppliers (name)
-      `);
-
-    data = purchasingInvoicesData;
-  } else if (type === 'suppliers_ledger' && id) {
-    const { data: suppliersLedgerData, error } = await supabase
-      .from(type)
-      .select('*')
-      .eq('supplier_id', id);
-
-    data = suppliersLedgerData;
   }
 
   const sortedData = Array.isArray(data)
@@ -76,11 +48,7 @@ export async function fetchListingData(type: itemTable, id?: string) {
         const aTime = new Date(a.created_at).getTime();
         const bTime = new Date(b.created_at).getTime();
 
-        // if ledger type => ascending (a - b)
-        // otherwise => descending (b - a)
-        return type === 'references_ledger' || type === 'suppliers_ledger'
-          ? aTime - bTime
-          : bTime - aTime;
+        return bTime - aTime;
       })
     : data;
 

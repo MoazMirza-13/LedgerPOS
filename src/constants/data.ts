@@ -17,6 +17,12 @@ export const navItems: NavItem[] = [
         group: 'Overview'
       },
       {
+        title: 'Unpaid Invoices',
+        url: '/dashboard/overview/unpaid-invoices',
+        isActive: false,
+        group: 'Overview'
+      },
+      {
         title: 'Profit',
         url: '/dashboard/overview/profit',
         isActive: false,
@@ -52,15 +58,6 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'References',
-    url: '/dashboard/references',
-    icon: 'user',
-    shortcut: ['g', 'r'],
-    isActive: false,
-    group: 'Billing',
-    items: [] // No child items
-  },
-  {
     title: 'Invoices',
     url: '/dashboard/invoices',
     icon: 'invoice',
@@ -68,32 +65,5 @@ export const navItems: NavItem[] = [
     isActive: false,
     group: 'Billing',
     items: [] // No child items
-  },
-  {
-    title: 'Suppliers',
-    url: '/dashboard/suppliers',
-    icon: 'user',
-    shortcut: ['g', 's'],
-    isActive: false,
-    group: 'Purchasing',
-    items: [] // No child items
-  },
-  {
-    title: 'Purchasing Invoices',
-    url: '/dashboard/purchasing-invoices',
-    icon: 'invoice',
-    shortcut: ['g', 'pi'],
-    isActive: false,
-    group: 'Purchasing',
-    items: [] // No child items
   }
-];
-
-export const warehouses = [
-  { key: 'Ghaziwal', label: 'Ghaziwal' },
-  { key: 'Zafarwal', label: 'Zafarwal' },
-  { key: 'LhrRoad', label: 'Lhr Road' },
-  { key: 'EidgahRoad', label: 'Eidgah Road' },
-  { key: 'MandiTile', label: 'Mandi Tile' },
-  { key: 'MandiBond', label: 'Mandi Bond' }
 ];

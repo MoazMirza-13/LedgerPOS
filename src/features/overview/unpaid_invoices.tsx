@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { getSupabaseClient } from '@/lib/actions';
 import { formatToPKTDate } from '@/utils/utils';
 import { Invoice } from 'types';
@@ -42,7 +41,7 @@ export async function UnpaidInvoices() {
             ) : (
               invoices.map((invoice) => (
                 <Link
-                  href={`invoices/${invoice.id}`}
+                  href={`/dashboard/invoices/${invoice.id}`}
                   key={invoice.id}
                   className='flex items-start justify-between rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
                 >
@@ -55,12 +54,6 @@ export async function UnpaidInvoices() {
                     </p>
                   </div>
                   <div className='text-right'>
-                    {invoice.reference && (
-                      <Badge variant='outline' className='mb-2'>
-                        <span className='text-gray-500'>Reference:</span>
-                        <span className='ml-1'>{invoice.reference}</span>
-                      </Badge>
-                    )}
                     <p className='font-semibold text-foreground'>
                       {formatCurrency(invoice.total_price)}
                     </p>

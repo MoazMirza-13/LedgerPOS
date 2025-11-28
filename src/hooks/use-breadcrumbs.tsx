@@ -27,10 +27,6 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
   '/dashboard/invoices': [
     { title: 'Dashboard', link: '/dashboard' },
     { title: 'Invoices', link: '/dashboard/invoices' }
-  ],
-  '/dashboard/references': [
-    { title: 'Dashboard', link: '/dashboard' },
-    { title: 'References', link: '/dashboard/references' }
   ]
 };
 
@@ -46,15 +42,7 @@ export function useBreadcrumbs() {
 
   // Memoized values to prevent unnecessary recalculations
   const { type, id, isDynamicRoute } = useMemo(() => {
-    const types: itemTable[] = [
-      'brands',
-      'products',
-      'categories',
-      'invoices',
-      'references',
-      'purchasing_invoices',
-      'suppliers'
-    ];
+    const types: itemTable[] = ['brands', 'products', 'categories', 'invoices'];
     const lastSegment = segments[segments.length - 1] || '';
     const type =
       types.find((t) => pathname.includes(`/${t.replace('_', '-')}/`)) || '';

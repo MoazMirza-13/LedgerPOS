@@ -16,7 +16,7 @@ interface AppSidebarProps {
 }
 
 export const company = {
-  name: 'Kashmir Tiles',
+  name: 'NS',
   logo: Store,
   plan: 'Admin Panel'
 };
@@ -50,10 +50,6 @@ export default function AppSidebar({}: AppSidebarProps) {
           <SidebarGroupSection
             title='Billing'
             items={navItems.filter((item) => item.group === 'Billing')}
-          />
-          <SidebarGroupSection
-            title='Purchasing'
-            items={navItems.filter((item) => item.group === 'Purchasing')}
           />
         </RoleGate>
       </SidebarContent>

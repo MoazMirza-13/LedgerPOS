@@ -46,13 +46,15 @@ const ResultItem = React.forwardRef(
             ? Icon && <Icon />
             : action.imgUrl && (
                 <div className='relative h-[60px] w-[60px]'>
-                  <Image
-                    src={action.imgUrl[0]}
-                    alt={action.name}
-                    className='rounded object-contain'
-                    fill
-                    sizes='60px'
-                  />
+                  {action.imgUrl.length > 0 && (
+                    <Image
+                      src={action.imgUrl[0]}
+                      alt={action?.name}
+                      className='rounded object-contain'
+                      fill
+                      sizes='60px'
+                    />
+                  )}
                 </div>
               )}
           <div className='flex flex-col'>

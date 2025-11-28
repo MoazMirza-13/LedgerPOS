@@ -13,9 +13,7 @@ import {
   Invoice,
   Invoice_items,
   itemTable,
-  Product,
-  PurchasingInvoice,
-  PurchasingInvoiceItems
+  Product
 } from 'types';
 
 export async function fetchViewData(
@@ -30,9 +28,6 @@ export async function fetchViewData(
     let data = null;
     let categories = null;
     let brands = null;
-    let products = null;
-    let references = null;
-    let suppliers = null;
     let newProduct = type === 'products';
     let pageTitle = '';
 
@@ -51,7 +46,7 @@ export async function fetchViewData(
         });
 
         const fetchedData = queryClient.getQueryData<
-          Invoice | Product | Category | Brand | PurchasingInvoice
+          Invoice | Product | Category | Brand
         >([type, id]);
 
         if (!fetchedData) {
@@ -84,20 +79,6 @@ export async function fetchViewData(
             ...fetchedData,
             invoice_items: (invoice_items as Invoice_items[]) || []
           };
-        } else if (type === 'purchasing_invoices' && fetchedData) {
-          const supabase = await getSupabaseClient();
-          const { data: invoice_items, error } = await supabase
-            .from('purchasing_invoice_items')
-            .select('*')
-            .eq('purchasing_invoice_id', fetchedData.id);
-
-          if (error) throw error;
-
-          data = {
-            ...fetchedData,
-            purchasing_invoice_items:
-              (invoice_items as PurchasingInvoiceItems[]) || []
-          };
         } else {
           data = fetchedData as Category | Brand;
         }
@@ -115,30 +96,11 @@ export async function fetchViewData(
       }
     }
 
-    if (type === 'invoices' || type === 'purchasing_invoices') {
-      const supabase = await getSupabaseClient();
-      const { data } = await supabase.from('products').select('*');
-
-      if (data) {
-        products = data;
-      }
-    }
-
     if (type === 'invoices') {
       const supabase = await getSupabaseClient();
       const { data } = await supabase.from('references').select('*');
 
       if (data) {
-        references = data;
-      }
-    }
-
-    if (type === 'purchasing_invoices') {
-      const supabase = await getSupabaseClient();
-      const { data } = await supabase.from('suppliers').select('*');
-
-      if (data) {
-        suppliers = data;
       }
     }
 
@@ -146,9 +108,6 @@ export async function fetchViewData(
       data,
       categories,
       brands,
-      products,
-      references,
-      suppliers,
       newProduct,
       pageTitle
     };
