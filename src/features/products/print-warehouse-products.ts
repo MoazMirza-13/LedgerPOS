@@ -42,7 +42,7 @@ export async function printWarehouseProducts(
                 </svg>
               </div>
               <div>
-                <h1 class="text-3xl font-bold tracking-tight">Kashmir Tiles</h1>
+                <h1 class="text-3xl font-bold tracking-tight">LedgerPOS</h1>
                 <p class="text-teal-300 text-sm font-medium mt-1">Products List (${warehouse})</p>
               </div>
             </div>
@@ -98,7 +98,7 @@ export async function printWarehouseProducts(
 
         <!-- FOOTER -->
         <div class="bg-slate-900 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
-          <p class="text-sm font-medium m-0">Kashmir Tiles | Warehouse Report - ${warehouse}</p>
+          <p class="text-sm font-medium m-0">LedgerPOS | Warehouse Report - ${warehouse}</p>
           <p class="text-xs text-slate-400 m-0 mt-2">Generated on ${formatToPKTDate(new Date())}</p>
         </div>
       </div>

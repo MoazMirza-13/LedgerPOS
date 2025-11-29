@@ -16,7 +16,7 @@ interface AppSidebarProps {
 }
 
 export const company = {
-  name: 'Kashmir Tiles',
+  name: 'LedgerPOS',
   logo: Store,
   plan: 'Admin Panel'
 };

@@ -3,8 +3,8 @@ import UserAuthForm from './user-auth-form';
 import { Store } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Kashmir Tiles | Sign in',
-  description: 'Admin panel for Kashmir Tiles.'
+  title: 'LedgerPOS | Sign in',
+  description: 'Admin panel for LedgerPOS.'
 };
 
 export default function SignInViewPage() {
@@ -17,11 +17,11 @@ export default function SignInViewPage() {
       <div className='relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex'>
         <div className='absolute inset-0 bg-zinc-900' />
         <div className='relative z-20 flex items-center gap-2 text-lg font-medium'>
-          <Store /> Kashmir Tiles
+          <Store /> LedgerPOS
         </div>
         <div className='relative z-20 mt-auto'>
           <blockquote className='space-y-2'>
-            <p className='text-lg'>Tiles and Marble house</p>
+            <p className='text-lg'>Manage your store, inventory with ledger</p>
             <footer className='text-sm'>Sign in to use</footer>
           </blockquote>
         </div>

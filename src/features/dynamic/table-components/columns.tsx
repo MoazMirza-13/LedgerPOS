@@ -64,8 +64,17 @@ export const useColumns = <T extends Entity>(
         }
       },
       {
+        accessorKey: 'title',
+        header: 'PRODUCT',
+        cell: ({ row }) => (
+          <Link href={`/dashboard/${type}/${row.original.id}`}>
+            {row.getValue('title')}
+          </Link>
+        )
+      },
+      {
         accessorKey: 'product_code',
-        header: 'Product',
+        header: 'CODE',
         cell: ({ row }) => (
           <Link href={`/dashboard/${type}/${row.original.id}`}>
             {row.getValue('product_code')}
@@ -86,6 +95,7 @@ export const useColumns = <T extends Entity>(
       baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
     }
     baseColumns.push(
+      { accessorKey: 'selling_price', header: 'SELLING' },
       {
         header: 'QUANTITY',
         accessorFn: (row) => {
@@ -100,7 +110,7 @@ export const useColumns = <T extends Entity>(
           return totalQuantity;
         }
       },
-      { accessorKey: 'selling_price', header: 'SELLING' },
+      { accessorKey: 'description', header: 'DESCRIPTION' },
       {
         header: 'STOCK',
         cell: ({ row }) => {
@@ -111,24 +121,6 @@ export const useColumns = <T extends Entity>(
         }
       }
     );
-    if (currentRole === 'super_admin') {
-      baseColumns.push({
-        header: 'TOTAL',
-        accessorFn: (row) => {
-          const product = row as Product;
-          const quantity =
-            (product.quantity_in_zafarwal || 0) +
-            (product.quantity_in_ghaziwal || 0) +
-            (product.quantity_in_lhr_road || 0) +
-            (product.quantity_in_eidgah_road || 0) +
-            (product.quantity_in_mandi_tile || 0) +
-            (product.quantity_in_mandi_bond || 0);
-
-          return quantity * product.cost_price;
-        },
-        cell: ({ getValue }) => getValue()
-      });
-    }
   }
 
   if (type === 'invoices') {

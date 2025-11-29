@@ -37,12 +37,6 @@ export function DataTable<TData, TValue>({
 
   const currentRole = useRole();
 
-  const totalSum = productsRoute
-    ? table
-        .getRowModel()
-        .rows.reduce((acc, row) => acc + Number(row.getValue('TOTAL') || 0), 0)
-    : 0;
-
   return (
     <>
       <div className='flex flex-1 flex-col space-y-4'>
@@ -118,9 +112,6 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
       </div>
-      {productsRoute && (
-        <div className='text-right text-lg font-bold'>Total: {totalSum}</div>
-      )}
     </>
   );
 }

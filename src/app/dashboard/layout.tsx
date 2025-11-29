@@ -7,8 +7,8 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-  title: 'Kashmir Tiles | Dashboard',
-  description: 'Admin panel for Kashmir Tiles.'
+  title: 'LedgerPOS | Dashboard',
+  description: 'Admin panel for LedgerPOS.'
 };
 
 export default async function DashboardLayout({

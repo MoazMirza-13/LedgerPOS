@@ -28,7 +28,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
               </svg>
             </div>
             <div>
-              <h1 class="text-4xl font-bold tracking-tight">Kashmir Tiles</h1>
+              <h1 class="text-4xl font-bold tracking-tight">LedgerPOS</h1>
               <p class="text-teal-300 text-sm font-medium mt-1">Tiles & Marble</p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
     <!-- FOOTER -->
     <div class="bg-slate-900 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
       <p class="text-sm font-medium m-0">Thank you for your business!</p>
-      <p class="text-xs text-slate-400 m-0 mt-2">Kashmir Tiles | Contact: 03030550072</p>
+      <p class="text-xs text-slate-400 m-0 mt-2">LedgerPOS | Contact: 03030550072</p>
       <p class="text-xs text-slate-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
     </div>
 
