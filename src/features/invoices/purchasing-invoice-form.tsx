@@ -290,7 +290,13 @@ export default function PurchasingInvoiceForm({
                             className='border-b hover:bg-muted/50'
                           >
                             <td className='px-4 py-3'>
-                              <div className='flex gap-2 lg:w-[125px]'>
+                              <div
+                                className={`flex gap-2 ${
+                                  items[index].product
+                                    ? 'lg:w-[125px]'
+                                    : 'w-[30rem]'
+                                }`}
+                              >
                                 {/* type product */}
                                 {(items[index].type === 'product' ||
                                   items[index].product_code) && (

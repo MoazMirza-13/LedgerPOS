@@ -65,7 +65,7 @@ export const useColumns = <T extends Entity>(
       },
       {
         accessorKey: 'product_code',
-        header: 'Product',
+        header: 'PRODUCT',
         cell: ({ row }) => (
           <Link href={`/dashboard/${type}/${row.original.id}`}>
             {row.getValue('product_code')}

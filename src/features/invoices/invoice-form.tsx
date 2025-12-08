@@ -82,7 +82,7 @@ export default function InvoiceForm({
     );
 
   const formSchema = z.object({
-    customer_name: z.string().min(1, 'Customer name is required'),
+    customer_name: z.string().optional(),
     customer_number: z.string().optional(),
     customer_address: z.string().optional(),
     invoice_items: z.array(invoiceItemSchema).min(1),
@@ -228,7 +228,7 @@ export default function InvoiceForm({
     <>
       {showPasswordPopup && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
-          <div className='w-80 space-y-4 rounded-lg bg-white p-6 shadow-lg'>
+          <div className='w-80 space-y-4 rounded-lg bg-white p-6 text-black shadow-lg'>
             <h2 className='text-lg font-semibold'>Super Admin Password</h2>
             <Input
               type='password'
@@ -415,7 +415,7 @@ export default function InvoiceForm({
                         >
                           <td
                             className={`flex gap-2 px-4 py-3 ${
-                              items[index].product ? 'w-[160px]' : 'w-[12rem]'
+                              items[index].product ? 'w-[160px]' : 'w-[30rem]'
                             }`}
                           >
                             {items[index].type === 'product' && (
@@ -726,9 +726,14 @@ export default function InvoiceForm({
                                           }
                                           placeholder='Add Price'
                                           onChange={(e) => {
-                                            const value = Number(
-                                              e.target.value
-                                            );
+                                            const value =
+                                              e.target.value === ''
+                                                ? ''
+                                                : Number(e.target.value);
+                                            field.onChange(value);
+                                          }}
+                                          onBlur={() => {
+                                            const value = Number(field.value);
 
                                             if (
                                               items[index].type === 'product'
@@ -739,8 +744,6 @@ export default function InvoiceForm({
                                               field.onChange(
                                                 Math.max(value, minPrice)
                                               );
-                                            } else {
-                                              field.onChange(value);
                                             }
                                           }}
                                         />

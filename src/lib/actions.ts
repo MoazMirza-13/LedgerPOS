@@ -246,7 +246,10 @@ export const invoiceSubmit = async (
       const { error } = await supabase.rpc(
         'create_invoice_with_items_warehouse',
         {
-          customer_name: values.customer_name,
+          customer_name:
+            values.customer_name !== ''
+              ? values.customer_name
+              : 'Walk-in Customer',
           customer_number: values.customer_number,
           customer_address: values.customer_address,
           total_price: values.total_price,
@@ -272,11 +275,14 @@ export const invoiceSubmit = async (
         'update_invoice_with_items_warehouse',
         {
           p_invoice_id: initialData.id,
-          p_customer_name: values.customer_name,
+          p_customer_name:
+            values.customer_name !== ''
+              ? values.customer_name
+              : 'Walk-in Customer',
           p_customer_number: values.customer_number,
           p_customer_address: values.customer_address,
           p_total_price: values.total_price,
-          p_reference: values.reference,
+          p_reference: values.reference || null,
           p_items: values.invoice_items.map((item) => ({
             product_code: item.product_code,
             description: item.description,

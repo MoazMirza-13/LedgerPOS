@@ -105,7 +105,7 @@ export function LowStockProducts({ products, categories, brands }: Props) {
                 <Link
                   key={product.id}
                   className='flex gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
-                  href={`products/${product.id}`}
+                  href={`/dashboard/products/${product.id}`}
                 >
                   {product.img_url && (
                     <div className='flex-shrink-0'>
