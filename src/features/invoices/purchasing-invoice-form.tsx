@@ -266,7 +266,7 @@ export default function PurchasingInvoiceForm({
                             {wh.label}
                           </th>
                         ))}
-                        <th className='w-[10%] px-4 py-3 text-right text-sm font-semibold'>
+                        <th className='w-[10%] px-4 py-3 text-sm font-semibold'>
                           Price
                         </th>
                         <th className='px-4 py-3 text-right text-sm font-semibold'>
