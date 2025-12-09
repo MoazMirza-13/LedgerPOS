@@ -19,9 +19,11 @@ export async function printInvoice(finalData: Invoice, date?: string) {
 
     <!-- HEADER -->
     <div>
-      <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-8 rounded-t-lg">
+      <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 rounded-t-lg">
+            <p class="text-teal-300 text-xs font-semibold tracking-widest">INVOICE# ${finalData.invoice_number}</p>
         <div class="flex items-start justify-between">
-          <div class="flex items-center gap-4">
+          <div class="flex flex-col">
+          <div class="flex items-center gap-4 ">
             <div class="bg-teal-500 p-3 rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-8m0 0l9-4 9 4M3 13l9-4 9 4v8M9 21V9m6 12V9" />
@@ -31,9 +33,9 @@ export async function printInvoice(finalData: Invoice, date?: string) {
               <h1 class="text-4xl font-bold tracking-tight">Kashmir Tiles</h1>
               <p class="text-teal-300 text-sm font-medium mt-1">Tiles & Marble</p>
             </div>
+            </div>
           </div>
           <div class="text-right">
-            <p class="text-teal-300 text-xs font-semibold tracking-widest">INVOICE# ${finalData.invoice_number}</p>
             <p class="text-slate-400 text-sm mt-2">${invoiceDate}</p>
           </div>
         </div>
