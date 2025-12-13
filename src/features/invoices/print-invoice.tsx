@@ -114,7 +114,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
     <!-- FOOTER -->
     <div class="bg-slate-900 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
       <p class="text-sm font-medium m-0">Thank you for your business!</p>
-      <p class="text-xs text-slate-400 m-0 mt-2">Kashmir Tiles | Contact: 03004541284</p>
+      <p class="text-xs text-slate-400 m-0 mt-2">Kashmir Tiles | Contact: 03127226579</p>
       <p class="text-xs text-slate-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
     </div>
 
