@@ -22,6 +22,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  console.log('ns');
   return (
     <html lang='en' className={`${lato.className}`} suppressHydrationWarning>
       <body className={'overflow-hidden'} suppressHydrationWarning>
