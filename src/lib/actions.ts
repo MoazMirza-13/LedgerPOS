@@ -24,19 +24,19 @@ export async function signIn(credentials: { email: string; password: string }) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.signInWithPassword(credentials);
 
-    const { data: userRole, error: urError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', data.user?.id)
-      .single();
+    // const { data: userRole, error: urError } = await supabase
+    //   .from('user_roles')
+    //   .select('role')
+    //   .eq('user_id', data.user?.id)
+    //   .single();
 
-    if (error || urError) throw error;
+    if (error) throw error;
 
-    const currentRole = userRole?.role;
-    const cookieStore = await cookies();
-    cookieStore.set('currentRole', currentRole || '', {
-      maxAge: 60 * 60 * 24 * 30 * 13
-    });
+    // const currentRole = userRole?.role;
+    // const cookieStore = await cookies();
+    // cookieStore.set('currentRole', currentRole || '', {
+    //   maxAge: 60 * 60 * 24 * 30 * 13
+    // });
 
     return { success: true };
   } catch (error: any) {
@@ -47,8 +47,8 @@ export async function signIn(credentials: { email: string; password: string }) {
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  (await cookies()).delete('currentRole');
-  redirect('/');
+  // (await cookies()).delete('currentRole');
+  // redirect('/');
 }
 
 export async function forceLogoutAllUsers() {
