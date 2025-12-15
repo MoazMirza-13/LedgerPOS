@@ -48,7 +48,7 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   // (await cookies()).delete('currentRole');
-  // redirect('/');
+  redirect('/');
 }
 
 export async function forceLogoutAllUsers() {
