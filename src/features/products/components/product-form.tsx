@@ -203,7 +203,7 @@ export default function ProductForm({
           imgPaths.push(slot);
         } else if (slot instanceof File) {
           // New file, upload it
-          const result = await imageUpload(slot);
+          const result = await imageUpload(slot, 'product_imgs');
           if (typeof result === 'string') {
             imgPaths.push(result);
           } else {

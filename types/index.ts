@@ -51,6 +51,7 @@ export type Category = {
   created_at: string;
   id: string;
   description: string;
+  img: string;
 };
 
 // currently same as category, schema might get updated later
@@ -59,6 +60,7 @@ export type Brand = {
   created_at: string;
   id: string;
   description: string;
+  img: string;
 };
 
 export type Invoice = {

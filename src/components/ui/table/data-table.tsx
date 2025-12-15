@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { useRole } from '@/context/RoleContext';
+// import { useRole } from '@/context/RoleContext';
 import {
   ColumnDef,
   flexRender,
@@ -35,7 +35,7 @@ export function DataTable<TData, TValue>({
   const pathname = usePathname();
   const productsRoute = pathname.includes('/products');
 
-  const currentRole = useRole();
+  // const currentRole = useRole();
 
   return (
     <>
@@ -51,10 +51,9 @@ export function DataTable<TData, TValue>({
                         <TableHead
                           key={header.id}
                           className={
-                            index === headers.length - 1 &&
-                            !productsRoute &&
-                            currentRole === 'super_admin'
-                              ? 'pr-8 text-right'
+                            index === headers.length - 1 && !productsRoute
+                              ? // && currentRole === 'super_admin'
+                                'pr-8 text-right'
                               : ''
                           }
                         >
@@ -80,10 +79,9 @@ export function DataTable<TData, TValue>({
                           <TableCell
                             key={cell.id}
                             className={
-                              index === cells.length - 1 &&
-                              !productsRoute &&
-                              currentRole === 'super_admin'
-                                ? 'pr-8 text-right'
+                              index === cells.length - 1 && !productsRoute
+                                ? // && currentRole === 'super_admin'
+                                  'pr-8 text-right'
                                 : ''
                             }
                           >

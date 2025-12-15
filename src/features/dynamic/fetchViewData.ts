@@ -5,7 +5,7 @@ import {
 } from '@/lib/actions';
 import { formatTitle, getImageUrl } from '@/utils/utils';
 import { QueryClient } from '@tanstack/react-query';
-import { cookies } from 'next/headers';
+// import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import {
   Brand,
@@ -22,8 +22,8 @@ export async function fetchViewData(
   id: string
 ) {
   try {
-    const cookieStore = await cookies();
-    const currentRole = cookieStore.get('currentRole')?.value || '';
+    // const cookieStore = await cookies();
+    // const currentRole = cookieStore.get('currentRole')?.value || '';
 
     let data = null;
     let categories = null;
@@ -31,11 +31,11 @@ export async function fetchViewData(
     let newProduct = type === 'products';
     let pageTitle = '';
 
-    if (currentRole === 'super_admin') {
-      pageTitle = formatTitle(id === 'new' ? 'Add New' : 'Edit', type);
-    } else {
-      pageTitle = formatTitle('', type);
-    }
+    // if (currentRole === 'super_admin') {
+    pageTitle = formatTitle(id === 'new' ? 'Add New' : 'Edit', type);
+    // } else {
+    // pageTitle = formatTitle('', type);
+    // }
 
     if (id !== 'new') {
       try {
@@ -80,7 +80,14 @@ export async function fetchViewData(
             invoice_items: (invoice_items as Invoice_items[]) || []
           };
         } else {
-          data = fetchedData as Category | Brand;
+          const imageUrl = (fetchedData as Category | Brand).img
+            ? await getImageUrl((fetchedData as Category | Brand).img)
+            : null;
+
+          data = {
+            ...fetchedData,
+            img: imageUrl
+          };
         }
       } catch (error) {
         throw error;
@@ -96,13 +103,13 @@ export async function fetchViewData(
       }
     }
 
-    if (type === 'invoices') {
-      const supabase = await getSupabaseClient();
-      const { data } = await supabase.from('references').select('*');
+    // if (type === 'invoices') {
+    //   const supabase = await getSupabaseClient();
+    //   const { data } = await supabase.from('references').select('*');
 
-      if (data) {
-      }
-    }
+    //   if (data) {
+    //   }
+    // }
 
     return {
       data,

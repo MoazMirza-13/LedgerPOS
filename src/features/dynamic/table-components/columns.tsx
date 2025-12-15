@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { Invoice, itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
-import { useRole } from '@/context/RoleContext';
+// import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
 import { usePathname } from 'next/navigation';
 
@@ -13,7 +13,7 @@ type Entity = itemData;
 export const useColumns = <T extends Entity>(
   type: itemTable
 ): ColumnDef<T>[] => {
-  const currentRole = useRole();
+  // const currentRole = useRole();
   const pathname = usePathname();
 
   const referenceSubRoute = pathname.includes('/references/');
@@ -23,6 +23,29 @@ export const useColumns = <T extends Entity>(
 
   if (type === 'categories' || type === 'brands') {
     baseColumns.push(
+      {
+        accessorKey: 'img',
+        header: 'IMAGE',
+        cell: ({ row }) => {
+          const url = row.getValue('img') as string;
+
+          return (
+            <div className='relative h-[110px] w-[110px]'>
+              {url && (
+                <Image
+                  src={url}
+                  alt='B/C image'
+                  loading='lazy'
+                  fill
+                  className='rounded-lg object-contain'
+                  sizes='(max-width: 768px) 100vw, 110px'
+                  quality={35}
+                />
+              )}
+            </div>
+          );
+        }
+      },
       {
         accessorKey: 'title',
         header: 'TITLE',
@@ -91,9 +114,9 @@ export const useColumns = <T extends Entity>(
         accessorFn: (row) => ('brands' in row ? row.brands?.title || '' : '')
       }
     );
-    if (currentRole === 'super_admin') {
-      baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
-    }
+    // if (currentRole === 'super_admin') {
+    baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
+    // }
     baseColumns.push(
       { accessorKey: 'selling_price', header: 'SELLING' },
       {
@@ -160,7 +183,7 @@ export const useColumns = <T extends Entity>(
   }
 
   if (
-    currentRole === 'super_admin' &&
+    // currentRole === 'super_admin' &&
     !referenceSubRoute &&
     !supplierSubRoute
   ) {

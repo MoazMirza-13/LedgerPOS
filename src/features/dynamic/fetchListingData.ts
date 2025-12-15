@@ -7,10 +7,20 @@ export async function fetchListingData(type: itemTable) {
   let data;
 
   if (type === 'categories' || type === 'brands') {
-    const { data: fetchedData, error } = await supabase.from(type).select('*');
-    data = fetchedData;
+    const { data: fetchedData } = await supabase.from(type).select('*');
+
+    const dataWithImg = fetchedData
+      ? await Promise.all(
+          fetchedData.map(async (item) => ({
+            ...item,
+            img: item.img ? await getImageUrl(item.img) : null
+          }))
+        )
+      : null;
+
+    data = dataWithImg;
   } else if (type === 'products') {
-    const { data: productsData, error } = await supabase.from(type).select(`
+    const { data: productsData } = await supabase.from(type).select(`
       *,
       categories (title),
       brands (title)
@@ -36,7 +46,7 @@ export async function fetchListingData(type: itemTable) {
 
     data = productsWithImg;
   } else if (type === 'invoices') {
-    const { data: invoicesData, error } = await supabase.from(type).select(`
+    const { data: invoicesData } = await supabase.from(type).select(`
       *
       `);
 

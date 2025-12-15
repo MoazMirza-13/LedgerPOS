@@ -144,7 +144,7 @@ export async function productSubmit(
 }
 
 export async function categoryBrandSubmit(
-  values: { title: string; description?: string },
+  values: { title: string; description?: string; img: string },
   initialData: (Category | Brand) | null,
   type: string
 ) {
@@ -154,7 +154,13 @@ export async function categoryBrandSubmit(
     if (!initialData) {
       const { error } = await supabase
         .from(type)
-        .insert([{ title: values.title, description: values.description }])
+        .insert([
+          {
+            title: values.title,
+            description: values.description,
+            img: values.img
+          }
+        ])
         .select();
       if (error) throw error;
       revalidatePath(`/dashboard/${type}`);
@@ -162,7 +168,13 @@ export async function categoryBrandSubmit(
     } else {
       const { error } = await supabase
         .from(type)
-        .update([{ title: values.title, description: values.description }])
+        .update([
+          {
+            title: values.title,
+            description: values.description,
+            img: values.img
+          }
+        ])
         .eq('id', initialData.id)
         .select();
       if (error) throw error;

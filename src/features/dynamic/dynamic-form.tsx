@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { categoryBrandSubmit } from '@/lib/actions';
-import { toastMsg } from '@/utils/utils';
+import { imageUpload, toastMsg } from '@/utils/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -27,8 +27,9 @@ import AddProductButton from '../../components/ui/add-product';
 import Link from 'next/link';
 import TableClientSide from './table-components/tableClient';
 import { getProducts } from '../products/get-products';
-import { useRole } from '@/context/RoleContext';
-import RoleGate from '@/components/role-gate/RoleGateClient';
+// import { useRole } from '@/context/RoleContext';
+// import RoleGate from '@/components/role-gate/RoleGateClient';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 export default function DynamicForm({
   initialData,
@@ -41,7 +42,8 @@ export default function DynamicForm({
 }) {
   const defaultValues = {
     title: initialData?.title || '',
-    description: initialData?.description || ''
+    description: initialData?.description || '',
+    img: initialData?.img || ''
   };
 
   const title = type === 'categories' ? 'Category' : 'Brand';
@@ -50,7 +52,16 @@ export default function DynamicForm({
     title: z.string().min(1, {
       message: `${title} name is required`
     }),
-    description: z.string().optional()
+    description: z.string().optional(),
+    img: z
+      .union([z.instanceof(File), z.string()])
+      .refine(
+        (val) =>
+          val instanceof File || (typeof val === 'string' && val.length > 0),
+        {
+          message: 'Image is required'
+        }
+      )
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,7 +75,28 @@ export default function DynamicForm({
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     startFormTransition(async () => {
-      const res = await categoryBrandSubmit(values, initialData, type);
+      let imagePath = '';
+
+      // upload only if it's a new file
+      if (values.img instanceof File) {
+        const uploaded = await imageUpload(values.img, 'brand_imgs');
+
+        if ((uploaded as any)?.error) {
+          toast.error('Image upload failed');
+          return;
+        }
+
+        imagePath = uploaded as string;
+      } else if (initialData) {
+        imagePath = initialData.img;
+      }
+
+      const payload = {
+        ...values,
+        img: imagePath
+      };
+
+      const res = await categoryBrandSubmit(payload, initialData, type);
       const entity = type === 'categories' ? 'Category' : 'Brand';
 
       if (res?.successNew) toast.success(toastMsg.dynamicNew(entity));
@@ -87,7 +119,7 @@ export default function DynamicForm({
     null
   );
 
-  const currentRole = useRole();
+  // const currentRole = useRole();
 
   return (
     <>
@@ -96,13 +128,13 @@ export default function DynamicForm({
           <CardTitle className='text-left text-2xl font-bold'>
             {pageTitle}
           </CardTitle>
-          <RoleGate allow='super_admin'>
-            {!newPath && (
-              <Link href={newLink}>
-                <AddProductButton />
-              </Link>
-            )}
-          </RoleGate>
+          {/* <RoleGate allow='super_admin'> */}
+          {!newPath && (
+            <Link href={newLink}>
+              <AddProductButton />
+            </Link>
+          )}
+          {/* </RoleGate> */}
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -110,11 +142,23 @@ export default function DynamicForm({
               onSubmit={form.handleSubmit(handleFormSubmit)}
               className='space-y-8'
             >
+              <FormField
+                control={form.control}
+                name='img'
+                render={({ field }) => (
+                  <FormItem className='w-[15rem]'>
+                    <FormLabel>Brand Image</FormLabel>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormItem>
+                )}
+              />
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                 <FormField
                   control={form.control}
                   name='title'
-                  disabled={currentRole !== 'super_admin'}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{`${title} Name`}</FormLabel>
@@ -129,7 +173,6 @@ export default function DynamicForm({
               <FormField
                 control={form.control}
                 name='description'
-                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
@@ -144,56 +187,56 @@ export default function DynamicForm({
                   </FormItem>
                 )}
               />
-              <RoleGate allow='super_admin'>
-                <Button type='submit' disabled={isPending || !isDirty}>
-                  {isPending ? (
-                    <div className='flex gap-2'>
-                      {initialData ? `Editing ` : `Adding`}
-                      <LoaderCircle className='h-5 w-5 animate-spin' />
-                    </div>
-                  ) : initialData ? (
-                    `Edit ${title}`
-                  ) : (
-                    `Add ${title}`
-                  )}
-                </Button>
-              </RoleGate>
+              {/* <RoleGate allow='super_admin'> */}
+              <Button type='submit' disabled={isPending || !isDirty}>
+                {isPending ? (
+                  <div className='flex gap-2'>
+                    {initialData ? `Editing ` : `Adding`}
+                    <LoaderCircle className='h-5 w-5 animate-spin' />
+                  </div>
+                ) : initialData ? (
+                  `Edit ${title}`
+                ) : (
+                  `Add ${title}`
+                )}
+              </Button>
+              {/* </RoleGate> */}
             </form>
           </Form>
         </CardContent>
       </Card>
 
       {/* table */}
-      <RoleGate allow='super_admin'>
-        {!newPath &&
-          (productsRes ? (
-            <div
-              className='flex flex-1 flex-col space-y-4'
-              style={{ minHeight: '600px' }}
-            >
-              <TableClientSide
-                type={'products'}
-                data={productsRes as Product[]}
-              />
-            </div>
-          ) : (
-            <Button
-              className='flex w-44 gap-2'
-              disabled={productsIsPending}
-              onClick={() => {
-                startTransition(() => {
-                  productsAction();
-                });
-              }}
-              variant={'secondary'}
-            >
-              View Products
-              {productsIsPending && (
-                <LoaderCircle className='h-5 w-5 animate-spin' />
-              )}
-            </Button>
-          ))}
-      </RoleGate>
+      {/* <RoleGate allow='super_admin'> */}
+      {!newPath &&
+        (productsRes ? (
+          <div
+            className='flex flex-1 flex-col space-y-4'
+            style={{ minHeight: '600px' }}
+          >
+            <TableClientSide
+              type={'products'}
+              data={productsRes as Product[]}
+            />
+          </div>
+        ) : (
+          <Button
+            className='flex w-44 gap-2'
+            disabled={productsIsPending}
+            onClick={() => {
+              startTransition(() => {
+                productsAction();
+              });
+            }}
+            variant={'secondary'}
+          >
+            View Products
+            {productsIsPending && (
+              <LoaderCircle className='h-5 w-5 animate-spin' />
+            )}
+          </Button>
+        ))}
+      {/* </RoleGate> */}
     </>
   );
 }

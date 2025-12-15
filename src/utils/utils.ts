@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
-import { itemData, itemTable, Product } from 'types';
+import { itemData, itemTable } from 'types';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getSupabaseClient } from '@/lib/actions';
 
@@ -25,7 +25,7 @@ export function formatBytes(
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / Math.pow(1024, i)).toFixed(decimals)} ${
     sizeType === 'accurate'
-      ? (accurateSizes[i] ?? 'Bytest')
+      ? (accurateSizes[i] ?? 'Bytes')
       : (sizes[i] ?? 'Bytes')
   }`;
 }
@@ -49,7 +49,7 @@ export const getImageUrl = async (img: string) => {
 
   const supabase = await getSupabaseClient();
   const imgUrl = img
-    ? supabase.storage.from('product_imgs').getPublicUrl(img).data.publicUrl
+    ? supabase.storage.from('imgs').getPublicUrl(img).data.publicUrl
     : null;
   return imgUrl;
 };
@@ -93,14 +93,20 @@ export const formatTitle = (text: string, type: itemTable) => {
   return `${text} ${formattedType}`;
 };
 
-export async function imageUpload(file: File) {
+export async function imageUpload(
+  file: File,
+  folder: string // e.g. 'brand_imgs', 'category_imgs', 'product_imgs'
+) {
   try {
     const supabase = createClient();
     const fileName = `${Date.now()}_${file.name}`;
+
     const { data, error } = await supabase.storage
-      .from('product_imgs')
-      .upload(`ns_imgs/${fileName}`, file);
+      .from('imgs')
+      .upload(`${folder}/${fileName}`, file);
+
     if (error) throw error;
+
     return data?.path;
   } catch (error: any) {
     return { error };
