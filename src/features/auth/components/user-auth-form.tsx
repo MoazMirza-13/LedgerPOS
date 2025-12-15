@@ -35,6 +35,8 @@ export default function UserAuthForm() {
     }
   });
 
+  console.log('kt');
+
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { isDirty } = form.formState;
