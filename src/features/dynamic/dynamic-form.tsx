@@ -77,10 +77,11 @@ export default function DynamicForm({
     startFormTransition(async () => {
       let imagePath = '';
 
+      const imgFolder = type === 'categories' ? 'category_imgs' : 'brand_imgs';
+
       // upload only if it's a new file
       if (values.img instanceof File) {
-        const uploaded = await imageUpload(values.img, 'brand_imgs');
-
+        const uploaded = await imageUpload(values.img, imgFolder);
         if ((uploaded as any)?.error) {
           toast.error('Image upload failed');
           return;
@@ -147,7 +148,7 @@ export default function DynamicForm({
                 name='img'
                 render={({ field }) => (
                   <FormItem className='w-[15rem]'>
-                    <FormLabel>Brand Image</FormLabel>
+                    <FormLabel>{title} Image</FormLabel>
                     <ImageUpload
                       value={field.value}
                       onChange={field.onChange}
