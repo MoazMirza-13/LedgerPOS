@@ -9,7 +9,7 @@ import { navItems } from '@/constants/data';
 import { Store } from 'lucide-react';
 import * as React from 'react';
 import { SidebarGroupSection } from './sidebar-group-section';
-import RoleGate from '../role-gate/RoleGateClient';
+// import RoleGate from '../role-gate/RoleGateClient';
 
 interface AppSidebarProps {
   // props here
@@ -36,22 +36,22 @@ export default function AppSidebar({}: AppSidebarProps) {
         </div>
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
-        <RoleGate allow='super_admin'>
-          <SidebarGroupSection
-            title='Overview'
-            items={navItems.filter((item) => item.group === 'Overview')}
-          />
-        </RoleGate>
+        {/* <RoleGate allow='super_admin'> */}
+        <SidebarGroupSection
+          title='Overview'
+          items={navItems.filter((item) => item.group === 'Overview')}
+        />
+        {/* </RoleGate> */}
         <SidebarGroupSection
           title='Stock Management'
           items={navItems.filter((item) => item.group === 'Stock Management')}
         />
-        <RoleGate allow='super_admin'>
-          <SidebarGroupSection
-            title='Billing'
-            items={navItems.filter((item) => item.group === 'Billing')}
-          />
-        </RoleGate>
+        {/* <RoleGate allow='super_admin'> */}
+        <SidebarGroupSection
+          title='Billing'
+          items={navItems.filter((item) => item.group === 'Billing')}
+        />
+        {/* </RoleGate> */}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

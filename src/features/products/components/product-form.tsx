@@ -30,8 +30,8 @@ import { toast } from 'sonner';
 import { Brand, Category, Product } from 'types';
 import Image from 'next/image';
 import { useRef } from 'react';
-import RoleGate from '@/components/role-gate/RoleGateClient';
-import { useRole } from '@/context/RoleContext';
+// import RoleGate from '@/components/role-gate/RoleGateClient';
+// import { useRole } from '@/context/RoleContext';
 import { Textarea } from '@/components/ui/textarea';
 import { ProductVariants } from './product-variants';
 import { Switch } from '@/components/ui/switch';
@@ -91,24 +91,43 @@ export default function ProductForm({
   };
 
   // Conditional image validation
-  const imageValidation = z
-    .array(z.instanceof(File))
-    .optional()
-    .refine(
-      (files) =>
-        !files ||
-        (Array.isArray(files) &&
-          files.length <= 4 &&
-          files.every(
-            (file) =>
-              file.size <= MAX_FILE_SIZE &&
-              ACCEPTED_IMAGE_TYPES.includes(file.type)
-          )),
-      {
-        message:
-          'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
-      }
-    );
+  const imageValidation = initialData
+    ? z
+        .any()
+        .optional()
+        .refine(
+          (files) =>
+            !files ||
+            (Array.isArray(files) &&
+              files.length <= 4 &&
+              files.every(
+                (file) =>
+                  file.size <= MAX_FILE_SIZE &&
+                  ACCEPTED_IMAGE_TYPES.includes(file.type)
+              )),
+          {
+            message:
+              'You can upload up to 4 images. Each must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
+          }
+        )
+    : z
+        .array(z.any())
+        .nullable()
+        .refine(
+          (files) => files !== null && files.length > 0,
+          'Image is required.'
+        )
+        .refine(
+          (files) =>
+            files === null ||
+            (files.length <= 4 &&
+              files.every(
+                (file: File) =>
+                  file.size <= MAX_FILE_SIZE &&
+                  ACCEPTED_IMAGE_TYPES.includes(file.type)
+              )),
+          'Each image must be under 5MB and be .jpg, .jpeg, .png, or .webp.'
+        );
 
   const formSchema = z.object({
     image: imageValidation,
@@ -136,7 +155,7 @@ export default function ProductForm({
 
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const currentRole = useRole();
+  // const currentRole = useRole();
   const { isDirty } = form.formState;
 
   const [imageSlots, setImageSlots] = useState<(string | File | null)[]>(() => {
@@ -291,30 +310,30 @@ export default function ProductForm({
                                     sizes='(max-width: 768px) 100vw, 110px'
                                     priority
                                   />
-                                  <RoleGate allow='super_admin'>
-                                    <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
-                                      <Button
-                                        type='button'
-                                        size='sm'
-                                        variant='secondary'
-                                        onClick={() =>
-                                          handleIndividualImageReplace(index)
-                                        }
-                                      >
-                                        <Upload className='h-4 w-4' />
-                                      </Button>
-                                      <Button
-                                        type='button'
-                                        size='sm'
-                                        variant='destructive'
-                                        onClick={() =>
-                                          handleIndividualImageRemove(index)
-                                        }
-                                      >
-                                        <X className='h-4 w-4' />
-                                      </Button>
-                                    </div>
-                                  </RoleGate>
+                                  {/* <RoleGate allow='super_admin'> */}
+                                  <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
+                                    <Button
+                                      type='button'
+                                      size='sm'
+                                      variant='secondary'
+                                      onClick={() =>
+                                        handleIndividualImageReplace(index)
+                                      }
+                                    >
+                                      <Upload className='h-4 w-4' />
+                                    </Button>
+                                    <Button
+                                      type='button'
+                                      size='sm'
+                                      variant='destructive'
+                                      onClick={() =>
+                                        handleIndividualImageRemove(index)
+                                      }
+                                    >
+                                      <X className='h-4 w-4' />
+                                    </Button>
+                                  </div>
+                                  {/* </RoleGate> */}
 
                                   {/* Show indicator for new vs existing */}
                                   {!newProduct && (
@@ -333,8 +352,8 @@ export default function ProductForm({
                                 <CardContent
                                   className='flex h-full cursor-pointer flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
                                   onClick={() => {
-                                    if (currentRole === 'super_admin')
-                                      fileInputRefs.current[index]?.click();
+                                    // if (currentRole === 'super_admin')
+                                    fileInputRefs.current[index]?.click();
                                   }}
                                 >
                                   <Upload className='mb-2 h-8 w-8 text-gray-400' />
@@ -361,7 +380,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='productTitle'
-                disabled={currentRole !== 'super_admin'}
+                // disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Title</FormLabel>
@@ -375,7 +394,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='productCode'
-                disabled={currentRole !== 'super_admin'}
+                // disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Code</FormLabel>
@@ -386,34 +405,34 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
-              <RoleGate allow='super_admin'>
-                <FormField
-                  control={form.control}
-                  name='costPrice'
-                  disabled={currentRole !== 'super_admin'}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cost Price</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          step='0'
-                          placeholder='Enter cost price'
-                          {...field}
-                          value={
-                            field.value === 0 && !initialData ? '' : field.value
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </RoleGate>
+              {/* <RoleGate allow='super_admin'> */}
+              <FormField
+                control={form.control}
+                name='costPrice'
+                // disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cost Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter cost price'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* </RoleGate> */}
               <FormField
                 control={form.control}
                 name='sellingPrice'
-                disabled={currentRole !== 'super_admin'}
+                // disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Selling Price</FormLabel>
@@ -435,7 +454,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='brand'
-                disabled={currentRole !== 'super_admin'}
+                // disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Brand</FormLabel>
@@ -446,7 +465,9 @@ export default function ProductForm({
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
-                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
+                        <SelectTrigger
+                        //  disabled={currentRole !== 'super_admin'}
+                        >
                           <SelectValue placeholder='Select brands' />
                         </SelectTrigger>
                       </FormControl>
@@ -476,7 +497,9 @@ export default function ProductForm({
                       value={field.value ? String(field.value) : ''}
                     >
                       <FormControl>
-                        <SelectTrigger disabled={currentRole !== 'super_admin'}>
+                        <SelectTrigger
+                        //  disabled={currentRole !== 'super_admin'}
+                        >
                           <SelectValue placeholder='Select categories' />
                         </SelectTrigger>
                       </FormControl>
@@ -501,7 +524,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='quantity'
-                disabled={currentRole !== 'super_admin'}
+                // disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Quantity</FormLabel>
@@ -523,7 +546,7 @@ export default function ProductForm({
               <FormField
                 control={form.control}
                 name='minQuantity'
-                disabled={currentRole !== 'super_admin'}
+                // disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Min Quantity</FormLabel>
@@ -568,7 +591,7 @@ export default function ProductForm({
                       id='stockStatus'
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      disabled={currentRole !== 'super_admin'}
+                      // disabled={currentRole !== 'super_admin'}
                       className='data-[state=checked]:bg-green-600'
                     />
                     <span className='text-sm text-gray-400'>
@@ -582,7 +605,7 @@ export default function ProductForm({
             <FormField
               control={form.control}
               name='description'
-              disabled={currentRole !== 'super_admin'}
+              // disabled={currentRole !== 'super_admin'}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -597,20 +620,20 @@ export default function ProductForm({
                 </FormItem>
               )}
             />
-            <RoleGate allow='super_admin'>
-              <Button type='submit' disabled={isPending || !isDirty}>
-                {isPending ? (
-                  <div className='flex gap-2'>
-                    {initialData ? 'Editing' : 'Adding'}
-                    <LoaderCircle className='h-5 w-5 animate-spin' />
-                  </div>
-                ) : initialData ? (
-                  'Edit Product'
-                ) : (
-                  'Add Product'
-                )}
-              </Button>
-            </RoleGate>
+            {/* <RoleGate allow='super_admin'> */}
+            <Button type='submit' disabled={isPending || !isDirty}>
+              {isPending ? (
+                <div className='flex gap-2'>
+                  {initialData ? 'Editing' : 'Adding'}
+                  <LoaderCircle className='h-5 w-5 animate-spin' />
+                </div>
+              ) : initialData ? (
+                'Edit Product'
+              ) : (
+                'Add Product'
+              )}
+            </Button>
+            {/* </RoleGate> */}
           </form>
         </Form>
       </CardContent>

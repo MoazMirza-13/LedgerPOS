@@ -103,7 +103,8 @@ export function kbarActions(
 
   return [
     ...navigationActions,
-    ...(currentRole === 'super_admin' ? newActions : []),
+    // ...(currentRole === 'super_admin' ? newActions : []),
+    ...newActions,
     ...productActions,
     ...brandActions,
     ...categoryActions,

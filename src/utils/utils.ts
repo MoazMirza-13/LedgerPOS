@@ -63,7 +63,7 @@ export const getClientImageUrl = async (img: string) => {
 
   const supabase = createClient();
   const imgUrl = img
-    ? supabase.storage.from('product_imgs').getPublicUrl(img).data.publicUrl
+    ? supabase.storage.from('imgs').getPublicUrl(img).data.publicUrl
     : null;
   return imgUrl;
 };
