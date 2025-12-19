@@ -125,12 +125,10 @@ export const useColumns = <T extends Entity>(
       },
       { accessorKey: 'description', header: 'DESCRIPTION' },
       {
-        header: 'STOCK',
-        cell: ({ row }) => {
-          const product = row.original as Product;
-          const quantity = row.getValue('quantity') as number;
-          const minQuantity = product.min_quantity;
-          return quantity > minQuantity ? '✅' : '❌';
+        header: 'Stock',
+        accessorFn: (row) => {
+          const product = row as Product;
+          return product.in_stock ? '✅' : '❌';
         }
       }
     );
