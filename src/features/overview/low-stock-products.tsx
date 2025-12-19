@@ -103,7 +103,7 @@ export function LowStockProducts({ products, categories, brands }: Props) {
               filteredProducts.map((product) => (
                 <Link
                   key={product.id}
-                  className='flex gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
+                  className='flex items-center gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
                   href={`/dashboard/products/${product.id}`}
                 >
                   {product.img_url && (
@@ -122,12 +122,17 @@ export function LowStockProducts({ products, categories, brands }: Props) {
                     </div>
                   )}
                   <div className='min-w-0 flex-1'>
-                    <p className='text-sm text-muted-foreground'>
-                      Product: {product.product_code}
-                    </p>
-                    <div className='mt-2 flex items-center gap-2'>
+                    <p className='text-sm'>{product.title}</p>
+                    <div className='text-sm text-muted-foreground'>
+                      Code:
+                      <Badge variant='secondary' className='ml-1'>
+                        {product.product_code}
+                      </Badge>
+                    </div>
+                    <div className='mt-2 flex flex-col items-start gap-2'>
+                      <Badge variant='outline'>Qty: {product.quantity}</Badge>
                       <Badge variant='destructive'>
-                        Qty: {product.quantity}
+                        Min: {product.min_quantity}
                       </Badge>
                     </div>
                   </div>
