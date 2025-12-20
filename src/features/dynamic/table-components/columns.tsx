@@ -123,7 +123,6 @@ export const useColumns = <T extends Entity>(
         header: 'QUANTITY',
         accessorKey: 'quantity'
       },
-      { accessorKey: 'description', header: 'DESCRIPTION' },
       {
         header: 'Stock',
         accessorFn: (row) => {
