@@ -42,6 +42,7 @@ export type Product = {
   in_stock: boolean;
   min_quantity: number;
   boxes: number;
+  optional?: boolean;
   quantity_in_zafarwal: number;
   quantity_in_ghaziwal: number;
   quantity_in_lhr_road: number;

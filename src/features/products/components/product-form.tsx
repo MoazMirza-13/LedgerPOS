@@ -33,6 +33,7 @@ import { useRef } from 'react';
 import RoleGate from '@/components/role-gate/RoleGateClient';
 import { useRole } from '@/context/RoleContext';
 import { warehouses } from '@/constants/data';
+import { Switch } from '@/components/ui/switch';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -82,6 +83,7 @@ export default function ProductForm({
     product: initialData?.product_code || '', // for KT product_code column will be used instead of name || title
     minQuantity: initialData?.min_quantity || 0,
     boxes: initialData?.boxes || 0,
+    optional: initialData?.optional || false,
     quantityInWarehouses: {
       Ghaziwal: initialData?.quantity_in_ghaziwal || 0,
       Zafarwal: initialData?.quantity_in_zafarwal || 0,
@@ -123,6 +125,7 @@ export default function ProductForm({
     }),
     minQuantity: z.coerce.number(),
     boxes: z.coerce.number(),
+    optional: z.boolean(),
     quantityInWarehouses: z.object({
       Ghaziwal: z.coerce.number().default(0),
       Zafarwal: z.coerce.number().default(0),
@@ -293,7 +296,7 @@ export default function ProductForm({
                                     fill
                                     className='rounded-lg object-contain'
                                     sizes='(max-width: 768px) 100vw, 110px'
-                                    priority
+                                    loading='lazy'
                                   />
                                   <RoleGate allow='super_admin'>
                                     <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
@@ -567,6 +570,31 @@ export default function ProductForm({
                 />
               ))}
             </div>
+            <FormField
+              control={form.control}
+              name='optional'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Optional</FormLabel>
+                  <div className='flex items-center gap-3'>
+                    <span className='text-2xl'>
+                      {field.value ? '✅' : '❌'}
+                    </span>
+                    <Switch
+                      id='optional'
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={currentRole !== 'super_admin'}
+                      className='data-[state=checked]:bg-green-600'
+                    />
+                    <span className='text-sm text-gray-400'>
+                      {field.value ? 'Optional Product' : 'Not Optional'}
+                    </span>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <RoleGate allow='super_admin'>
               <Button type='submit' disabled={isPending || !isDirty}>
                 {isPending ? (

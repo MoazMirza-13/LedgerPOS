@@ -67,36 +67,43 @@ export async function printInvoice(finalData: Invoice, date?: string) {
           </thead>
           <tbody>
             ${finalData.invoice_items
-              .map(
-                (item: any) => `
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                  <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                    ${item.product_code ? item.product_code : item.optional_item}
-                  </td>
-                   <td class="px-4 py-3 text-sm text-gray-700 text-center">${item.product_code ? item.boxes : ''}</td>
-                  <td class="px-4 py-3 text-sm text-gray-700 text-center">${item.quantity}</td>
-                  <td class="px-4 py-3 text-sm text-gray-700 text-center">
-                  ${(() => {
-                    const itemsPerBox = item.product?.boxes || 1;
-                    const totalPieces = item.quantity || 0;
+              .map((item: any) => {
+                const totalPieces = item.quantity || 0;
+                const itemsPerBox = item.product?.boxes || 1;
+                let totalQuantityDisplay = '';
+
+                if (item.product_code) {
+                  if (item.product?.optional) {
+                    // Optional → only pieces
+                    totalQuantityDisplay = `${totalPieces} Piece${totalPieces > 1 ? 's' : ''}`;
+                  } else {
+                    // Normal → box + piece
                     const boxes = Math.floor(totalPieces / itemsPerBox);
                     const pieces = totalPieces % itemsPerBox;
-                    if (!totalPieces) return '';
-                    if (!item.product_code) return '';
-                    return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
+                    totalQuantityDisplay = `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
                       boxes && pieces ? ' and ' : ''
                     }${pieces ? pieces + ' Piece' + (pieces > 1 ? 's' : '') : ''}`;
-                  })()}
-                </td>
-                  <td class="px-4 py-3 text-sm text-gray-600">${item.product_code ? item.warehouse : ''}</td>
-                  <td class="px-4 py-3 text-sm text-gray-700 text-right">Rs. ${item.price}</td>
-                  <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-right">
-                    Rs. ${item.quantity * item.price}
-                  </td>
-                </tr>`
-              )
+                  }
+                }
+
+                return `
+                  <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                      ${item.product_code ? item.product_code : item.optional_item}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-700 text-center">
+                      ${item.product?.optional ? '' : item.boxes || ''}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-700 text-center">${totalPieces}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700 text-center">${totalQuantityDisplay}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${item.product_code ? item.warehouse : ''}</td>
+                    <td class="px-4 py-3 text-sm text-gray-700 text-right">Rs. ${item.price}</td>
+                    <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-right">Rs. ${totalPieces * item.price}</td>
+                  </tr>`;
+              })
               .join('')}
           </tbody>
+
         </table>
       </div>
 

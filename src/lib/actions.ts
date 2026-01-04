@@ -85,6 +85,7 @@ export async function productSubmit(
     sellingPrice: number;
     minQuantity: number;
     boxes: number;
+    optional: boolean;
     quantityInWarehouses: {
       Zafarwal: number;
       Ghaziwal: number;
@@ -111,6 +112,7 @@ export async function productSubmit(
           brand_id: values.brand ? values.brand : null,
           min_quantity: values.minQuantity,
           boxes: values.boxes,
+          optional: values.optional,
           img_url: imgPaths,
           quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
           quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
@@ -138,6 +140,7 @@ export async function productSubmit(
             brand_id: values.brand ? values.brand : null,
             min_quantity: values.minQuantity,
             boxes: values.boxes,
+            optional: values.optional,
             quantity_in_zafarwal: values.quantityInWarehouses.Zafarwal,
             quantity_in_ghaziwal: values.quantityInWarehouses.Ghaziwal,
             quantity_in_lhr_road: values.quantityInWarehouses.LhrRoad,

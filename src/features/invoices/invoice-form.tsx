@@ -542,107 +542,150 @@ export default function InvoiceForm({
                           (initialData?.invoice_items[index]?.product_code &&
                             items[index].type === 'product') ? (
                             <>
-                              <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.boxes`}
-                                  render={({ field }) => (
-                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-center'
-                                          {...field}
-                                          value={
-                                            field.value === 0 && !initialData
-                                              ? ''
-                                              : (field.value ?? '')
-                                          }
-                                          placeholder='Add Box'
-                                          onChange={(e) => {
-                                            const value = Number(
-                                              e.target.value
-                                            );
-                                            const itemsPerBox =
-                                              items[index].product?.boxes || 1;
+                              {items[index].product?.optional ? (
+                                <td></td>
+                              ) : (
+                                <td className='px-4 py-3'>
+                                  <div className='flex items-center justify-center'>
+                                    <FormField
+                                      control={control}
+                                      name={`invoice_items.${index}.boxes`}
+                                      render={({ field }) => (
+                                        <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
+                                          <FormControl>
+                                            <Input
+                                              type='number'
+                                              min='0'
+                                              className='text-center'
+                                              {...field}
+                                              value={
+                                                items[index].product?.optional
+                                                  ? 0
+                                                  : field.value === 0 &&
+                                                      !initialData
+                                                    ? ''
+                                                    : (field.value ?? '')
+                                              }
+                                              placeholder='Add Box'
+                                              onChange={(e) => {
+                                                if (
+                                                  items[index].product?.optional
+                                                ) {
+                                                  // ✅ force boxes to 0 if product is optional
+                                                  field.onChange(0);
+                                                  return;
+                                                }
 
-                                            field.onChange(value);
-                                            form.setValue(
-                                              `invoice_items.${index}.quantity`,
-                                              value > 0
-                                                ? value * itemsPerBox
-                                                : 0
-                                            );
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
-                              </td>
-                              <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.quantity`}
-                                  render={({ field }) => (
-                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-center'
-                                          {...field}
-                                          value={
-                                            field.value === 0 ? '' : field.value
-                                          }
-                                          placeholder='Add Piece'
-                                          onChange={(e) => {
-                                            const value = Number(
-                                              e.target.value
-                                            );
-                                            const itemsPerBox =
-                                              items[index].product?.boxes || 1;
+                                                const value = Number(
+                                                  e.target.value
+                                                );
+                                                const itemsPerBox =
+                                                  items[index].product?.boxes ||
+                                                  1;
 
-                                            field.onChange(value);
-                                            form.setValue(
-                                              `invoice_items.${index}.boxes`,
-                                              value > 0
-                                                ? Math.floor(
-                                                    value / itemsPerBox
-                                                  )
-                                                : 0
-                                            );
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
+                                                field.onChange(value);
+                                                form.setValue(
+                                                  `invoice_items.${index}.quantity`,
+                                                  value > 0
+                                                    ? value * itemsPerBox
+                                                    : 0
+                                                );
+                                              }}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </div>
+                                </td>
+                              )}
+
+                              <td className='px-4 py-3'>
+                                <div className='flex items-center justify-center'>
+                                  <FormField
+                                    control={control}
+                                    name={`invoice_items.${index}.quantity`}
+                                    render={({ field }) => (
+                                      <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
+                                        <FormControl>
+                                          <Input
+                                            type='number'
+                                            min='0'
+                                            className='text-center'
+                                            {...field}
+                                            value={
+                                              field.value === 0
+                                                ? ''
+                                                : field.value
+                                            }
+                                            placeholder='Add Piece'
+                                            onChange={(e) => {
+                                              const value = Number(
+                                                e.target.value
+                                              );
+                                              field.onChange(value);
+
+                                              const product =
+                                                items[index].product;
+
+                                              // Only update boxes if the product exists and is not optional
+                                              if (
+                                                product &&
+                                                !product.optional
+                                              ) {
+                                                const itemsPerBox =
+                                                  product.boxes || 1;
+                                                form.setValue(
+                                                  `invoice_items.${index}.boxes`,
+                                                  value > 0
+                                                    ? Math.floor(
+                                                        value / itemsPerBox
+                                                      )
+                                                    : 0
+                                                );
+                                              }
+                                            }}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
                               </td>
                               <td className='px-4 py-3 text-center'>
-                                <Input
-                                  readOnly
-                                  className='w-full cursor-default select-none bg-muted/40 text-center font-medium text-muted-foreground md:w-max'
-                                  value={(() => {
-                                    const itemsPerBox =
-                                      items[index].product?.boxes || 1;
-                                    const totalPieces =
-                                      items[index].quantity || 0;
-                                    const boxes = Math.floor(
-                                      totalPieces / itemsPerBox
-                                    );
-                                    const pieces = totalPieces % itemsPerBox;
-                                    if (!items[index].product) return '';
-                                    if (!totalPieces) return '';
-                                    return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
-                                      boxes && pieces ? ' and ' : ''
-                                    }${pieces ? pieces + ' Piece' + (pieces > 1 ? 's' : '') : ''}`;
-                                  })()}
-                                  placeholder='Total Quantity'
-                                />
+                                <div className='flex items-center justify-center'>
+                                  <Input
+                                    readOnly
+                                    className='w-full cursor-default select-none bg-muted/40 text-center font-medium text-muted-foreground md:w-max'
+                                    value={(() => {
+                                      const product = items[index].product;
+                                      if (!product) return '';
+
+                                      const totalPieces =
+                                        items[index].quantity || 0;
+                                      if (!totalPieces) return '';
+
+                                      // OPTIONAL PRODUCTS → ONLY PIECES
+                                      if (product.optional) {
+                                        return `${totalPieces} Piece${totalPieces > 1 ? 's' : ''}`;
+                                      }
+
+                                      // NORMAL PRODUCTS → BOX + PIECE LOGIC
+                                      const itemsPerBox = product.boxes || 1;
+                                      const boxes = Math.floor(
+                                        totalPieces / itemsPerBox
+                                      );
+                                      const pieces = totalPieces % itemsPerBox;
+
+                                      return `${boxes ? boxes + ' Box' + (boxes > 1 ? 'es' : '') : ''}${
+                                        boxes && pieces ? ' and ' : ''
+                                      }${pieces ? pieces + ' Piece' + (pieces > 1 ? 's' : '') : ''}`;
+                                    })()}
+                                    placeholder='Total Quantity'
+                                  />
+                                </div>
                               </td>
-                              <td className='relative w-[16%] px-4 py-3'>
+                              <td className='relative flex w-max justify-center justify-self-center px-4 py-3'>
                                 <FormField
                                   control={form.control}
                                   name={`invoice_items.${index}.warehouse`}
@@ -710,47 +753,51 @@ export default function InvoiceForm({
                                 />
                               </td>
                               <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.price`}
-                                  render={({ field }) => (
-                                    <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-right'
-                                          {...field}
-                                          value={
-                                            field.value === 0 ? '' : field.value
-                                          }
-                                          placeholder='Add Price'
-                                          onChange={(e) => {
-                                            const value =
-                                              e.target.value === ''
+                                <div className='flex items-center justify-center'>
+                                  <FormField
+                                    control={control}
+                                    name={`invoice_items.${index}.price`}
+                                    render={({ field }) => (
+                                      <FormItem className='w-auto lg:w-[75px] xl:w-[110px]'>
+                                        <FormControl>
+                                          <Input
+                                            type='number'
+                                            min='0'
+                                            className='text-center'
+                                            {...field}
+                                            value={
+                                              field.value === 0
                                                 ? ''
-                                                : Number(e.target.value);
-                                            field.onChange(value);
-                                          }}
-                                          onBlur={() => {
-                                            const value = Number(field.value);
-
-                                            if (
-                                              items[index].type === 'product'
-                                            ) {
-                                              const minPrice =
-                                                items[index].product
-                                                  ?.cost_price ?? 0;
-                                              field.onChange(
-                                                Math.max(value, minPrice)
-                                              );
+                                                : field.value
                                             }
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
+                                            placeholder='Add Price'
+                                            onChange={(e) => {
+                                              const value =
+                                                e.target.value === ''
+                                                  ? ''
+                                                  : Number(e.target.value);
+                                              field.onChange(value);
+                                            }}
+                                            onBlur={() => {
+                                              const value = Number(field.value);
+
+                                              if (
+                                                items[index].type === 'product'
+                                              ) {
+                                                const minPrice =
+                                                  items[index].product
+                                                    ?.cost_price ?? 0;
+                                                field.onChange(
+                                                  Math.max(value, minPrice)
+                                                );
+                                              }
+                                            }}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
                               </td>
                               <td className='px-4 py-3 text-right font-semibold'>
                                 {/* $ */}
