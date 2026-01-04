@@ -306,9 +306,9 @@ export default function ProductForm({
                                     }
                                     alt={`Product image ${index + 1}`}
                                     fill
+                                    loading='lazy'
                                     className='rounded-lg object-contain'
                                     sizes='(max-width: 768px) 100vw, 110px'
-                                    priority
                                   />
                                   {/* <RoleGate allow='super_admin'> */}
                                   <div className='absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100'>
