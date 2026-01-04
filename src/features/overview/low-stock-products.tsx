@@ -117,7 +117,7 @@ export function LowStockProducts({ products, categories, brands }: Props) {
                         alt='low_stock_product'
                         width={80}
                         height={80}
-                        className='h-auto w-auto rounded-md object-cover'
+                        className='rounded-md object-cover'
                       />
                     </div>
                   )}
