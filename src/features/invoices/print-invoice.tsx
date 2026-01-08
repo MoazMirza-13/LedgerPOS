@@ -24,58 +24,54 @@ export async function printInvoice(finalData: Invoice, date?: string) {
 
         <!-- HEADER -->
         <div>
-          <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-8 rounded-t-lg">
-            <div class="flex items-start justify-between">
+          <div class="bg-gray-800 text-white p-6 rounded-t-lg">
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
-                <div class="bg-teal-500 p-3 rounded-lg">
+                <div class="bg-gray-600 p-3 rounded-lg">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store-icon lucide-store"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/></svg>
                 </div>
                 <div>
                   <h1 class="text-4xl font-bold tracking-tight">NS</h1>
-                  <p class="text-teal-300 text-sm font-medium mt-1">Narowal Store</p>
+                  <p class="text-gray-400 text-sm font-medium mt-1">Narowal Store</p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="text-teal-300 text-xs font-semibold tracking-widest">INVOICE# ${finalData.invoice_number}</p>
-                <p class="text-slate-400 text-sm mt-2">${invoiceDate}</p>
+                <p class="text-gray-400 text-xs font-semibold tracking-widest">INVOICE# ${finalData.invoice_number}</p>
+                <p class="text-gray-500 text-sm mt-2">${invoiceDate}</p>
               </div>
             </div>
           </div>
 
           <!-- BILL TO -->
-          <div class="p-8 bg-slate-50 border-b border-slate-200">
-            <div>
-              <h3 class="text-xs font-bold text-slate-600 tracking-widest mb-2">BILL TO</h3>
-              <p class="text-sm text-slate-700 m-0"><strong>Customer Name:</strong> ${finalData.customer_name}</p>
-              <p class="text-sm text-slate-700 m-0"><strong>Address:</strong> ${finalData.customer_address}</p>
-              <p class="text-sm text-slate-700 m-0"><strong>Phone:</strong> ${finalData.customer_number}</p>
-            </div>
+          <div class="p-8 bg-gray-50 border-b border-gray-200">
+            <h3 class="text-xs font-bold text-gray-600 tracking-widest mb-2">BILL TO</h3>
+            <p class="text-sm text-gray-700 m-0"><strong>Customer Name:</strong> ${finalData.customer_name}</p>
+            <p class="text-sm text-gray-700 m-0"><strong>Address:</strong> ${finalData.customer_address}</p>
+            <p class="text-sm text-gray-700 m-0"><strong>Phone:</strong> ${finalData.customer_number}</p>
           </div>
 
           <!-- TABLE -->
           <div class="p-8">
             <table class="w-full">
               <thead>
-                <tr class="bg-teal-50 border-b-2 border-teal-500">
-                  <th class="px-4 py-4 text-left text-xs font-bold text-slate-900 tracking-wider">Product</th>
-                  <th class="px-4 py-4 text-center text-xs font-bold text-slate-900 tracking-wider">Quantity</th>
-                  <th class="px-4 py-4 text-right text-xs font-bold text-slate-900 tracking-wider">Price</th>
-                  <th class="px-4 py-4 text-right text-xs font-bold text-slate-900 tracking-wider">Total</th>
+                <tr class="bg-gray-100 border-b-2 border-gray-400">
+                  <th class="px-4 py-4 text-left text-xs font-bold text-gray-900 tracking-wider">Product</th>
+                  <th class="px-4 py-4 text-center text-xs font-bold text-gray-900 tracking-wider">Quantity</th>
+                  <th class="px-4 py-4 text-right text-xs font-bold text-gray-900 tracking-wider">Price</th>
+                  <th class="px-4 py-4 text-right text-xs font-bold text-gray-900 tracking-wider">Total</th>
                 </tr>
               </thead>
               <tbody>
                 ${chunk
                   .map(
                     (item: any) => `
-                    <tr class="border-b border-slate-200 hover:bg-slate-50">
-                      <td class="px-4 py-3 text-sm font-medium text-slate-900">
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                      <td class="px-4 py-3 text-sm font-medium text-gray-900">
                         ${item.product_code ? item.product.title : item.optional_item}
                       </td>
-                      <td class="px-4 py-3 text-sm text-slate-700 text-center">${item.quantity}</td>
-                      <td class="px-4 py-3 text-sm text-slate-700 text-right">Rs. ${item.price}</td>
-                      <td class="px-4 py-3 text-sm font-semibold text-slate-900 text-right">
-                        Rs. ${item.quantity * item.price}
-                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-700 text-center">${item.quantity}</td>
+                      <td class="px-4 py-3 text-sm text-gray-700 text-right">Rs. ${item.price}</td>
+                      <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-right">Rs. ${item.quantity * item.price}</td>
                     </tr>`
                   )
                   .join('')}
@@ -87,10 +83,10 @@ export async function printInvoice(finalData: Invoice, date?: string) {
           ${
             i + itemsPerPage >= finalData.invoice_items.length
               ? `<div class="px-8 pb-8 flex justify-end">
-                  <div class="bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-500 rounded-lg p-6">
+                  <div class="bg-gray-100 border-2 border-gray-500 rounded-lg p-6">
                     <div class="flex flex-col justify-center items-center">
-                      <span class="text-lg font-bold text-slate-900 mb-2">Total Amount</span>
-                      <span class="text-3xl font-bold text-teal-600">Rs. ${finalData.total_price}</span>
+                      <span class="text-lg font-bold text-gray-900 mb-2">Total Amount</span>
+                      <span class="text-3xl font-bold text-gray-900">Rs. ${finalData.total_price}</span>
                     </div>
                   </div>
                 </div>`
@@ -100,17 +96,16 @@ export async function printInvoice(finalData: Invoice, date?: string) {
         </div>
 
         <!-- FOOTER -->
-        <div class="bg-slate-900 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
+        <div class="bg-gray-800 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
           <p class="text-sm font-medium m-0">Thank you for your business!</p>
-          <p class="text-xs text-slate-400 m-0 mt-2">NS | Contact: 03030550072</p>
-          <p class="text-xs text-slate-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
+          <p class="text-xs text-gray-400 m-0 mt-2">NS | Contact: 03030550072</p>
+          <p class="text-xs text-gray-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
         </div>
 
       </div>
     `;
 
     document.body.appendChild(container);
-
     const canvas = await html2canvas(container, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
 
