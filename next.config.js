@@ -15,7 +15,13 @@ const nextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb' // max limit for upload-image api
+    }
+  }
 };
 
 module.exports = nextConfig;

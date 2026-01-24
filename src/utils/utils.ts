@@ -98,18 +98,21 @@ export async function imageUpload(
   folder: string // e.g. 'brand_imgs', 'category_imgs', 'product_imgs'
 ) {
   try {
-    const supabase = createClient();
-    const fileName = `${Date.now()}_${file.name}`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
 
-    const { data, error } = await supabase.storage
-      .from('imgs')
-      .upload(`${folder}/${fileName}`, file);
+    const res = await fetch('/api/upload-image', {
+      method: 'POST',
+      body: formData
+    });
 
-    if (error) throw error;
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
 
-    return data?.path;
+    return data.path;
   } catch (error: any) {
-    return { error };
+    return { error: error.message };
   }
 }
 
