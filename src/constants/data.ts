@@ -65,5 +65,14 @@ export const navItems: NavItem[] = [
     isActive: false,
     group: 'Billing',
     items: [] // No child items
+  },
+  {
+    title: 'Super Dashboard',
+    url: '/dashboard/super-user',
+    icon: 'dashboard',
+    shortcut: ['g', 'sd'],
+    isActive: false,
+    group: 'Super User',
+    items: [] // No child items
   }
 ];

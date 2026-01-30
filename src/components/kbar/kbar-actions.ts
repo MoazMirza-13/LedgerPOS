@@ -1,6 +1,6 @@
 import { navItems } from '@/constants/data';
 import { signOut } from '@/lib/actions';
-import { formatTitle } from '@/utils/utils';
+import { formatTitle, getRoleBasedNavItems } from '@/utils/utils';
 import { itemTable, nestedArray } from 'types';
 
 export function kbarActions(
@@ -8,40 +8,49 @@ export function kbarActions(
   apiData: nestedArray,
   currentRole: string
 ) {
-  const navigationActions = navItems.flatMap((navItem) => {
-    const baseAction =
-      navItem.url !== '#'
-        ? {
-            id: `${navItem.title.toLowerCase()}Action`,
-            name: navItem.title,
-            shortcut: navItem.shortcut,
-            keywords: navItem.title.toLowerCase(),
-            section: 'Navigation',
-            subtitle: `Go to ${navItem.title}`,
-            icon: navItem.icon,
-            perform: () => navigateTo(navItem.url)
-          }
-        : null;
+  const roleBasedNavItems = getRoleBasedNavItems(navItems, currentRole);
 
-    // Map child items into actions
-    const childActions =
-      navItem.items?.map((childItem) => ({
-        id: `${childItem.title.toLowerCase()}Action`,
-        name: childItem.title,
-        shortcut: childItem.shortcut,
-        keywords: childItem.title.toLowerCase(),
-        section: navItem.title,
-        subtitle: `Go to ${childItem.title}`,
-        icon: navItem.icon,
-        perform: () => navigateTo(childItem.url)
-      })) ?? [];
+  const navigationActions = roleBasedNavItems
+    .filter(
+      (navItem) =>
+        !(navItem.title === 'Dashboard' && currentRole !== 'super_admin')
+    )
+    .flatMap((navItem) => {
+      const baseAction =
+        navItem.url !== '#'
+          ? {
+              id: `${navItem.title.toLowerCase()}Action`,
+              name: navItem.title,
+              shortcut: navItem.shortcut,
+              keywords: navItem.title.toLowerCase(),
+              section: 'Navigation',
+              subtitle: `Go to ${navItem.title}`,
+              icon: navItem.icon,
+              perform: () => navigateTo(navItem.url)
+            }
+          : null;
+      // Map child items into actions
 
-    // Return only valid actions (ignoring null base actions for containers)
-    return baseAction ? [baseAction, ...childActions] : childActions;
-  });
+      const childActions =
+        navItem.items?.map((childItem) => ({
+          id: `${childItem.title.toLowerCase()}Action`,
+          name: childItem.title,
+          shortcut: childItem.shortcut,
+          keywords: childItem.title.toLowerCase(),
+          section: navItem.title,
+          subtitle: `Go to ${childItem.title}`,
+          icon: navItem.icon,
+          perform: () => navigateTo(childItem.url)
+        })) ?? [];
+
+      return baseAction ? [baseAction, ...childActions] : childActions;
+    });
 
   const newActions = navItems
-    .filter((navItem) => navItem.title !== 'Dashboard') // Exclude "Dashboard"
+    .filter(
+      (navItem) =>
+        navItem.title !== 'Dashboard' && navItem.title !== 'Super Dashboard'
+    ) // Exclude "Dashboard"
     .flatMap((navItem) => {
       return {
         id: `new${navItem.title.toLowerCase()}Action`,
@@ -103,8 +112,7 @@ export function kbarActions(
 
   return [
     ...navigationActions,
-    // ...(currentRole === 'super_admin' ? newActions : []),
-    ...newActions,
+    ...(currentRole === 'super_admin' ? newActions : []),
     ...productActions,
     ...brandActions,
     ...categoryActions,

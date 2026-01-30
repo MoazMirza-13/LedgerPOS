@@ -35,34 +35,43 @@ export const updateSession = async (request: NextRequest) => {
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
+    const currentRole = request.cookies.get('currentRole')?.value;
+    const currentStore = request.cookies.get('currentStore')?.value;
 
-    // const currentRole = request.cookies.get('currentRole')?.value;
+    // invalid / missing role
+    if (!user.error) {
+      const { data } = await supabase.rpc('current_user_role_and_tenant');
+      const userRole = data?.[0]?.role;
+      const userStore = data?.[0]?.tenant_name;
 
-    // // invalid / missing role
-    // if (!user.error) {
-    //   const { data: userRoleData } = await supabase
-    //     .from('user_roles')
-    //     .select('role')
-    //     .eq('user_id', user.data.user?.id)
-    //     .single();
+      if (currentRole !== userRole) {
+        await supabase.auth.signOut();
+        const redirect = NextResponse.redirect(new URL('/', request.url));
+        redirect.cookies.delete('currentRole');
+        redirect.cookies.delete('currentStore');
+        return redirect;
+      }
 
-    //   const userRole = userRoleData?.role;
-
-    //   if (currentRole !== userRole) {
-    //     await supabase.auth.signOut();
-    //     const redirect = NextResponse.redirect(new URL('/', request.url));
-    //     redirect.cookies.delete('currentRole');
-    //     return redirect;
-    //   }
-    // }
+      if (userRole !== 'super_owner' && currentStore !== userStore) {
+        await supabase.auth.signOut();
+        const redirect = NextResponse.redirect(new URL('/', request.url));
+        redirect.cookies.delete('currentRole');
+        redirect.cookies.delete('currentStore');
+        return redirect;
+      }
+    }
 
     // protected routes
     if (request.nextUrl.pathname.startsWith('/dashboard') && user.error) {
       return NextResponse.redirect(new URL('/', request.url));
     }
 
-    //  const homePage = currentRole === 'super_admin' ? 'overview' : 'products';
-    const homePage = 'overview';
+    const homePage =
+      currentRole === 'super_owner'
+        ? 'super-user'
+        : currentRole === 'super_admin'
+          ? 'overview'
+          : 'products';
 
     if (request.nextUrl.pathname === '/' && !user.error) {
       return NextResponse.redirect(
@@ -70,37 +79,27 @@ export const updateSession = async (request: NextRequest) => {
       );
     }
 
-    // if (
-    //       request.nextUrl.pathname.includes('new') &&
-    //       !user.error &&
-    //       currentRole !== 'super_admin'
-    //     ) {
-    //       return NextResponse.redirect(
-    //         new URL(`/dashboard/${homePage}`, request.url)
-    //       );
-    //     }
+    const superAdminOnly = ['new', 'overview', 'invoices'];
 
-    //     // keep them separate as might need to add complex logic in future
+    if (
+      !user.error &&
+      currentRole !== 'super_admin' &&
+      superAdminOnly.some((p) => request.nextUrl.pathname.includes(p))
+    ) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
+    }
 
-    //     if (
-    //       request.nextUrl.pathname.includes('overview') &&
-    //       !user.error &&
-    //       currentRole !== 'super_admin'
-    //     ) {
-    //       return NextResponse.redirect(
-    //         new URL(`/dashboard/${homePage}`, request.url)
-    //       );
-    //     }
-
-    //     if (
-    //       request.nextUrl.pathname.includes('invoices') &&
-    //       !user.error &&
-    //       currentRole !== 'super_admin'
-    //     ) {
-    //       return NextResponse.redirect(
-    //         new URL(`/dashboard/${homePage}`, request.url)
-    //       );
-    //     }
+    if (
+      !user.error &&
+      currentRole !== 'super_owner' &&
+      request.nextUrl.pathname.includes('super')
+    ) {
+      return NextResponse.redirect(
+        new URL(`/dashboard/${homePage}`, request.url)
+      );
+    }
 
     return response;
   } catch (e) {

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import ListingPage from '@/features/dynamic/listing';
 import TableAction from '@/features/dynamic/table-components/table-action';
-// import RoleGate from '@/components/role-gate/RoleGateServer';
+import RoleGate from '@/components/role-gate/RoleGateServer';
 import { itemData, itemTable } from 'types';
 
 interface PageContentProps {
@@ -37,14 +37,14 @@ export const PageContent: React.FC<PageContentProps> = ({
       <div className='flex items-start justify-between'>
         <Heading title={title} description={description} />
         {newLink && (
-          // <RoleGate allow='super_admin'>
-          <Link
-            href={newLink}
-            className={cn(buttonVariants(), 'text-xs md:text-sm')}
-          >
-            <Plus className='mr-2 h-4 w-4' /> Add New
-          </Link>
-          // </RoleGate>
+          <RoleGate allow='super_admin'>
+            <Link
+              href={newLink}
+              className={cn(buttonVariants(), 'text-xs md:text-sm')}
+            >
+              <Plus className='mr-2 h-4 w-4' /> Add New
+            </Link>
+          </RoleGate>
         )}
       </div>
       <Separator />

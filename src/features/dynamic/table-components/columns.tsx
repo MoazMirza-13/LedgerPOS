@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { CellAction } from '@/features/dynamic/table-components/cell-action';
 import { Invoice, itemData, itemTable, Product } from 'types';
 import Link from 'next/link';
-// import { useRole } from '@/context/RoleContext';
+import { useRole } from '@/context/RoleContext';
 import { formatToPKTDate } from '@/utils/utils';
 import { usePathname } from 'next/navigation';
 
@@ -13,7 +13,7 @@ type Entity = itemData;
 export const useColumns = <T extends Entity>(
   type: itemTable
 ): ColumnDef<T>[] => {
-  // const currentRole = useRole();
+  const currentRole = useRole();
   const pathname = usePathname();
 
   const referenceSubRoute = pathname.includes('/references/');
@@ -180,7 +180,7 @@ export const useColumns = <T extends Entity>(
   }
 
   if (
-    // currentRole === 'super_admin' &&
+    currentRole === 'super_admin' &&
     !referenceSubRoute &&
     !supplierSubRoute
   ) {

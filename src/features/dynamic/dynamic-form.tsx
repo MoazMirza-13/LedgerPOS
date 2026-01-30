@@ -25,10 +25,10 @@ import { Brand, Category, Product } from 'types';
 import * as z from 'zod';
 import AddProductButton from '../../components/ui/add-product';
 import Link from 'next/link';
-import TableClientSide from './table-components/tableClient';
-import { getProducts } from '../products/get-products';
-// import { useRole } from '@/context/RoleContext';
-// import RoleGate from '@/components/role-gate/RoleGateClient';
+// import TableClientSide from './table-components/tableClient';
+// import { getProducts } from '../products/get-products';
+import { useRole } from '@/context/RoleContext';
+import RoleGate from '@/components/role-gate/RoleGateClient';
 import { ImageUpload } from '@/components/ui/image-upload';
 
 export default function DynamicForm({
@@ -115,12 +115,12 @@ export default function DynamicForm({
   const newPath = pathname.includes('new');
   const newLink = `/dashboard/products/new?${title.toLowerCase()}=${initialData?.title}`;
 
-  const [productsRes, productsAction, productsIsPending] = useActionState(
-    () => (initialData ? getProducts(initialData, pathname) : null),
-    null
-  );
+  // const [productsRes, productsAction, productsIsPending] = useActionState(
+  //   () => (initialData ? getProducts(initialData, pathname) : null),
+  //   null
+  // );
 
-  // const currentRole = useRole();
+  const currentRole = useRole();
 
   return (
     <>
@@ -129,13 +129,13 @@ export default function DynamicForm({
           <CardTitle className='text-left text-2xl font-bold'>
             {pageTitle}
           </CardTitle>
-          {/* <RoleGate allow='super_admin'> */}
-          {!newPath && (
-            <Link href={newLink}>
-              <AddProductButton />
-            </Link>
-          )}
-          {/* </RoleGate> */}
+          <RoleGate allow='super_admin'>
+            {!newPath && (
+              <Link href={newLink}>
+                <AddProductButton />
+              </Link>
+            )}
+          </RoleGate>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -146,12 +146,14 @@ export default function DynamicForm({
               <FormField
                 control={form.control}
                 name='img'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem className='w-[15rem]'>
                     <FormLabel>{title} Image</FormLabel>
                     <ImageUpload
                       value={field.value}
                       onChange={field.onChange}
+                      disabled={currentRole === 'admin'}
                     />
                   </FormItem>
                 )}
@@ -160,6 +162,7 @@ export default function DynamicForm({
                 <FormField
                   control={form.control}
                   name='title'
+                  disabled={currentRole !== 'super_admin'}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{`${title} Name`}</FormLabel>
@@ -174,6 +177,7 @@ export default function DynamicForm({
               <FormField
                 control={form.control}
                 name='description'
+                disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
@@ -188,20 +192,20 @@ export default function DynamicForm({
                   </FormItem>
                 )}
               />
-              {/* <RoleGate allow='super_admin'> */}
-              <Button type='submit' disabled={isPending || !isDirty}>
-                {isPending ? (
-                  <div className='flex gap-2'>
-                    {initialData ? `Editing ` : `Adding`}
-                    <LoaderCircle className='h-5 w-5 animate-spin' />
-                  </div>
-                ) : initialData ? (
-                  `Edit ${title}`
-                ) : (
-                  `Add ${title}`
-                )}
-              </Button>
-              {/* </RoleGate> */}
+              <RoleGate allow='super_admin'>
+                <Button type='submit' disabled={isPending || !isDirty}>
+                  {isPending ? (
+                    <div className='flex gap-2'>
+                      {initialData ? `Editing ` : `Adding`}
+                      <LoaderCircle className='h-5 w-5 animate-spin' />
+                    </div>
+                  ) : initialData ? (
+                    `Edit ${title}`
+                  ) : (
+                    `Add ${title}`
+                  )}
+                </Button>
+              </RoleGate>
             </form>
           </Form>
         </CardContent>
@@ -209,7 +213,7 @@ export default function DynamicForm({
 
       {/* table */}
       {/* <RoleGate allow='super_admin'> */}
-      {!newPath &&
+      {/* {!newPath &&
         (productsRes ? (
           <div
             className='flex flex-1 flex-col space-y-4'
@@ -236,7 +240,7 @@ export default function DynamicForm({
               <LoaderCircle className='h-5 w-5 animate-spin' />
             )}
           </Button>
-        ))}
+        ))} */}
       {/* </RoleGate> */}
     </>
   );

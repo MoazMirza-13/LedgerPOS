@@ -6,6 +6,7 @@ import SearchInput from '../search-input';
 import { UserNav } from './user-nav';
 import ThemeToggle from './ThemeToggle/theme-toggle';
 import { getUserSession } from '@/lib/actions';
+import RoleGate from '../role-gate/RoleGateServer';
 
 export default async function Header() {
   const session = await getUserSession();
@@ -20,9 +21,11 @@ export default async function Header() {
       </div>
 
       <div className='flex items-center gap-2 px-4'>
-        <div className='hidden md:flex'>
-          <SearchInput />
-        </div>
+        <RoleGate allow={['super_admin', 'admin']}>
+          <div className='hidden md:flex'>
+            <SearchInput />
+          </div>
+        </RoleGate>
         <UserNav user={user} />
         <ThemeToggle />
       </div>

@@ -21,7 +21,7 @@ export default function SignInViewPage() {
         </div>
         <div className='relative z-20 mt-auto'>
           <blockquote className='space-y-2'>
-            <p className='text-lg'>Boss Ahmad</p>
+            <p className='text-lg'>Your own city, your own store.</p>
             <footer className='text-sm'>Sign in to use</footer>
           </blockquote>
         </div>

@@ -21,12 +21,15 @@ export default async function DashboardLayout({
   const defaultOpen = cookieStore.get('sidebar:state')?.value === 'true';
 
   const currentRole = cookieStore.get('currentRole')?.value || '';
+  const currentStore = decodeURIComponent(
+    cookieStore.get('currentStore')?.value || 'NS'
+  );
 
   return (
     <RoleProvider value={currentRole}>
       <KBar>
         <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
+          <AppSidebar currentStore={currentStore} />
           <SidebarInset>
             <Header />
             {/* page main content */}

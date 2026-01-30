@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
-import { itemData, itemTable } from 'types';
+import { itemData, itemTable, NavItem } from 'types';
 import { formatInTimeZone } from 'date-fns-tz';
 import { getSupabaseClient } from '@/lib/actions';
 
@@ -142,4 +142,29 @@ export function filterWithDate(
       new Date(item.created_at) >= start &&
       new Date(item.created_at) <= end
   );
+}
+
+export function getRoleBasedNavItems(
+  navItems: NavItem[],
+  role: string
+): NavItem[] {
+  return navItems
+    .filter((item) => item.title !== 'Super Dashboard')
+    .map((item) => {
+      // Dashboard children only for super_admin
+      if (item.title === 'Dashboard') {
+        return {
+          ...item,
+          items: role === 'super_admin' ? item.items : []
+        };
+      }
+
+      // Invoices only for super_admin
+      if (item.title === 'Invoices') {
+        return role === 'super_admin' ? item : null;
+      }
+
+      return item;
+    })
+    .filter(Boolean) as NavItem[];
 }
