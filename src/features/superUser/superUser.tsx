@@ -54,32 +54,53 @@ interface User {
   tenant_id: string;
 }
 
+interface StoreFormData {
+  name: string;
+  phone: string;
+  address: string;
+  minOrder: number | null;
+}
+
+const INITIAL_STORE_FORM: StoreFormData = {
+  name: '',
+  phone: '',
+  address: '',
+  minOrder: null
+};
+
+const INITIAL_USER_FORM = {
+  email: '',
+  password: '',
+  role: 'admin',
+  store: ''
+};
+
 export default function SuperUserDashboard() {
   const [stores, setStores] = useState<Store[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [storeSearch, setStoreSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
+
+  // Store dialog state
   const [openStoreDialog, setOpenStoreDialog] = useState(false);
-  const [openUserDialog, setOpenUserDialog] = useState(false);
-  const [newStoreName, setNewStoreName] = useState('');
-  const [newStorePhone, setNewStorePhone] = useState('');
-  const [newStoreAddress, setNewStoreAddress] = useState('');
-  const [newStoreMinOrder, setNewStoreMinOrder] = useState<number | null>(null);
+  const [storeFormData, setStoreFormData] =
+    useState<StoreFormData>(INITIAL_STORE_FORM);
   const [editingStore, setEditingStore] = useState<Store | null>(null);
+
+  // Store deletion state
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deletingStore, setDeletingStore] = useState<Store | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
-  const [newUserRole, setNewUserRole] = useState('admin');
-  const [newUserStore, setNewUserStore] = useState('');
+  // User dialog state
+  const [openUserDialog, setOpenUserDialog] = useState(false);
+  const [userFormData, setUserFormData] = useState(INITIAL_USER_FORM);
 
+  // User deletion state
   const [openUserDeleteModal, setOpenUserDeleteModal] = useState(false);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const [deleteUserLoading, setDeleteUserLoading] = useState(false);
 
-  // Fetch stores and users on mount
   useEffect(() => {
     fetchStores();
     fetchUsers();
@@ -121,89 +142,73 @@ export default function SuperUserDashboard() {
     );
   }, [users, userSearch]);
 
-  // Get store name by ID
   const getStoreName = (tenantId: string) => {
     const store = stores.find((t) => t.id === tenantId);
     return store?.name || 'Unknown';
   };
 
-  async function handleCreateStore() {
+  const resetStoreDialog = () => {
+    setOpenStoreDialog(false);
+    setEditingStore(null);
+    setStoreFormData(INITIAL_STORE_FORM);
+  };
+
+  const resetUserDialog = () => {
+    setOpenUserDialog(false);
+    setUserFormData(INITIAL_USER_FORM);
+  };
+
+  const validateStoreForm = () => {
     if (
-      !newStoreName.trim() ||
-      !newStorePhone.trim() ||
-      !newStoreAddress.trim() ||
-      newStoreMinOrder === null
+      !storeFormData.name.trim() ||
+      !storeFormData.phone.trim() ||
+      !storeFormData.address.trim() ||
+      storeFormData.minOrder === null
     ) {
       toast.error('All fields are required');
-      return;
+      return false;
     }
 
-    if (!isValidPhone(newStorePhone)) {
+    if (!isValidPhone(storeFormData.phone)) {
       toast.error('Invalid phone number format');
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  async function handleStoreSubmit() {
+    if (!validateStoreForm()) return;
 
     const supabase = createClient();
+    const storeData = {
+      name: storeFormData.name.trim(),
+      phone_no: storeFormData.phone.trim(),
+      address: storeFormData.address.trim(),
+      min_order: storeFormData.minOrder
+    };
 
-    const { error } = await supabase.from('tenants').insert({
-      name: newStoreName.trim(),
-      phone_no: newStorePhone.trim(),
-      address: newStoreAddress.trim(),
-      min_order: newStoreMinOrder
-    });
+    let error;
+    if (editingStore) {
+      const result = await supabase
+        .from('tenants')
+        .update(storeData)
+        .eq('id', editingStore.id);
+      error = result.error;
+    } else {
+      const result = await supabase.from('tenants').insert(storeData);
+      error = result.error;
+    }
 
     if (error) {
       toast.error(error.message);
     } else {
-      setOpenStoreDialog(false);
-      setNewStoreName('');
-      setNewStorePhone('');
-      setNewStoreAddress('');
-      setNewStoreMinOrder(null);
-      toast.success(toastMsg.dynamicNew('Store'));
-      await fetchStores();
-    }
-  }
-
-  async function handleUpdateStore() {
-    if (!editingStore) return;
-
-    if (
-      !newStoreName.trim() ||
-      !newStorePhone.trim() ||
-      !newStoreAddress.trim() ||
-      newStoreMinOrder === null
-    ) {
-      toast.error('All fields are required');
-      return;
-    }
-
-    if (!isValidPhone(newStorePhone)) {
-      toast.error('Invalid phone number format');
-      return;
-    }
-
-    const supabase = createClient();
-    const { error } = await supabase
-      .from('tenants')
-      .update({
-        name: newStoreName.trim(),
-        phone_no: newStorePhone.trim(),
-        address: newStoreAddress.trim(),
-        min_order: newStoreMinOrder
-      })
-      .eq('id', editingStore.id);
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(toastMsg.dynamicUpdate('Store'));
-      setOpenStoreDialog(false);
-      setEditingStore(null);
-      setNewStoreName('');
-      setNewStorePhone('');
-      setNewStoreAddress('');
-      setNewStoreMinOrder(null);
+      toast.success(
+        editingStore
+          ? toastMsg.dynamicUpdate('Store')
+          : toastMsg.dynamicNew('Store')
+      );
+      resetStoreDialog();
       await fetchStores();
     }
   }
@@ -226,18 +231,17 @@ export default function SuperUserDashboard() {
       toast.error(error.message);
     } else {
       toast.success(toastMsg.deleteItem);
-      setOpenStoreDialog(false);
-      setEditingStore(null);
-      setNewStoreName('');
-      setNewStorePhone('');
-      setNewStoreAddress('');
-      setNewStoreMinOrder(null);
+      resetStoreDialog();
       await fetchStores();
     }
   }
 
   async function handleCreateUser() {
-    if (!newUserEmail.trim() || !newUserPassword.trim() || !newUserStore) {
+    if (
+      !userFormData.email.trim() ||
+      !userFormData.password.trim() ||
+      !userFormData.store
+    ) {
       alert('Please fill in all fields');
       return;
     }
@@ -246,19 +250,15 @@ export default function SuperUserDashboard() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: newUserEmail,
-        password: newUserPassword,
-        tenantId: newUserStore,
-        role: newUserRole
+        email: userFormData.email,
+        password: userFormData.password,
+        tenantId: userFormData.store,
+        role: userFormData.role
       })
     });
 
     if (response.ok) {
-      setOpenUserDialog(false);
-      setNewUserEmail('');
-      setNewUserPassword('');
-      setNewUserStore('');
-      setNewUserRole('admin');
+      resetUserDialog();
       await fetchUsers();
       toast.success(toastMsg.dynamicNew('User'));
     } else {
@@ -283,13 +283,24 @@ export default function SuperUserDashboard() {
 
     if (response.ok) {
       toast.success('User deleted successfully');
-      await fetchUsers(); // refresh user list
+      await fetchUsers();
       setDeletingUser(null);
     } else {
       const error = await response.text();
       toast.error(error);
     }
   }
+
+  const handleEditStore = (store: Store) => {
+    setEditingStore(store);
+    setStoreFormData({
+      name: store.name,
+      phone: store.phone_no,
+      address: store.address,
+      minOrder: store.min_order
+    });
+    setOpenStoreDialog(true);
+  };
 
   return (
     <div className='min-h-screen bg-background p-4'>
@@ -349,8 +360,13 @@ export default function SuperUserDashboard() {
                         </label>
                         <Input
                           placeholder='Enter store name'
-                          value={newStoreName}
-                          onChange={(e) => setNewStoreName(e.target.value)}
+                          value={storeFormData.name}
+                          onChange={(e) =>
+                            setStoreFormData({
+                              ...storeFormData,
+                              name: e.target.value
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -359,8 +375,13 @@ export default function SuperUserDashboard() {
                         </label>
                         <Input
                           placeholder='Enter store phone no'
-                          value={newStorePhone}
-                          onChange={(e) => setNewStorePhone(e.target.value)}
+                          value={storeFormData.phone}
+                          onChange={(e) =>
+                            setStoreFormData({
+                              ...storeFormData,
+                              phone: e.target.value
+                            })
+                          }
                         />
                       </div>
 
@@ -370,8 +391,13 @@ export default function SuperUserDashboard() {
                         </label>
                         <Input
                           placeholder='Enter store address'
-                          value={newStoreAddress}
-                          onChange={(e) => setNewStoreAddress(e.target.value)}
+                          value={storeFormData.address}
+                          onChange={(e) =>
+                            setStoreFormData({
+                              ...storeFormData,
+                              address: e.target.value
+                            })
+                          }
                         />
                       </div>
 
@@ -382,33 +408,23 @@ export default function SuperUserDashboard() {
                         <Input
                           type='number'
                           placeholder='Enter minimum order limit'
+                          value={storeFormData.minOrder ?? ''}
                           onChange={(e) =>
-                            setNewStoreMinOrder(
-                              e.target.value ? Number(e.target.value) : null
-                            )
+                            setStoreFormData({
+                              ...storeFormData,
+                              minOrder: e.target.value
+                                ? Number(e.target.value)
+                                : null
+                            })
                           }
                         />
                       </div>
 
                       <div className='flex justify-end gap-2'>
-                        <Button
-                          variant='outline'
-                          onClick={() => {
-                            setOpenStoreDialog(false);
-                            setEditingStore(null);
-                            setNewStoreName('');
-                            setNewStorePhone('');
-                            setNewStoreAddress('');
-                            setNewStoreMinOrder(null);
-                          }}
-                        >
+                        <Button variant='outline' onClick={resetStoreDialog}>
                           Cancel
                         </Button>
-                        <Button
-                          onClick={
-                            editingStore ? handleUpdateStore : handleCreateStore
-                          }
-                        >
+                        <Button onClick={handleStoreSubmit}>
                           {editingStore ? 'Update Store' : 'Create Store'}
                         </Button>
 
@@ -441,7 +457,6 @@ export default function SuperUserDashboard() {
               </div>
 
               <div className='overflow-x-auto'>
-                {/* or try layout fixed class */}
                 <Table className='min-w-max'>
                   <TableHeader>
                     <TableRow>
@@ -466,14 +481,7 @@ export default function SuperUserDashboard() {
                         <TableRow key={store.id}>
                           <TableCell
                             className='cursor-pointer font-medium'
-                            onClick={() => {
-                              setEditingStore(store);
-                              setNewStoreName(store.name);
-                              setNewStorePhone(store.phone_no);
-                              setNewStoreAddress(store.address);
-                              setNewStoreMinOrder(store.min_order);
-                              setOpenStoreDialog(true);
-                            }}
+                            onClick={() => handleEditStore(store)}
                           >
                             {store.name}
                           </TableCell>
@@ -527,8 +535,13 @@ export default function SuperUserDashboard() {
                         <Input
                           type='email'
                           placeholder='user@example.com'
-                          value={newUserEmail}
-                          onChange={(e) => setNewUserEmail(e.target.value)}
+                          value={userFormData.email}
+                          onChange={(e) =>
+                            setUserFormData({
+                              ...userFormData,
+                              email: e.target.value
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -538,8 +551,13 @@ export default function SuperUserDashboard() {
                         <Input
                           type='password'
                           placeholder='Enter password'
-                          value={newUserPassword}
-                          onChange={(e) => setNewUserPassword(e.target.value)}
+                          value={userFormData.password}
+                          onChange={(e) =>
+                            setUserFormData({
+                              ...userFormData,
+                              password: e.target.value
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -547,8 +565,10 @@ export default function SuperUserDashboard() {
                           Store
                         </label>
                         <Select
-                          value={newUserStore}
-                          onValueChange={setNewUserStore}
+                          value={userFormData.store}
+                          onValueChange={(value) =>
+                            setUserFormData({ ...userFormData, store: value })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder='Select a store' />
@@ -567,8 +587,10 @@ export default function SuperUserDashboard() {
                           Role
                         </label>
                         <Select
-                          value={newUserRole}
-                          onValueChange={setNewUserRole}
+                          value={userFormData.role}
+                          onValueChange={(value) =>
+                            setUserFormData({ ...userFormData, role: value })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -582,16 +604,7 @@ export default function SuperUserDashboard() {
                         </Select>
                       </div>
                       <div className='flex justify-end gap-2'>
-                        <Button
-                          variant='outline'
-                          onClick={() => {
-                            setOpenUserDialog(false);
-                            setNewUserEmail('');
-                            setNewUserPassword('');
-                            setNewUserStore('');
-                            setNewUserRole('admin');
-                          }}
-                        >
+                        <Button variant='outline' onClick={resetUserDialog}>
                           Cancel
                         </Button>
                         <Button onClick={handleCreateUser}>Create User</Button>
@@ -653,8 +666,8 @@ export default function SuperUserDashboard() {
                               variant='destructive'
                               size='sm'
                               onClick={() => {
-                                setDeletingUser(user); // new state for selected user
-                                setOpenUserDeleteModal(true); // new modal state
+                                setDeletingUser(user);
+                                setOpenUserDeleteModal(true);
                               }}
                             >
                               <Trash size={16} />
