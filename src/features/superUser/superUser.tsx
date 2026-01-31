@@ -34,13 +34,17 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { Plus, Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Plus, Search, Trash } from 'lucide-react';
 import { toast } from 'sonner';
+import { isValidPhone, toastMsg } from '@/utils/utils';
+import { AlertModal } from '@/components/modal/alert-modal';
 
 interface Store {
   id: string;
   name: string;
+  phone_no: string;
+  address: string;
+  min_order: number;
 }
 
 interface User {
@@ -58,12 +62,22 @@ export default function SuperUserDashboard() {
   const [openStoreDialog, setOpenStoreDialog] = useState(false);
   const [openUserDialog, setOpenUserDialog] = useState(false);
   const [newStoreName, setNewStoreName] = useState('');
+  const [newStorePhone, setNewStorePhone] = useState('');
+  const [newStoreAddress, setNewStoreAddress] = useState('');
+  const [newStoreMinOrder, setNewStoreMinOrder] = useState<number | null>(null);
+  const [editingStore, setEditingStore] = useState<Store | null>(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deletingStore, setDeletingStore] = useState<Store | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('admin');
   const [newUserStore, setNewUserStore] = useState('');
 
-  const router = useRouter();
+  const [openUserDeleteModal, setOpenUserDeleteModal] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [deleteUserLoading, setDeleteUserLoading] = useState(false);
 
   // Fetch stores and users on mount
   useEffect(() => {
@@ -114,14 +128,28 @@ export default function SuperUserDashboard() {
   };
 
   async function handleCreateStore() {
-    if (!newStoreName.trim()) {
-      alert('Please enter a store name');
+    if (
+      !newStoreName.trim() ||
+      !newStorePhone.trim() ||
+      !newStoreAddress.trim() ||
+      newStoreMinOrder === null
+    ) {
+      toast.error('All fields are required');
       return;
     }
 
-    const supabase = await createClient();
+    if (!isValidPhone(newStorePhone)) {
+      toast.error('Invalid phone number format');
+      return;
+    }
+
+    const supabase = createClient();
+
     const { error } = await supabase.from('tenants').insert({
-      name: newStoreName
+      name: newStoreName.trim(),
+      phone_no: newStorePhone.trim(),
+      address: newStoreAddress.trim(),
+      min_order: newStoreMinOrder
     });
 
     if (error) {
@@ -129,7 +157,81 @@ export default function SuperUserDashboard() {
     } else {
       setOpenStoreDialog(false);
       setNewStoreName('');
-      toast.success('New store has been added');
+      setNewStorePhone('');
+      setNewStoreAddress('');
+      setNewStoreMinOrder(null);
+      toast.success(toastMsg.dynamicNew('Store'));
+      await fetchStores();
+    }
+  }
+
+  async function handleUpdateStore() {
+    if (!editingStore) return;
+
+    if (
+      !newStoreName.trim() ||
+      !newStorePhone.trim() ||
+      !newStoreAddress.trim() ||
+      newStoreMinOrder === null
+    ) {
+      toast.error('All fields are required');
+      return;
+    }
+
+    if (!isValidPhone(newStorePhone)) {
+      toast.error('Invalid phone number format');
+      return;
+    }
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('tenants')
+      .update({
+        name: newStoreName.trim(),
+        phone_no: newStorePhone.trim(),
+        address: newStoreAddress.trim(),
+        min_order: newStoreMinOrder
+      })
+      .eq('id', editingStore.id);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(toastMsg.dynamicUpdate('Store'));
+      setOpenStoreDialog(false);
+      setEditingStore(null);
+      setNewStoreName('');
+      setNewStorePhone('');
+      setNewStoreAddress('');
+      setNewStoreMinOrder(null);
+      await fetchStores();
+    }
+  }
+
+  async function handleDeleteStore() {
+    if (!deletingStore) return;
+
+    setDeleteLoading(true);
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('tenants')
+      .delete()
+      .eq('id', deletingStore.id);
+
+    setDeleteLoading(false);
+    setOpenDeleteModal(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(toastMsg.deleteItem);
+      setOpenStoreDialog(false);
+      setEditingStore(null);
+      setNewStoreName('');
+      setNewStorePhone('');
+      setNewStoreAddress('');
+      setNewStoreMinOrder(null);
       await fetchStores();
     }
   }
@@ -158,7 +260,31 @@ export default function SuperUserDashboard() {
       setNewUserStore('');
       setNewUserRole('admin');
       await fetchUsers();
-      toast.success('New user has been added');
+      toast.success(toastMsg.dynamicNew('User'));
+    } else {
+      const error = await response.text();
+      toast.error(error);
+    }
+  }
+
+  async function handleDeleteUser() {
+    if (!deletingUser) return;
+
+    setDeleteUserLoading(true);
+
+    const response = await fetch('/api/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: deletingUser?.id })
+    });
+
+    setDeleteUserLoading(false);
+    setOpenUserDeleteModal(false);
+
+    if (response.ok) {
+      toast.success('User deleted successfully');
+      await fetchUsers(); // refresh user list
+      setDeletingUser(null);
     } else {
       const error = await response.text();
       toast.error(error);
@@ -167,6 +293,20 @@ export default function SuperUserDashboard() {
 
   return (
     <div className='min-h-screen bg-background p-4'>
+      <AlertModal
+        isOpen={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={handleDeleteStore}
+        loading={deleteLoading}
+      />
+
+      <AlertModal
+        isOpen={openUserDeleteModal}
+        onClose={() => setOpenUserDeleteModal(false)}
+        onConfirm={handleDeleteUser}
+        loading={deleteUserLoading}
+      />
+
       <div className='mx-auto'>
         <div className='mb-8'>
           <h1 className='text-4xl font-bold tracking-tight'>NS Management</h1>
@@ -198,7 +338,9 @@ export default function SuperUserDashboard() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Create New Store</DialogTitle>
+                      <DialogTitle>
+                        {editingStore ? 'Update Store' : 'Create New Store'}
+                      </DialogTitle>
                     </DialogHeader>
                     <div className='space-y-4'>
                       <div>
@@ -211,19 +353,76 @@ export default function SuperUserDashboard() {
                           onChange={(e) => setNewStoreName(e.target.value)}
                         />
                       </div>
+                      <div>
+                        <label className='mb-2 block text-sm font-medium'>
+                          Phone Number
+                        </label>
+                        <Input
+                          placeholder='Enter store phone no'
+                          value={newStorePhone}
+                          onChange={(e) => setNewStorePhone(e.target.value)}
+                        />
+                      </div>
+
+                      <div>
+                        <label className='mb-2 block text-sm font-medium'>
+                          Address
+                        </label>
+                        <Input
+                          placeholder='Enter store address'
+                          value={newStoreAddress}
+                          onChange={(e) => setNewStoreAddress(e.target.value)}
+                        />
+                      </div>
+
+                      <div>
+                        <label className='mb-2 block text-sm font-medium'>
+                          Minimum Order
+                        </label>
+                        <Input
+                          type='number'
+                          placeholder='Enter minimum order limit'
+                          onChange={(e) =>
+                            setNewStoreMinOrder(
+                              e.target.value ? Number(e.target.value) : null
+                            )
+                          }
+                        />
+                      </div>
+
                       <div className='flex justify-end gap-2'>
                         <Button
                           variant='outline'
                           onClick={() => {
                             setOpenStoreDialog(false);
+                            setEditingStore(null);
                             setNewStoreName('');
+                            setNewStorePhone('');
+                            setNewStoreAddress('');
+                            setNewStoreMinOrder(null);
                           }}
                         >
                           Cancel
                         </Button>
-                        <Button onClick={handleCreateStore}>
-                          Create Store
+                        <Button
+                          onClick={
+                            editingStore ? handleUpdateStore : handleCreateStore
+                          }
+                        >
+                          {editingStore ? 'Update Store' : 'Create Store'}
                         </Button>
+
+                        {editingStore && (
+                          <Button
+                            variant='destructive'
+                            onClick={() => {
+                              setDeletingStore(editingStore);
+                              setOpenDeleteModal(true);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </DialogContent>
@@ -234,7 +433,7 @@ export default function SuperUserDashboard() {
               <div className='relative'>
                 <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
-                  placeholder='Search stores...'
+                  placeholder='Search stores'
                   className='pl-8'
                   value={storeSearch}
                   onChange={(e) => setStoreSearch(e.target.value)}
@@ -242,24 +441,53 @@ export default function SuperUserDashboard() {
               </div>
 
               <div className='overflow-x-auto'>
-                <Table>
+                {/* or try layout fixed class */}
+                <Table className='min-w-max'>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Min Order</TableHead>
+                      <TableHead>Address</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredStores.length === 0 ? (
                       <TableRow>
-                        <TableCell className='py-6 text-center text-muted-foreground'>
+                        <TableCell
+                          colSpan={4}
+                          className='py-6 text-center text-muted-foreground'
+                        >
                           No stores found
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredStores.map((store) => (
                         <TableRow key={store.id}>
-                          <TableCell className='font-medium'>
+                          <TableCell
+                            className='cursor-pointer font-medium'
+                            onClick={() => {
+                              setEditingStore(store);
+                              setNewStoreName(store.name);
+                              setNewStorePhone(store.phone_no);
+                              setNewStoreAddress(store.address);
+                              setNewStoreMinOrder(store.min_order);
+                              setOpenStoreDialog(true);
+                            }}
+                          >
                             {store.name}
+                          </TableCell>
+
+                          <TableCell className='text-sm text-muted-foreground'>
+                            {store.phone_no}
+                          </TableCell>
+
+                          <TableCell className='font-medium'>
+                            {store.min_order}
+                          </TableCell>
+
+                          <TableCell className='text-sm'>
+                            {store.address}
                           </TableCell>
                         </TableRow>
                       ))
@@ -377,7 +605,7 @@ export default function SuperUserDashboard() {
               <div className='relative'>
                 <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
-                  placeholder='Search users...'
+                  placeholder='Search users'
                   className='pl-8'
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
@@ -418,6 +646,19 @@ export default function SuperUserDashboard() {
                           </TableCell>
                           <TableCell className='text-sm text-muted-foreground'>
                             {getStoreName(user.tenant_id)}
+                          </TableCell>
+
+                          <TableCell>
+                            <Button
+                              variant='destructive'
+                              size='sm'
+                              onClick={() => {
+                                setDeletingUser(user); // new state for selected user
+                                setOpenUserDeleteModal(true); // new modal state
+                              }}
+                            >
+                              <Trash size={16} />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))

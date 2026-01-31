@@ -168,3 +168,13 @@ export function getRoleBasedNavItems(
     })
     .filter(Boolean) as NavItem[];
 }
+
+export function isValidPhone(phone: string) {
+  // 03030550072
+  const local = /^0\d{10}$/;
+
+  // +923030550072  → +92 + 10 digits
+  const intl = /^\+92\d{10}$/;
+
+  return local.test(phone) || intl.test(phone);
+}
