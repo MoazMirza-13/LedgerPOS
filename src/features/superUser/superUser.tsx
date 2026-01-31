@@ -573,7 +573,7 @@ export default function SuperUserDashboard() {
                           <SelectTrigger>
                             <SelectValue placeholder='Select a store' />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className='max-h-60 overflow-auto'>
                             {stores.map((store) => (
                               <SelectItem key={store.id} value={store.id}>
                                 {store.name}
