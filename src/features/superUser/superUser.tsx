@@ -445,7 +445,7 @@ export default function SuperUserDashboard() {
                 </Dialog>
               </div>
             </CardHeader>
-            <CardContent className='space-y-4'>
+            <CardContent className='flex flex-col space-y-4'>
               <div className='relative'>
                 <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
@@ -456,7 +456,7 @@ export default function SuperUserDashboard() {
                 />
               </div>
 
-              <div className='overflow-x-auto'>
+              <div className='max-h-[calc(75vh-8rem)] overflow-auto [&::-webkit-scrollbar-corner]:bg-transparent'>
                 <Table className='min-w-max'>
                   <TableHeader>
                     <TableRow>
@@ -614,7 +614,7 @@ export default function SuperUserDashboard() {
                 </Dialog>
               </div>
             </CardHeader>
-            <CardContent className='space-y-4'>
+            <CardContent className='flex flex-col space-y-4'>
               <div className='relative'>
                 <Search className='absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
                 <Input
@@ -625,8 +625,8 @@ export default function SuperUserDashboard() {
                 />
               </div>
 
-              <div className='overflow-x-auto'>
-                <Table>
+              <div className='max-h-[calc(75vh-8rem)] overflow-auto [&::-webkit-scrollbar-corner]:bg-transparent'>
+                <Table className='min-w-max'>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
