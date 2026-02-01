@@ -101,7 +101,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
         <!-- FOOTER -->
         <div class="bg-gray-800 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
           <p class="text-sm font-medium m-0">Thank you for your business!</p>
-          <p class="text-xs text-gray-400 m-0 mt-2">NS | Contact: ‪0370 6978758‬</p>
+          <p class="text-xs text-gray-400 m-0 mt-2">NS | Contact: 03706978758</p>
           <p class="text-xs text-gray-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
         </div>
 
