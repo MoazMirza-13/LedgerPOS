@@ -88,6 +88,30 @@ export type Invoice_items = {
   product_id?: string;
 };
 
+export type Order = {
+  id: string;
+  tenant_id: string;
+  customer_name: string;
+  customer_number?: string | null;
+  customer_address?: string | null;
+  total_price: number;
+  message?: string | null;
+  status: 'pending' | 'completed' | 'delivered' | 'canceled' | string;
+  created_at: string;
+  order_number?: number;
+  items?: OrderItem[];
+};
+
+export type OrderItem = {
+  id: string;
+  order_id: string;
+  product_id?: string | null;
+  product_name: string;
+  quantity: number;
+  price: number;
+  created_at: string;
+};
+
 export interface ProfitData {
   invoiceId: string;
   invoiceNumber: number;
@@ -103,9 +127,14 @@ export interface ProfitData {
   totalProfit: number;
 }
 
-export type itemTable = 'categories' | 'products' | 'brands' | 'invoices';
+export type itemTable =
+  | 'categories'
+  | 'products'
+  | 'brands'
+  | 'invoices'
+  | 'orders';
 
-export type itemData = Product | Category | Brand | Invoice;
+export type itemData = Product | Category | Brand | Invoice | Order;
 
 export type nestedArray = {
   products: Product[];

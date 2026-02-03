@@ -50,10 +50,18 @@ export default function AppSidebar({ currentStore }: AppSidebarProps) {
             items={navItems.filter((item) => item.group === 'Stock Management')}
           />
         </RoleGate>
+        {/* super_admin billing */}
         <RoleGate allow='super_admin'>
           <SidebarGroupSection
             title='Billing'
             items={navItems.filter((item) => item.group === 'Billing')}
+          />
+        </RoleGate>
+        {/* admin billing */}
+        <RoleGate allow='admin'>
+          <SidebarGroupSection
+            title='Billing'
+            items={navItems.filter((item) => item.group === 'admin Billing')}
           />
         </RoleGate>
         <RoleGate allow='super_owner'>

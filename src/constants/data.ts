@@ -57,6 +57,16 @@ export const navItems: NavItem[] = [
     group: 'Stock Management',
     items: [] // No child items
   },
+  // super_admin billing
+  {
+    title: 'Orders',
+    url: '/dashboard/orders',
+    icon: 'order',
+    shortcut: ['g', 'o'],
+    isActive: false,
+    group: 'Billing',
+    items: [] // No child items
+  },
   {
     title: 'Invoices',
     url: '/dashboard/invoices',
@@ -64,6 +74,16 @@ export const navItems: NavItem[] = [
     shortcut: ['g', 'i'],
     isActive: false,
     group: 'Billing',
+    items: [] // No child items
+  },
+  // admin billing
+  {
+    title: 'Orders',
+    url: '/dashboard/orders',
+    icon: 'order',
+    shortcut: ['g', 'o'],
+    isActive: false,
+    group: 'admin Billing',
     items: [] // No child items
   },
   {
