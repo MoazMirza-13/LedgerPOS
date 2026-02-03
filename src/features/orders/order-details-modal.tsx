@@ -6,6 +6,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { FileText } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { formatToPKTDate } from '@/utils/utils';
 import { useEffect, useState } from 'react';
@@ -32,6 +34,7 @@ export function OrderDetailsModal({
 }: OrderDetailsModalProps) {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
 
   useEffect(() => {
     if (open && order) {
@@ -56,6 +59,34 @@ export function OrderDetailsModal({
       fetchOrderItems();
     }
   }, [open, order]);
+
+  const handleCreateInvoice = async () => {
+    if (!order) return;
+
+    try {
+      setCreatingInvoice(true);
+      const supabase = createClient();
+
+      const { error } = await supabase.rpc('create_invoice_from_order', {
+        p_order_id: order.id
+      });
+
+      if (error) throw error;
+
+      toast.success('Invoice created successfully!', {
+        description: `Invoice has been generated for Order #${order.order_number}`
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      toast.error('Failed to create invoice', {
+        description: 'Please try again or contact support'
+      });
+    } finally {
+      setCreatingInvoice(false);
+    }
+  };
 
   if (!order) return null;
 
@@ -132,6 +163,18 @@ export function OrderDetailsModal({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Create Invoice Button */}
+          <div className='flex justify-end border-t pt-4'>
+            <Button
+              onClick={handleCreateInvoice}
+              disabled={creatingInvoice || loading || items.length === 0}
+              className='gap-2'
+            >
+              <FileText className='h-4 w-4' />
+              {creatingInvoice ? 'Creating Invoice...' : 'Create Invoice'}
+            </Button>
           </div>
         </div>
       </DialogContent>
