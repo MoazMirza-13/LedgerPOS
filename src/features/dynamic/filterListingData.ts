@@ -1,4 +1,5 @@
-import { filterByWarehouse, formatToPKTDate } from '@/utils/utils';
+// not using anymore after server side pagination and filtration
+import { filterByWarehouse } from '@/utils/utils';
 import {
   Brand,
   Category,
@@ -40,13 +41,11 @@ export function filterListingData(
       value = `${product.product_code ?? ''} ${product.title ?? ''}`;
     } else if (type === 'invoices') {
       const invoice = item as Invoice;
-      value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} ${
-        invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
+      value = `${invoice.customer_name ?? ''} ${invoice.invoice_number ?? ''} : ''
       }`;
     } else if (type === 'purchasing_invoices') {
       const invoice = item as PurchasingInvoice;
-      value = ` ${invoice.invoice_number ?? ''} ${
-        invoice.created_at ? formatToPKTDate(invoice.created_at) : ''
+      value = ` ${invoice.invoice_number ?? ''}  : ''
       }`;
     } else if (type === 'references' || type === 'suppliers') {
       const data = item as Reference | Supplier;

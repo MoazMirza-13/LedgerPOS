@@ -5,23 +5,48 @@ import { Product } from 'types';
 import { getImageUrl, getTotalQuantity } from '@/utils/utils';
 import { fetchListingData } from '@/features/dynamic/fetchListingData';
 
-export default async function Page() {
-  const products = await fetchListingData('products');
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function Page(props: PageProps) {
+  const searchParams = await props.searchParams;
+  const PAGE_SIZE = 900;
+  let offset = 0;
+  let fetchedCount = 0;
+  const products: Product[] = [];
+
+  do {
+    const batch = (await fetchListingData({
+      type: 'products',
+      offset,
+      limit: PAGE_SIZE,
+      filters: searchParams
+    })) as Product[];
+
+    products.push(...batch);
+    fetchedCount = batch.length;
+    offset += PAGE_SIZE;
+  } while (fetchedCount === PAGE_SIZE);
 
   const categoryBrandData = await getCategoriesBrandsData();
   const categories = categoryBrandData ? categoryBrandData[0].categories : [];
   const brands = categoryBrandData ? categoryBrandData[0].brands : [];
 
-  const lowStockProducts =
-    products?.filter((p: Product) => getTotalQuantity(p) < p.min_quantity) ||
-    [];
+  const lowStockProducts = products.filter(
+    (p: Product) => getTotalQuantity(p) < p.min_quantity
+  );
 
   const productsWithUrls = await Promise.all(
-    lowStockProducts.map(async (p) => ({
-      ...p,
-      img_url: await getImageUrl(p.img_url?.[0] || '')
-    }))
+    lowStockProducts.map(async (p) => {
+      const url = await getImageUrl(p.img_url?.[0] || '');
+      return {
+        ...p,
+        img_url: url ? [url] : []
+      };
+    })
   );
+
   return (
     <PageContainer scrollable>
       <div className='w-full'>

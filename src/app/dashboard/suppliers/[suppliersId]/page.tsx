@@ -11,16 +11,36 @@ export const metadata = {
   title: 'Dashboard: Supplier Ledger'
 };
 
-type PageProps = { params: Promise<{ suppliersId: string }> };
+type PageProps = {
+  params: Promise<{ suppliersId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 export default async function Page(props: PageProps) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
+  const normalize = (
+    value: string | string[] | undefined
+  ): string | undefined => (Array.isArray(value) ? value[0] : value);
+  const today = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'Asia/Karachi'
+  });
+  const filters = {
+    ...searchParams,
+    from: normalize(searchParams.from) || today,
+    to: normalize(searchParams.to) || today
+  };
   if (!checkUUID(params.suppliersId)) notFound();
 
   const supplierData = await getDataById('suppliers', params.suppliersId);
   if (!supplierData) notFound();
 
-  const data = await fetchListingData('suppliers_ledger', params.suppliersId);
+  const data = await fetchListingData({
+    type: 'suppliers_ledger',
+    id: params.suppliersId,
+    limit: 900,
+    filters
+  });
   const items_data: Suppliers_ledger[] = data ? data : [];
 
   return (

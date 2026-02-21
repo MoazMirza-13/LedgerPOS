@@ -25,59 +25,66 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Invoice, Invoice_items, Product, ProfitData, Reference } from 'types';
+import { Invoice_items, ProfitData } from 'types';
 import { DateRangePicker } from '@/components/ui/date-range-picker-mini';
-import { filterWithDate, formatToPKTDate } from '@/utils/utils';
+import { formatToPKTDate } from '@/utils/utils';
+import { parseAsString, useQueryStates } from 'nuqs';
+
+type ProfitInvoice = {
+  id?: string;
+  customer_name: string;
+  created_at: string;
+  reference?: string;
+  invoice_number?: number;
+  references?: Array<{ name: string }> | null;
+};
+
+type ProfitProduct = {
+  id: string;
+  product_code: string;
+  cost_price: number;
+};
 
 interface ProfitViewerProps {
-  invoices: Invoice[];
+  invoices: ProfitInvoice[];
   invoiceItems: Invoice_items[];
-  products: Product[];
-  references: Reference[];
+  products: ProfitProduct[];
+  references: Array<{ id?: string; name: string }>;
+  from: string;
+  to: string;
+  selectedReference: string;
 }
 
 export function ProfitViewer({
   invoices,
   invoiceItems,
   products,
-  references
+  references,
+  from,
+  to,
+  selectedReference
 }: ProfitViewerProps) {
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: new Date(new Date().setDate(new Date().getDate() - 7)),
-    to: new Date()
+  const [, setSearchParams] = useQueryStates({
+    from: parseAsString.withOptions({ shallow: false }),
+    to: parseAsString.withOptions({ shallow: false }),
+    reference: parseAsString.withOptions({ shallow: false })
   });
-  const [selectedReference, setSelectedReference] = React.useState<
-    string | 'all'
-  >('all');
 
-  // Calculate profit data based on filters
+  const dateRange = React.useMemo<DateRange | undefined>(
+    () => ({
+      from: new Date(from),
+      to: new Date(to)
+    }),
+    [from, to]
+  );
+
+  // Invoices are already filtered on the server. Compute profit only.
   const profitData = React.useMemo(() => {
-    // Filter invoices by date range and reference
-    const filteredInvoices = invoices.filter((invoice) => {
-      // Date filtering using your util
-      const dateMatch =
-        !dateRange?.from ||
-        filterWithDate(
-          [invoice],
-          dateRange.from,
-          dateRange.to ?? dateRange.from
-        ).length > 0;
-
-      // Reference filter
-      const referenceMatch =
-        selectedReference === 'all' || invoice.reference === selectedReference;
-
-      return dateMatch && referenceMatch;
-    });
-
-    // Calculate profit for each invoice
-    const profitResults: ProfitData[] = filteredInvoices.map((invoice) => {
-      // Get all items for this invoice
+    const profitResults: ProfitData[] = invoices.map((invoice) => {
       const items = invoiceItems.filter(
         (item) => item.invoice_id === invoice.id
       );
 
-      // Calculate profit for each item
       const itemsWithProfit = items.map((item) => {
         const product = products.find((p) => p.id === item.product_id);
         const quantity = item.quantity ?? 0;
@@ -104,14 +111,14 @@ export function ProfitViewer({
         customerName: invoice.customer_name,
         date: invoice.created_at,
         reference: invoice.reference ?? '',
-        referenceName: invoice.references?.name ?? '',
+        referenceName: invoice.references?.[0]?.name ?? '',
         items: itemsWithProfit,
         totalProfit
       };
     });
 
     return profitResults;
-  }, [invoices, invoiceItems, products, dateRange, selectedReference]);
+  }, [invoices, invoiceItems, products]);
 
   // Calculate overall totals
   const overallProfit = profitData.reduce(
@@ -136,14 +143,26 @@ export function ProfitViewer({
               <label className='text-sm font-medium'>Date Range</label>
               <DateRangePicker
                 dateRange={dateRange}
-                onDateRangeChange={setDateRange}
+                onDateRangeChange={(range) => {
+                  if (!range?.from || !range?.to) return;
+                  setSearchParams({
+                    from: range.from.toLocaleDateString('en-CA', {
+                      timeZone: 'Asia/Karachi'
+                    }),
+                    to: range.to.toLocaleDateString('en-CA', {
+                      timeZone: 'Asia/Karachi'
+                    })
+                  });
+                }}
               />
             </div>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Reference</label>
               <Select
                 value={selectedReference}
-                onValueChange={setSelectedReference}
+                onValueChange={(value) => {
+                  setSearchParams({ reference: value });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder='Select reference' />

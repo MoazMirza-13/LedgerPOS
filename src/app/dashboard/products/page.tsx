@@ -22,7 +22,11 @@ export default async function Page(props: pageProps) {
   // This key is used for invoke suspense if any of the search params changed (used for filters).
   const key = serialize({ ...searchParams });
 
-  const data = await fetchListingData('products');
+  const data = await fetchListingData({
+    type: 'products',
+    limit: 900,
+    filters: searchParams
+  });
   const items_data: itemData[] = data ? data : [];
 
   const categoryBrandData = await getCategoriesBrandsData();

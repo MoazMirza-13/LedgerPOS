@@ -1,75 +1,112 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { DataTable } from '@/components/ui/table/data-table';
 import { useColumns } from '@/features/dynamic/table-components/columns';
 import { itemData, itemTable } from 'types';
-import { filterWithDate } from '@/utils/utils';
-import { filterListingData } from '../filterListingData';
 import { parseAsString, useQueryStates } from 'nuqs';
+import { fetchMoreListingData } from '../fetchMoreListingData';
 
 interface TableClientProps {
   data: itemData[];
   type: itemTable;
 }
 
-export default function TableClientSide({ data, type }: TableClientProps) {
+export default function TableClientSide({
+  data: initialData,
+  type
+}: TableClientProps) {
   // don't use the date util here
   const today = new Date().toLocaleDateString('en-CA', {
     timeZone: 'Asia/Karachi'
-  });
-
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: new Date(today),
-    to: new Date(today)
   });
 
   const parsers = {
     q: parseAsString.withDefault(''),
     categories: parseAsString.withDefault(''),
     brands: parseAsString.withDefault(''),
-    warehouses: parseAsString.withDefault('')
+    warehouses: parseAsString.withDefault(''),
+    from: parseAsString.withOptions({ shallow: false }).withDefault(today),
+    to: parseAsString.withOptions({ shallow: false }).withDefault(today)
   };
 
-  const [searchParams] = useQueryStates(parsers);
+  const [searchParams, setSearchParams] = useQueryStates(parsers);
   const pathname = usePathname();
+  const isReferenceLedger = pathname?.includes('/references/');
+  const isSupplierLedger = pathname?.includes('/suppliers/');
+  const isLedgerRoute = isReferenceLedger || isSupplierLedger;
+  const ledgerId = useMemo(() => {
+    if (!isLedgerRoute || !pathname) return undefined;
+    const parts = pathname.split('/').filter(Boolean);
+    return parts[parts.length - 1];
+  }, [isLedgerRoute, pathname]);
 
-  const tableData = useMemo(() => {
-    if (
-      !pathname?.includes('/references/') &&
-      !pathname?.includes('/suppliers/')
-    ) {
-      const { filteredData } = filterListingData(data, type, searchParams);
-      return filteredData;
-    } else {
-      const filteredData = filterWithDate(data, dateRange.from, dateRange.to);
-      return filteredData;
+  const [fullData, setFullData] = useState<itemData[]>(initialData);
+  const [offset, setOffset] = useState(initialData.length);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(initialData.length === 900);
+
+  useEffect(() => {
+    setFullData(initialData);
+    setOffset(initialData.length);
+    setHasMore(initialData.length === 900);
+  }, [initialData]);
+
+  const fetchMore = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const newData = await fetchMoreListingData(type, offset, 900, ledgerId, {
+        q: searchParams.q,
+        categories: searchParams.categories,
+        brands: searchParams.brands,
+        warehouses: searchParams.warehouses,
+        from: searchParams.from,
+        to: searchParams.to
+      });
+      if (newData.length < 900) setHasMore(false);
+      setFullData((prev) => [...prev, ...newData]);
+      setOffset((prev: number) => prev + 900);
+    } catch (e) {
+      // handle error if needed
+    } finally {
+      setLoading(false);
     }
-  }, [data, dateRange, pathname, type, searchParams]);
+  };
+
+  const tableData = useMemo(() => fullData, [fullData]);
 
   return (
     <>
-      {(pathname?.includes('/references/') ||
-        pathname?.includes('/suppliers/')) && (
+      {isLedgerRoute && (
         <div className='flex justify-center'>
           <DateRangePicker
+            key={`${searchParams.from}-${searchParams.to}`}
             onUpdate={(values) => {
               if (!values.range.from || !values.range.to) return;
-              setDateRange({
-                from: new Date(values.range.from),
-                to: new Date(values.range.to)
+              const nextFrom = values.range.from.toLocaleDateString('en-CA', {
+                timeZone: 'Asia/Karachi'
               });
+              const nextTo = values.range.to.toLocaleDateString('en-CA', {
+                timeZone: 'Asia/Karachi'
+              });
+              setSearchParams({ from: nextFrom, to: nextTo });
             }}
-            initialDateFrom={today}
-            initialDateTo={today}
+            initialDateFrom={searchParams.from || today}
+            initialDateTo={searchParams.to || today}
             align='center'
             locale='en-PK'
             showCompare={false}
           />
         </div>
       )}
-      <DataTable columns={useColumns(type)} data={tableData} />
+      <DataTable
+        columns={useColumns(type)}
+        data={tableData}
+        onLoadMore={fetchMore}
+        loading={loading}
+      />
     </>
   );
 }

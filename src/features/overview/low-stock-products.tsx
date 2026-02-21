@@ -15,7 +15,6 @@ import { DataTableResetFilter } from '@/components/ui/table/data-table-reset-fil
 import { useTableFilters } from '../dynamic/table-components/use-table-filters';
 import { Product, Category, Brand } from 'types';
 import { getTotalQuantity } from '@/utils/utils';
-import { useMemo } from 'react';
 
 interface Props {
   products: Product[];
@@ -32,33 +31,6 @@ export function LowStockProducts({ products, categories, brands }: Props) {
     isAnyFilterActive,
     resetFilters
   } = useTableFilters();
-
-  const filteredProducts = useMemo(() => {
-    if (!isAnyFilterActive) {
-      return products;
-    }
-
-    return products.filter((product) => {
-      const hasSelectedCategory =
-        categoriesFilter.length === 0 ||
-        (product.categories?.title &&
-          categoriesFilter.includes(product.categories.title));
-
-      const hasSelectedBrand =
-        brandsFilter.length === 0 ||
-        (product.brands?.title && brandsFilter.includes(product.brands.title));
-
-      if (categoriesFilter.length > 0 && brandsFilter.length > 0) {
-        return hasSelectedCategory || hasSelectedBrand;
-      } else if (categoriesFilter.length > 0) {
-        return hasSelectedCategory;
-      } else if (brandsFilter.length > 0) {
-        return hasSelectedBrand;
-      }
-
-      return true;
-    });
-  }, [products, categoriesFilter, brandsFilter, isAnyFilterActive]);
 
   return (
     <Card className='flex h-[70vh] flex-col'>
@@ -96,18 +68,18 @@ export function LowStockProducts({ products, categories, brands }: Props) {
         <CardContent className='overflow-y-auto'>
           <div className='space-y-4'>
             {/* Product List */}
-            {filteredProducts.length === 0 ? (
+            {products.length === 0 ? (
               <div className='py-8 text-center text-muted-foreground'>
                 No low-stock products match the selected filters
               </div>
             ) : (
-              filteredProducts.map((product) => (
+              products.map((product) => (
                 <Link
                   key={product.id}
                   className='flex gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50'
                   href={`/dashboard/products/${product.id}`}
                 >
-                  {product.img_url && (
+                  {product.img_url && product.img_url.length > 0 && (
                     <div className='flex-shrink-0'>
                       <Image
                         src={

@@ -1,5 +1,4 @@
 'use client';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   Table,
   TableBody,
@@ -16,15 +15,22 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { usePathname } from 'next/navigation';
+import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
+import { useRef, useEffect } from 'react';
+import { cn } from '@/utils/utils';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onLoadMore?: () => void;
+  loading?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data
+  data,
+  onLoadMore,
+  loading
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -37,90 +43,141 @@ export function DataTable<TData, TValue>({
 
   const currentRole = useRole();
 
-  const totalSum = productsRoute
-    ? table
-        .getRowModel()
-        .rows.reduce((acc, row) => acc + Number(row.getValue('TOTAL') || 0), 0)
-    : 0;
+  // show all warehouses total sum here i.e all six warehouses total stock prices
+  // const totalSum = productsRoute
+  //   ? table
+  //       .getRowModel()
+  //       .rows.reduce((acc, row) => acc + Number(row.getValue('TOTAL') || 0), 0)
+  //   : 0;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const viewport = scrollRef.current;
+    if (!viewport || !onLoadMore) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = viewport;
+      if (scrollHeight === 0) return;
+      if ((scrollTop + clientHeight) / scrollHeight >= 0.8) {
+        onLoadMore();
+      }
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, [onLoadMore]);
 
   return (
     <>
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='relative flex flex-1'>
           <div className='absolute bottom-0 left-0 right-0 top-0 flex overflow-scroll rounded-md border md:overflow-auto'>
-            <ScrollArea className='flex-1'>
-              <Table className='relative'>
-                <TableHeader className={`sticky top-0 z-10 bg-background`}>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header, index, headers) => (
-                        <TableHead
-                          key={header.id}
-                          className={
-                            index === headers.length - 1 &&
-                            !productsRoute &&
-                            currentRole === 'super_admin'
-                              ? 'pr-8 text-right'
-                              : ''
-                          }
-                        >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        data-state={row.getIsSelected() && 'selected'}
-                      >
-                        {row.getVisibleCells().map((cell, index, cells) => (
-                          <TableCell
-                            key={cell.id}
+            <ScrollAreaPrimitive.Root
+              className={cn('relative flex-1 overflow-hidden')}
+            >
+              <ScrollAreaPrimitive.Viewport
+                ref={scrollRef}
+                className='h-full w-full rounded-[inherit]'
+              >
+                <Table className='relative'>
+                  <TableHeader className={`sticky top-0 z-10 bg-background`}>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header, index, headers) => (
+                          <TableHead
+                            key={header.id}
                             className={
-                              index === cells.length - 1 &&
+                              index === headers.length - 1 &&
                               !productsRoute &&
                               currentRole === 'super_admin'
                                 ? 'pr-8 text-right'
                                 : ''
                             }
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </TableCell>
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
                         ))}
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className='h-24 text-center'
-                      >
-                        No results.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              <ScrollBar orientation='horizontal' />
-            </ScrollArea>
+                    ))}
+                  </TableHeader>
+                  <TableBody>
+                    {table.getRowModel().rows?.length ? (
+                      table.getRowModel().rows.map((row) => (
+                        <TableRow
+                          key={row.id}
+                          data-state={row.getIsSelected() && 'selected'}
+                        >
+                          {row.getVisibleCells().map((cell, index, cells) => (
+                            <TableCell
+                              key={cell.id}
+                              className={
+                                index === cells.length - 1 &&
+                                !productsRoute &&
+                                currentRole === 'super_admin'
+                                  ? 'pr-8 text-right'
+                                  : ''
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className='h-24 text-center'
+                        >
+                          No results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {loading && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className='h-24 text-center'
+                        >
+                          <div className='flex items-center justify-center'>
+                            <div className='h-6 w-6 animate-spin rounded-full border-4 border-gray-400 border-t-transparent'></div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </ScrollAreaPrimitive.Viewport>
+              <ScrollAreaPrimitive.Scrollbar
+                orientation='vertical'
+                className='flex h-full w-2.5 touch-none select-none border-l border-l-transparent bg-border/50 p-0.5 transition-colors'
+              >
+                <ScrollAreaPrimitive.Thumb className='relative flex-1 rounded-full bg-border' />
+              </ScrollAreaPrimitive.Scrollbar>
+              <ScrollAreaPrimitive.Scrollbar
+                orientation='horizontal'
+                className='flex h-2.5 touch-none select-none flex-col border-t border-t-transparent bg-border/50 p-0.5 transition-colors'
+              >
+                <ScrollAreaPrimitive.Thumb className='relative flex-1 rounded-full bg-border' />
+              </ScrollAreaPrimitive.Scrollbar>
+              <ScrollAreaPrimitive.Corner />
+            </ScrollAreaPrimitive.Root>
           </div>
         </div>
       </div>
-      {productsRoute && (
+      {/* show all warehouses total sum here i.e all six warehouses total stock prices */}
+      {/* {productsRoute && (
         <div className='text-right text-lg font-bold'>Total: {totalSum}</div>
-      )}
+      )} */}
     </>
   );
 }
