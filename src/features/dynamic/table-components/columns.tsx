@@ -123,11 +123,17 @@ export const useColumns = <T extends Entity>(
         header: 'QUANTITY',
         accessorKey: 'quantity'
       },
+      // {
+      //   header: 'Stock',
+      //   accessorFn: (row) => {
+      //     const product = row as Product;
+      //     return product.in_stock ? '✅' : '❌';
+      //   }
       {
         header: 'Stock',
         accessorFn: (row) => {
           const product = row as Product;
-          return product.in_stock ? '✅' : '❌';
+          return product.quantity > 0 ? '✅' : '❌';
         }
       }
     );

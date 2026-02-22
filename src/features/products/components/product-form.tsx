@@ -561,7 +561,7 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name='productVariants'
                 render={({ field }) => (
@@ -571,9 +571,9 @@ export default function ProductForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
             </div>
-            <FormField
+            {/* <FormField
               control={form.control}
               name='inStock'
               render={({ field }) => (
@@ -597,7 +597,7 @@ export default function ProductForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
             <FormField
               control={form.control}
               name='description'
