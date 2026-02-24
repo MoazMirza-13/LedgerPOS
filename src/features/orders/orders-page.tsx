@@ -7,7 +7,6 @@ import { createClient } from '@/utils/supabase/client';
 import { OrdersTable } from '@/features/orders/orders-table';
 import { OrderDetailsModal } from '@/features/orders/order-details-modal';
 import { MinOrderAmountInput } from '@/features/orders/min-order-amount-input';
-
 import { Order } from 'types';
 
 const POLL_INTERVAL = 1 * 60 * 1000; // 1 minute
@@ -98,8 +97,8 @@ export default function OrdersPage() {
   }, []);
 
   return (
-    <main className='min-h-screen'>
-      <div className='px-6 py-4'>
+    <main className='min-h-screen w-full'>
+      <div className='py-4'>
         <div className='mb-8'>
           <h1 className='text-3xl font-bold tracking-tight'>Orders</h1>
           <p className='mb-4 text-sm text-muted-foreground'>Manage orders</p>

@@ -1,4 +1,5 @@
 // orders page is diff and separate than other pages
+import PageContainer from '@/components/layout/page-container';
 import OrdersPage from '@/features/orders/orders-page';
 import { Metadata } from 'next';
 
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  return <OrdersPage />;
+  return (
+    <PageContainer>
+      <OrdersPage />
+    </PageContainer>
+  );
 }

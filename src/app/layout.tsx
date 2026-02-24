@@ -5,10 +5,17 @@ import { Lato } from 'next/font/google';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 import Providers from '@/components/layout/providers';
+import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'NS | Admin Panel',
   description: 'Admin panel for NS.'
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1
 };
 
 const lato = Lato({
