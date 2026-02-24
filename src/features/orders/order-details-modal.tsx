@@ -92,7 +92,7 @@ export function OrderDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-h-[90vh] max-w-2xl overflow-hidden'>
+      <DialogContent className='max-h-[90vh] max-w-2xl overflow-hidden overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Order #{order.order_number}</DialogTitle>
         </DialogHeader>
@@ -150,7 +150,7 @@ export function OrderDetailsModal({
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className='flex items-center justify-between rounded border bg-gray-50 p-3'
+                    className='flex items-center justify-between rounded border p-3'
                   >
                     <div>
                       <p className='font-medium'>{item.product_name}</p>
