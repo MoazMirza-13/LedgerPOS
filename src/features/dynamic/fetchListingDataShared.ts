@@ -77,6 +77,8 @@ export async function fetchListingDataShared(
       }
     } else if (type === 'references' || type === 'suppliers') {
       query = query.ilike('name', `%${search}%`);
+    } else if (type === 'products') {
+      query = query.ilike('product_code', `%${search}%`);
     } else {
       query = query.ilike('title', `%${search}%`);
     }
