@@ -21,13 +21,15 @@ export async function printInvoice(finalData: Invoice, date?: string) {
     const chunk = finalData.invoice_items.slice(i, i + itemsPerPage);
 
     const container = document.createElement('div');
-    container.className = 'w-full max-w-4xl mx-auto bg-white text-[12px]';
+    container.style.width = '794px';
+    container.style.background = 'white';
+    container.style.fontSize = '12px';
     container.innerHTML = `
       <div class="min-h-[1123px] flex flex-col justify-between bg-white text-[12px]">
 
         <!-- HEADER -->
         <div>
-          <div class="bg-gray-800 text-white p-6 rounded-t-lg">
+          <div class="bg-gray-800 text-white p-6 ">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <div class="bg-gray-600 p-3 rounded-lg">
@@ -99,7 +101,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
         </div>
 
         <!-- FOOTER -->
-        <div class="bg-gray-800 text-white px-8 py-6 rounded-b-lg text-center mt-auto">
+        <div class="bg-gray-800 text-white px-8 py-6  text-center mt-auto">
           <p class="text-sm font-medium m-0">Thank you for your business!</p>
           <p class="text-xs text-gray-400 m-0 mt-2">NS | Contact: 03706978758</p>
           <p class="text-xs text-gray-500 m-0 mt-3">Invoice generated on ${invoiceDate}</p>
