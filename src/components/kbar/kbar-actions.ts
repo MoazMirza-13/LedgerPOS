@@ -1,6 +1,9 @@
 import { navItems } from '@/constants/data';
-import { signOut } from '@/lib/actions';
-import { formatTitle, getRoleBasedNavItems } from '@/utils/utils';
+import {
+  formatTitle,
+  getRoleBasedNavItems,
+  handleSignOut
+} from '@/utils/utils';
 import { itemTable, nestedArray } from 'types';
 
 export function kbarActions(
@@ -75,7 +78,7 @@ export function kbarActions(
     keywords: 'logout signout exit',
     section: 'Account',
     subtitle: 'Sign out of your account',
-    perform: signOut
+    perform: handleSignOut
   };
 
   // api data

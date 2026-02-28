@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { signOut } from '@/lib/actions';
+import { handleSignOut } from '@/utils/utils';
 
 interface UserNavProps {
   user?: {
@@ -43,7 +44,7 @@ export function UserNav({ user }: UserNavProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={signOut}>
+        <DropdownMenuItem onClick={handleSignOut}>
           Sign out
           <DropdownMenuShortcut>⇧ S + O</DropdownMenuShortcut>
         </DropdownMenuItem>

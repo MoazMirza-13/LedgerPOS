@@ -4,7 +4,8 @@ import { validate as uuidValidate } from 'uuid';
 import { createClient } from '@/utils/supabase/client';
 import { itemData, itemTable, NavItem } from 'types';
 import { formatInTimeZone } from 'date-fns-tz';
-import { getSupabaseClient } from '@/lib/actions';
+import { getSupabaseClient, signOut } from '@/lib/actions';
+import { unregisterPushSubscription } from './push';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -177,4 +178,9 @@ export function isValidPhone(phone: string) {
   const intl = /^\+92\d{10}$/;
 
   return local.test(phone) || intl.test(phone);
+}
+
+export async function handleSignOut() {
+  await unregisterPushSubscription();
+  await signOut();
 }

@@ -8,8 +8,9 @@ import { OrdersTable } from '@/features/orders/orders-table';
 import { OrderDetailsModal } from '@/features/orders/order-details-modal';
 import { MinOrderAmountInput } from '@/features/orders/min-order-amount-input';
 import { Order } from 'types';
+import { registerPushSubscription } from '@/utils/push';
 
-const POLL_INTERVAL = 1 * 60 * 1000; // 1 minute
+const POLL_INTERVAL = 1 * 60 * 1000;
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -20,10 +21,43 @@ export default function OrdersPage() {
   const initializedRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Preload audio
+  // Preload audio — only used via SW message now
   useEffect(() => {
     audioRef.current = new Audio('/sounds/new_order.mp3');
     audioRef.current.load();
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('stop', null);
+    }
+  }, []);
+
+  // Register push subscription once
+  useEffect(() => {
+    registerPushSubscription();
+  }, []);
+
+  // Listen for SW message to play sound
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'PLAY_ORDER_SOUND') {
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch((err) => {
+            console.log('Audio play failed:', err);
+          });
+        }
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('message', handleMessage);
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', handleMessage);
+    };
   }, []);
 
   const handleOrderClick = (order: Order) => {
@@ -51,23 +85,12 @@ export default function OrdersPage() {
       initializedRef.current &&
       maxOrderNumber > highestOrderRef.current
     ) {
-      // Play sound even if tab is hidden
-      if (audioRef.current) {
-        audioRef.current.play().catch((err) => {
-          console.log('Audio play failed:', err);
-        });
+      // ✅ Only show toast — SW handles notification and sound
+      if (document.visibilityState === 'visible') {
+        toast.success('New Order Received!');
       }
-
-      toast.success('New Order Received!');
-
-      // Try to show browser notification if permission granted
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('New Order Received!', {
-          body: `Order #${maxOrderNumber}`,
-          icon: '/icon.png', // Add your icon path
-          tag: 'new-order'
-        });
-      }
+      // ❌ Removed: manual Notification, removed: audioRef.play()
+      // Everything is now driven by the service worker push
     }
 
     highestOrderRef.current = Math.max(highestOrderRef.current, maxOrderNumber);
@@ -75,24 +98,16 @@ export default function OrdersPage() {
     setOrders(data as Order[]);
   };
 
-  // Request notification permission on mount
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
-  }, []);
-
   // Initial load
   useEffect(() => {
     fetchOrders(false);
   }, []);
 
-  // Polling - ALWAYS runs, regardless of visibility
+  // Polling — still needed to refresh the orders table UI
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchOrders(true); // Always notify
+      fetchOrders(true);
     }, POLL_INTERVAL);
-
     return () => clearInterval(interval);
   }, []);
 
