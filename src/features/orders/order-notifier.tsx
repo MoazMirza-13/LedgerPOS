@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { registerPushSubscription } from '@/utils/push';
+import Script from 'next/dist/client/script';
 
 export function OrderNotifier() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -58,5 +59,13 @@ export function OrderNotifier() {
     };
   }, []);
 
-  return null; // renders nothing, just runs logic
+  return (
+    <Script
+      src='//cdn.jsdelivr.net/npm/eruda'
+      onLoad={() => {
+        // @ts-ignore
+        window.eruda?.init();
+      }}
+    />
+  ); // renders nothing, just runs logic
 }
