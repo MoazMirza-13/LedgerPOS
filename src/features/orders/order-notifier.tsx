@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { registerPushSubscription } from '@/utils/push';
-import Script from 'next/dist/client/script';
+import Script from 'next/script';
 
 export function OrderNotifier() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -21,30 +21,47 @@ export function OrderNotifier() {
     }
   }, []);
 
-  // Register push subscription once globally
+  // Handle push permission + registration
   useEffect(() => {
-    registerPushSubscription();
+    if (!('Notification' in window)) return;
+
+    if (Notification.permission === 'granted') {
+      registerPushSubscription();
+    } else if (Notification.permission === 'default') {
+      setTimeout(() => {
+        toast('Enable order notifications', {
+          description: 'Get notified instantly when new orders arrive.',
+          duration: Infinity,
+          action: {
+            label: 'Enable',
+            onClick: () => registerPushSubscription()
+          },
+          cancel: {
+            label: 'Dismiss',
+            onClick: () => toast.dismiss()
+          }
+        });
+      }, 1000);
+    }
   }, []);
 
-  // Listen for SW message — plays sound + shows toast from any page
+  // Listen for SW message — play sound + show toast
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'PLAY_ORDER_SOUND') {
-        // Play sound
         if (audioRef.current) {
           audioRef.current.currentTime = 0;
           audioRef.current.play().catch((err) => {
             console.log('Audio play failed:', err);
           });
         }
-        // Show toast from any page
         toast.success('New Order Received!', {
           description: event.data?.orderNumber
             ? `Order #${event.data.orderNumber} has been placed.`
             : undefined,
-          duration: 8000, // stays longer so admin can notice
+          duration: 8000,
           action: {
             label: 'View Orders',
             onClick: () => (window.location.href = '/dashboard/orders')
@@ -60,12 +77,14 @@ export function OrderNotifier() {
   }, []);
 
   return (
-    <Script
-      src='//cdn.jsdelivr.net/npm/eruda'
-      onLoad={() => {
-        // @ts-ignore
-        window.eruda?.init();
-      }}
-    />
-  ); // renders nothing, just runs logic
+    <>
+      <Script
+        src='//cdn.jsdelivr.net/npm/eruda'
+        onLoad={() => {
+          // @ts-ignore
+          window.eruda?.init();
+        }}
+      />
+    </>
+  );
 }
