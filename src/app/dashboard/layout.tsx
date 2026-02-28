@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { RoleProvider } from '@/context/RoleContext';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
+import { OrderNotifier } from '@/features/orders/order-notifier';
 
 export const metadata: Metadata = {
   title: 'NS | Dashboard',
@@ -32,6 +33,7 @@ export default async function DashboardLayout({
           <AppSidebar currentStore={currentStore} />
           <SidebarInset>
             <Header />
+            <OrderNotifier />
             {/* page main content */}
             {children}
             {/* page main content ends */}

@@ -1,5 +1,10 @@
 import { createClient } from '@/utils/supabase/client';
 
+const PUSH_REGISTERED_KEY = 'push_subscription_registered';
+
+// Promise-based lock — queues concurrent calls instead of dropping them
+let registrationPromise: Promise<void> | null = null;
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -8,15 +13,28 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export async function registerPushSubscription(): Promise<void> {
+  // If already running, wait for it to finish and return — don't start another
+  if (registrationPromise) {
+    return registrationPromise;
+  }
+
+  registrationPromise = _doRegister();
+
+  try {
+    await registrationPromise;
+  } finally {
+    registrationPromise = null;
+  }
+}
+
+async function _doRegister(): Promise<void> {
   try {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      // console.warn('Push notifications not supported on this browser');
       return;
     }
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.warn('Notification permission denied');
       return;
     }
 
@@ -24,24 +42,20 @@ export async function registerPushSubscription(): Promise<void> {
     await navigator.serviceWorker.ready;
 
     const existing = await registration.pushManager.getSubscription();
-    if (existing) {
-      // Only save if not already in DB — check by endpoint
-      const supabase = createClient();
-      const { data } = await supabase
-        .from('push_subscriptions')
-        .select('id')
-        .eq('endpoint', existing.endpoint)
-        .single();
 
-      if (!data) {
-        // Not in DB yet — save it (e.g. new login, DB was cleared)
-        await saveSubscriptionToSupabase(existing);
-      } else {
-        // console.log('✅ Already subscribed, skipping save');
+    if (existing) {
+      const alreadyRegistered = localStorage.getItem(PUSH_REGISTERED_KEY);
+      if (alreadyRegistered === existing.endpoint) {
+        // Already saved in DB — do nothing
+        return;
       }
+      // Exists in browser but not saved in DB
+      await saveSubscriptionToSupabase(existing);
+      localStorage.setItem(PUSH_REGISTERED_KEY, existing.endpoint);
       return;
     }
 
+    // No subscription exists — create exactly one
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(
@@ -50,9 +64,8 @@ export async function registerPushSubscription(): Promise<void> {
     });
 
     await saveSubscriptionToSupabase(subscription);
-    // console.log('✅ Push subscription registered successfully');
+    localStorage.setItem(PUSH_REGISTERED_KEY, subscription.endpoint);
   } catch (err) {
-    // console.error('❌ Failed to register push subscription:', err);
     console.error('err regarding push');
   }
 }
@@ -65,11 +78,7 @@ async function saveSubscriptionToSupabase(
   const {
     data: { user }
   } = await supabase.auth.getUser();
-
-  if (!user) {
-    // console.warn('No user logged in, cannot save push subscription');
-    return;
-  }
+  if (!user) return;
 
   const { error } = await supabase.from('push_subscriptions').upsert(
     {
@@ -81,38 +90,32 @@ async function saveSubscriptionToSupabase(
   );
 
   if (error) {
-    // console.error('❌ Failed to save push subscription:', error);
-    return;
+    console.error('push subscription save error');
   }
-
-  // console.log('✅ Subscription saved for user:', user.id);
 }
 
 export async function unregisterPushSubscription(): Promise<void> {
   try {
     const supabase = createClient();
 
-    // Get the current subscription endpoint before unsubscribing
     const registration =
       await navigator.serviceWorker.getRegistration('/sw.js');
     const subscription = await registration?.pushManager.getSubscription();
 
     if (subscription) {
-      // 1. Remove from Supabase DB first
       const { error } = await supabase
         .from('push_subscriptions')
         .delete()
         .eq('endpoint', subscription.endpoint);
 
-      if (error) {
-        // console.error('❌ Failed to remove push subscription from DB:', error);
+      if (!error) {
+        // Clear localStorage so next login re-registers cleanly
+        localStorage.removeItem(PUSH_REGISTERED_KEY);
       }
 
-      // 2. Unsubscribe browser from push
       await subscription.unsubscribe();
-      // console.log('✅ Push subscription removed');
     }
   } catch (err) {
-    // console.error('❌ Failed to unregister push subscription:', err);
+    // silent
   }
 }

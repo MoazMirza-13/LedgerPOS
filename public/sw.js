@@ -1,11 +1,10 @@
-// sw.js v2
+// sw.js v3
 
 self.addEventListener('push', function (event) {
   const data = event.data?.json() ?? {};
 
   event.waitUntil(
     Promise.all([
-      // 1. Show native notification
       self.registration.showNotification(data.title || 'New Order!', {
         body: data.body || 'A new order has been placed.',
         icon: '/icon.png',
@@ -14,11 +13,12 @@ self.addEventListener('push', function (event) {
         requireInteraction: true,
         silent: false
       }),
-
-      // 2. Message any open tabs to play the MP3
       self.clients.matchAll({ type: 'window' }).then((clients) => {
         clients.forEach((client) => {
-          client.postMessage({ type: 'PLAY_ORDER_SOUND' });
+          client.postMessage({
+            type: 'PLAY_ORDER_SOUND',
+            orderNumber: data.orderNumber // pass order number to toast
+          });
         });
       })
     ])
