@@ -101,8 +101,11 @@ async function _doRegister(): Promise<void> {
     await saveSubscriptionToSupabase(subscription);
     localStorage.setItem(PUSH_REGISTERED_KEY, subscription.endpoint);
     console.log('[PUSH] ✅ New subscription saved successfully');
-  } catch (err) {
+  } catch (err: any) {
     console.error('[PUSH] ❌ Error in _doRegister:', err);
+    console.error('[PUSH] error name:', err?.name);
+    console.error('[PUSH] error message:', err?.message);
+    console.error('[PUSH] error code:', err?.code);
   }
 }
 
