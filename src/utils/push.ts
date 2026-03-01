@@ -52,6 +52,35 @@ async function _doRegister(): Promise<void> {
     const registration = await navigator.serviceWorker.register('/sw.js');
     console.log('[PUSH] SW registered, waiting for ready...');
     await navigator.serviceWorker.ready;
+
+    // 👇 iOS fix — wait for SW to be fully activated before subscribing
+    if (registration.active?.state !== 'activated') {
+      console.log('[PUSH] waiting for SW to fully activate...');
+      await new Promise<void>((resolve) => {
+        const sw =
+          registration.installing ??
+          registration.waiting ??
+          registration.active;
+
+        if (!sw) {
+          resolve();
+          return;
+        }
+
+        if (sw.state === 'activated') {
+          resolve();
+          return;
+        }
+
+        sw.addEventListener('statechange', function handler(e) {
+          if ((e.target as ServiceWorker).state === 'activated') {
+            sw.removeEventListener('statechange', handler);
+            resolve();
+          }
+        });
+      });
+    }
+
     console.log('[PUSH] SW ready, state:', registration.active?.state);
 
     console.log('[PUSH] checking existing subscription...');
