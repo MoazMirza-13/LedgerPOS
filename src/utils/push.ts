@@ -10,54 +10,12 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from(Array.from(rawData).map((c) => c.charCodeAt(0)));
 }
 
-// Called on page load — only registers SW, no permission request
-export async function initServiceWorker(): Promise<void> {
-  try {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-
-    const registration = await navigator.serviceWorker.register('/sw.js');
-    await navigator.serviceWorker.ready;
-
-    if (registration.active?.state !== 'activated') {
-      await new Promise<void>((resolve) => {
-        const sw =
-          registration.installing ??
-          registration.waiting ??
-          registration.active;
-        if (!sw || sw.state === 'activated') {
-          resolve();
-          return;
-        }
-        sw.addEventListener('statechange', function handler(e) {
-          if ((e.target as ServiceWorker).state === 'activated') {
-            sw.removeEventListener('statechange', handler);
-            resolve();
-          }
-        });
-      });
-    }
-
-    console.log('[PUSH] SW pre-registered and activated');
-
-    // Check if already subscribed
-    const existing = await registration.pushManager.getSubscription();
-    if (existing) {
-      const alreadyRegistered = localStorage.getItem(PUSH_REGISTERED_KEY);
-      if (alreadyRegistered === existing.endpoint) {
-        console.log('[PUSH] ✅ Already registered — skipping');
-        return;
-      }
-      await saveSubscriptionToSupabase(existing);
-      localStorage.setItem(PUSH_REGISTERED_KEY, existing.endpoint);
-    }
-  } catch (err) {
-    console.error('[PUSH] SW init error:', err);
-  }
-}
-
-// Called DIRECTLY from button tap — no awaits before subscribe
 export async function registerPushSubscription(): Promise<void> {
-  if (registrationPromise) return registrationPromise;
+  console.log('[PUSH] registerPushSubscription called');
+  if (registrationPromise) {
+    console.log('[PUSH] already in progress, waiting...');
+    return registrationPromise;
+  }
   registrationPromise = _doRegister();
   try {
     await registrationPromise;
@@ -68,30 +26,70 @@ export async function registerPushSubscription(): Promise<void> {
 
 async function _doRegister(): Promise<void> {
   try {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    console.log('[PUSH] _doRegister started');
+    console.log(
+      '[PUSH] serviceWorker supported:',
+      'serviceWorker' in navigator
+    );
+    console.log('[PUSH] PushManager supported:', 'PushManager' in window);
+    console.log('[PUSH] Notification supported:', 'Notification' in window);
 
-    // Request permission first — must be from user gesture
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.warn('[PUSH] ❌ Push not supported on this browser — exiting');
+      return;
+    }
+
+    console.log('[PUSH] requesting notification permission...');
     const permission = await Notification.requestPermission();
     console.log('[PUSH] permission result:', permission);
-    if (permission !== 'granted') return;
 
-    // Get already-initialized registration
-    const registration =
-      await navigator.serviceWorker.getRegistration('/sw.js');
-    if (!registration) {
-      console.error('[PUSH] No SW registration found');
+    if (permission !== 'granted') {
+      console.warn('[PUSH] ❌ Permission not granted — exiting');
       return;
     }
 
-    // Subscribe immediately — still within gesture call stack
+    console.log('[PUSH] registering service worker...');
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    console.log('[PUSH] SW registered, waiting for ready...');
+    await navigator.serviceWorker.ready;
+    console.log('[PUSH] SW ready, state:', registration.active?.state);
+
+    console.log('[PUSH] checking existing subscription...');
     const existing = await registration.pushManager.getSubscription();
+    console.log(
+      '[PUSH] existing subscription:',
+      existing ? existing.endpoint : 'none'
+    );
+
     if (existing) {
+      const alreadyRegistered = localStorage.getItem(PUSH_REGISTERED_KEY);
+      console.log(
+        '[PUSH] localStorage entry:',
+        alreadyRegistered ? 'found' : 'not found'
+      );
+      console.log(
+        '[PUSH] endpoints match:',
+        alreadyRegistered === existing.endpoint
+      );
+
+      if (alreadyRegistered === existing.endpoint) {
+        console.log('[PUSH] ✅ Already registered and saved — skipping');
+        return;
+      }
+
+      console.log('[PUSH] saving existing subscription to DB...');
       await saveSubscriptionToSupabase(existing);
       localStorage.setItem(PUSH_REGISTERED_KEY, existing.endpoint);
+      console.log('[PUSH] ✅ Existing subscription saved');
       return;
     }
 
-    console.log('[PUSH] subscribing...');
+    console.log('[PUSH] no existing subscription, creating new one...');
+    console.log(
+      '[PUSH] VAPID key present:',
+      !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    );
+
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(
@@ -99,11 +97,15 @@ async function _doRegister(): Promise<void> {
       )
     });
 
-    console.log('[PUSH] ✅ Subscribed:', subscription.endpoint);
+    console.log('[PUSH] new subscription created:', subscription.endpoint);
     await saveSubscriptionToSupabase(subscription);
     localStorage.setItem(PUSH_REGISTERED_KEY, subscription.endpoint);
+    console.log('[PUSH] ✅ New subscription saved successfully');
   } catch (err: any) {
-    console.error('[PUSH] ❌ Error:', err?.name, err?.message);
+    console.error('[PUSH] ❌ Error in _doRegister:', err);
+    console.error('[PUSH] error name:', err?.name);
+    console.error('[PUSH] error message:', err?.message);
+    console.error('[PUSH] error code:', err?.code);
   }
 }
 

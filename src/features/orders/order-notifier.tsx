@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { initServiceWorker, registerPushSubscription } from '@/utils/push';
+import { registerPushSubscription } from '@/utils/push';
 import Script from 'next/script';
 
 export function OrderNotifier() {
@@ -21,15 +21,29 @@ export function OrderNotifier() {
     }
   }, []);
 
+  // Handle push permission + registration
   useEffect(() => {
-    // Pre-register SW silently on page load — no permission request
-    initServiceWorker();
-
     if (!('Notification' in window)) return;
 
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+
+    // iOS PWA → ALWAYS require user click
+    if (isIos && isStandalone) {
+      showEnableToast();
+      return;
+    }
+
+    // Other devices
     if (Notification.permission === 'granted') {
       registerPushSubscription();
     } else if (Notification.permission === 'default') {
+      showEnableToast();
+    }
+
+    function showEnableToast() {
       const toastShown = sessionStorage.getItem('push_toast_shown');
       if (toastShown) return;
       sessionStorage.setItem('push_toast_shown', 'true');
@@ -40,8 +54,6 @@ export function OrderNotifier() {
           duration: Infinity,
           action: {
             label: 'Enable',
-            // This tap directly triggers registerPushSubscription
-            // iOS sees this as a valid user gesture ✅
             onClick: () => registerPushSubscription()
           },
           cancel: {
