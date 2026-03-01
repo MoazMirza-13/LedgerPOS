@@ -1,0 +1,16 @@
+{
+  ('name');
+  'NS Dashboard', 'short_name';
+  'NS', 'start_url';
+  '/dashboard/orders', 'display';
+  'standalone', 'background_color';
+  '#ffffff', 'theme_color';
+  '#000000', 'icons';
+  [
+    {
+      src: '/icon.png',
+      sizes: '1024x1024',
+      type: 'image/png'
+    }
+  ];
+}

@@ -28,6 +28,11 @@ export function OrderNotifier() {
     if (Notification.permission === 'granted') {
       registerPushSubscription();
     } else if (Notification.permission === 'default') {
+      // Guard against showing twice
+      const toastShown = sessionStorage.getItem('push_toast_shown');
+      if (toastShown) return;
+      sessionStorage.setItem('push_toast_shown', 'true');
+
       setTimeout(() => {
         toast('Enable order notifications', {
           description: 'Get notified instantly when new orders arrive.',

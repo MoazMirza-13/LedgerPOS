@@ -9,7 +9,8 @@ import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'NS | Admin Panel',
-  description: 'Admin panel for NS.'
+  description: 'Admin panel for NS.',
+  manifest: '/manifest.json'
 };
 
 export const viewport: Viewport = {
