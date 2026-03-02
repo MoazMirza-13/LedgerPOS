@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { registerPushSubscription } from '@/utils/push';
-import Script from 'next/script';
 
 export function OrderNotifier() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -31,7 +30,7 @@ export function OrderNotifier() {
       (window.navigator as any).standalone === true;
 
     // iOS PWA → ALWAYS require user click
-    if (isIos && isStandalone) {
+    if (isIos && isStandalone && Notification.permission !== 'granted') {
       showEnableToast();
       return;
     }
@@ -96,15 +95,5 @@ export function OrderNotifier() {
     };
   }, []);
 
-  return (
-    <>
-      <Script
-        src='//cdn.jsdelivr.net/npm/eruda'
-        onLoad={() => {
-          // @ts-ignore
-          window.eruda?.init();
-        }}
-      />
-    </>
-  );
+  return null;
 }
