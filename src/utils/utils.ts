@@ -184,3 +184,23 @@ export async function handleSignOut() {
   await unregisterPushSubscription();
   await signOut();
 }
+
+export const formatPakNumber = (number: string): string => {
+  if (!number) return '';
+
+  // Remove everything except digits (removes +, spaces, dashes, etc.)
+  let cleaned = number.replace(/\D/g, '');
+
+  // 03030550072 → convert to 923030550072
+  if (cleaned.startsWith('0')) {
+    return '92' + cleaned.slice(1);
+  }
+
+  // 923030550072 → already correct
+  if (cleaned.startsWith('92')) {
+    return cleaned;
+  }
+
+  // Fallback (if something unexpected)
+  return cleaned;
+};

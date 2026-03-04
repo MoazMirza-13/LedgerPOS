@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { formatToPKTDate } from '@/utils/utils';
+import { formatPakNumber, formatToPKTDate } from '@/utils/utils';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Order } from 'types';
@@ -79,7 +79,7 @@ export function OrderDetailsModal({
 
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating invoice:', error);
+      // console.error('Error creating invoice:', error);
       toast.error('Failed to create invoice', {
         description: 'Please try again or contact support'
       });
@@ -108,7 +108,19 @@ export function OrderDetailsModal({
               </div>
               <div>
                 <p className='text-sm text-gray-600'>Phone</p>
-                <p className='font-medium'>{order.customer_number || 'N/A'}</p>
+
+                {order.customer_number ? (
+                  <a
+                    href={`https://wa.me/${formatPakNumber(order.customer_number)}`}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='font-medium text-green-600 hover:underline'
+                  >
+                    {order.customer_number}
+                  </a>
+                ) : (
+                  <p className='font-medium'>N/A</p>
+                )}
               </div>
               <div className='col-span-2'>
                 <p className='text-sm text-gray-600'>Address</p>
