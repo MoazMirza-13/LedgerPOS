@@ -1,6 +1,6 @@
 {
   "name": "NS Dashboard",
-  "short_name": "NS",
+  "short_name": "NS Dashboard",
   "start_url": "/dashboard/orders",
   "display": "standalone",
   "background_color": "#ffffff",

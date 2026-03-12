@@ -13,6 +13,7 @@ import { formatPakNumber, formatToPKTDate } from '@/utils/utils';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Order } from 'types';
+import { printInvoice } from '../invoices/print-invoice';
 
 interface OrderItem {
   id: string;
@@ -67,7 +68,7 @@ export function OrderDetailsModal({
       setCreatingInvoice(true);
       const supabase = createClient();
 
-      const { error } = await supabase.rpc('create_invoice_from_order', {
+      const { data, error } = await supabase.rpc('create_invoice_from_order', {
         p_order_id: order.id
       });
 
@@ -77,9 +78,28 @@ export function OrderDetailsModal({
         description: `Invoice has been generated for Order #${order.order_number}`
       });
 
+      // Shape the data for printInvoice
+      const invoiceData = {
+        invoice_number: data?.invoice_number ?? order.order_number,
+        customer_name: order.customer_name,
+        customer_number: order.customer_number ?? undefined, // ✅
+        customer_address: order.customer_address ?? undefined, // ✅
+        total_price: order.total_price,
+        created_at: new Date().toISOString(),
+        payment: false,
+        invoice_items: items.map((item) => ({
+          product_code: null,
+          optional_item: item.product_name,
+          quantity: item.quantity,
+          price: item.price,
+          product: null
+        }))
+      };
+
+      await printInvoice(invoiceData);
+
       onOpenChange(false);
     } catch (error) {
-      // console.error('Error creating invoice:', error);
       toast.error('Failed to create invoice', {
         description: 'Please try again or contact support'
       });

@@ -6,6 +6,10 @@ import { formatToPKTDate } from '@/utils/utils';
 import Cookies from 'js-cookie';
 
 export async function printInvoice(finalData: Invoice, date?: string) {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // Open window synchronously BEFORE any awaits (only for iOS)
+  const iosWindow = isIOS ? window.open('', '_blank') : null;
+
   const storeName = decodeURIComponent(Cookies.get('currentStore') || 'NS');
 
   const invoiceDate = date
@@ -124,5 +128,20 @@ export async function printInvoice(finalData: Invoice, date?: string) {
     document.body.removeChild(container);
   }
 
-  window.open(pdf.output('bloburl'), '_blank');
+  // window.open(pdf.output('bloburl'), '_blank');
+  const blob = pdf.output('blob');
+  const url = URL.createObjectURL(blob);
+
+  if (isIOS && iosWindow) {
+    iosWindow.location.href = url; // redirect the already-open window
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${finalData.invoice_number}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

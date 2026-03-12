@@ -13,6 +13,7 @@ const POLL_INTERVAL = 1 * 60 * 1000;
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -23,12 +24,12 @@ export default function OrdersPage() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data) {
+    if (error) {
       toast.error('Failed to fetch orders.');
-      return;
     }
 
-    setOrders(data as Order[]);
+    setOrders((data as Order[]) || []);
+    setLoading(false);
   };
 
   // Initial load
@@ -53,6 +54,7 @@ export default function OrdersPage() {
         <MinOrderAmountInput />
         <OrdersTable
           orders={orders}
+          loading={loading}
           onOrderClick={(order) => {
             setSelectedOrder(order);
             setModalOpen(true);

@@ -28,6 +28,7 @@ const STATUS_OPTIONS = ['pending', 'processing', 'delivered', 'confirmed'];
 
 interface OrdersTableProps {
   orders: Order[];
+  loading: boolean;
   onOrderClick: (order: Order) => void;
   onOrdersUpdated: () => void;
 }
@@ -35,7 +36,8 @@ interface OrdersTableProps {
 export function OrdersTable({
   orders,
   onOrderClick,
-  onOrdersUpdated
+  onOrdersUpdated,
+  loading
 }: OrdersTableProps) {
   const [localOrders, setLocalOrders] = useState<Order[]>([]);
   const [originalOrders, setOriginalOrders] = useState<Order[]>([]);
@@ -93,7 +95,7 @@ export function OrdersTable({
     toast.success('Message copied');
   };
 
-  if (localOrders.length === 0) {
+  if (loading) {
     return (
       <div className='flex items-center justify-center py-8'>
         <p className='text-gray-600'>Loading orders...</p>
@@ -101,91 +103,108 @@ export function OrdersTable({
     );
   }
 
-  return (
-    <div className='flex flex-1 flex-col space-y-4'>
-      <div className='relative flex flex-1'>
-        <div className='absolute left-0 right-0 flex h-[60vh] overflow-scroll rounded-md border md:overflow-auto'>
-          <ScrollArea className='flex-1'>
-            <Table className='relative'>
-              <TableHeader className={`sticky top-0 z-10 bg-background`}>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Message</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {localOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className='text-sm text-gray-600'>
-                      {formatToPKTDate(order.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => onOrderClick(order)}
-                        className='cursor-pointer font-medium text-blue-600 hover:underline'
-                      >
-                        #{order.order_number}
-                      </button>
-                    </TableCell>
-                    <TableCell>{order.customer_name}</TableCell>
-                    <TableCell>Rs {order.total_price}</TableCell>
-                    <TableCell>
-                      <Select
-                        value={order.status}
-                        disabled={saving}
-                        onValueChange={(value) =>
-                          handleStatusChange(order.id, value)
-                        }
-                      >
-                        <SelectTrigger className='w-32'>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {STATUS_OPTIONS.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              <span className='capitalize'>{status}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      {order.message ? (
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => handleCopyMessage(order.message || '')}
-                          className='h-auto p-1'
-                        >
-                          <Copy className='h-4 w-4' />
-                        </Button>
-                      ) : (
-                        <span className='text-gray-400'>No message</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>{' '}
-            <ScrollBar orientation='horizontal' />
-          </ScrollArea>
-        </div>
-
-        {hasChanges && (
-          <div className='flex justify-end gap-2 border-t p-4'>
-            <Button variant='outline' onClick={handleCancel} disabled={saving}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              Save Changes
-            </Button>
-          </div>
-        )}
+  if (!loading && localOrders.length === 0) {
+    return (
+      <div className='flex items-center justify-center py-8'>
+        <p className='text-gray-600'>You Have No New Orders</p>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      <div className='flex flex-1 flex-col space-y-4'>
+        <div className='relative flex flex-1 flex-col'>
+          {/* add flex-col */}
+          <div className='flex h-[60vh] overflow-scroll rounded-md border md:overflow-auto'>
+            {/* remove absolute left-0 right-0 */}
+            <ScrollArea className='flex-1'>
+              <Table className='relative'>
+                <TableHeader className={`sticky top-0 z-10 bg-background`}>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Order #</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Message</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {localOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className='text-sm text-gray-600'>
+                        {formatToPKTDate(order.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => onOrderClick(order)}
+                          className='cursor-pointer font-medium text-blue-600 hover:underline'
+                        >
+                          #{order.order_number}
+                        </button>
+                      </TableCell>
+                      <TableCell>{order.customer_name}</TableCell>
+                      <TableCell>Rs {order.total_price}</TableCell>
+                      <TableCell>
+                        <Select
+                          value={order.status}
+                          disabled={saving}
+                          onValueChange={(value) =>
+                            handleStatusChange(order.id, value)
+                          }
+                        >
+                          <SelectTrigger className='w-32'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {STATUS_OPTIONS.map((status) => (
+                              <SelectItem key={status} value={status}>
+                                <span className='capitalize'>{status}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        {order.message ? (
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() =>
+                              handleCopyMessage(order.message || '')
+                            }
+                            className='h-auto p-1'
+                          >
+                            <Copy className='h-4 w-4' />
+                          </Button>
+                        ) : (
+                          <span className='text-gray-400'>No message</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>{' '}
+              <ScrollBar orientation='horizontal' />
+            </ScrollArea>
+          </div>
+          {hasChanges && (
+            <div className='flex justify-end gap-2 border-t p-4'>
+              <Button
+                variant='outline'
+                onClick={handleCancel}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                Save Changes
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
