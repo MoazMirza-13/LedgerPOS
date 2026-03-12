@@ -38,6 +38,7 @@ export function OrderDetailsModal({
   const [creatingInvoice, setCreatingInvoice] = useState(false);
 
   // remove this later
+  // test 2
 
   useEffect(() => {
     if (open && order) {
