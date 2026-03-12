@@ -76,7 +76,14 @@ export async function printInvoice(finalData: Invoice, date?: string) {
                     (item: any) => `
                     <tr class="border-b border-gray-200 hover:bg-gray-50">
                       <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                        ${item.product_code ? item.product.title : item.optional_item}
+                        ${
+                          // Priority: optional_item → description (stored on invoice item) → fetched product name/title → fallback
+                          item.optional_item ??
+                          item.description ??
+                          item.product?.name ??
+                          item.product?.title ??
+                          '—'
+                        }
                       </td>
                       <td class="px-4 py-3 text-sm text-gray-700 text-center">${item.quantity}</td>
                       <td class="px-4 py-3 text-sm text-gray-700 text-right">Rs. ${item.price}</td>

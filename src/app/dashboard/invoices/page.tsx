@@ -29,7 +29,7 @@ export default async function Page(props: pageProps) {
         title='Invoices'
         description='Manage invoices'
         type='invoices'
-        newLink='/dashboard/invoices/new'
+        // newLink='/dashboard/invoices/new'
         itemsData={items_data}
         searchParams={searchParams}
         pageKey={key}

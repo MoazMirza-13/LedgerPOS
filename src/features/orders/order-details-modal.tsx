@@ -37,9 +37,6 @@ export function OrderDetailsModal({
   const [loading, setLoading] = useState(false);
   const [creatingInvoice, setCreatingInvoice] = useState(false);
 
-  // remove this later
-  // test 2
-
   useEffect(() => {
     if (open && order) {
       const fetchOrderItems = async () => {

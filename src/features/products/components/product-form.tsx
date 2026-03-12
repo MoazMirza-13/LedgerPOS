@@ -81,7 +81,7 @@ export default function ProductForm({
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
     costPrice: initialData?.cost_price || 0,
     sellingPrice: initialData?.selling_price || 0,
-    productCode: initialData?.product_code || '',
+    // productCode: initialData?.product_code || '',
     productTitle: initialData?.title || '',
     minQuantity: initialData?.min_quantity || 0,
     quantity: initialData?.quantity || 0,
@@ -138,9 +138,9 @@ export default function ProductForm({
     productTitle: z.string().min(1, {
       message: 'Product Title is required'
     }),
-    productCode: z.string().min(1, {
-      message: 'Product Code is required'
-    }),
+    // productCode: z.string().min(1, {
+    //   message: 'Product Code is required'
+    // }),
     minQuantity: z.coerce.number(),
     quantity: z.coerce.number(),
     productVariants: z.array(z.string()).optional(),
@@ -391,7 +391,7 @@ export default function ProductForm({
                   </FormItem>
                 )}
               />
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name='productCode'
                 disabled={currentRole !== 'super_admin'}
@@ -404,7 +404,7 @@ export default function ProductForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               <RoleGate allow='super_admin'>
                 <FormField
                   control={form.control}

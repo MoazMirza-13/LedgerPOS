@@ -19,6 +19,7 @@ import { LoaderCircle, Trash2, Plus } from 'lucide-react';
 import {
   getMaxInvoiceNumber,
   getProductByCode,
+  getProductById,
   invoiceSubmit
 } from '@/lib/actions';
 import { Invoice } from 'types';
@@ -42,6 +43,7 @@ export default function InvoiceForm({
   const invoiceItemSchema = z.object({
     type: z.enum(['product', 'optional']).default('product'),
     product_code: z.string().optional().nullable(),
+    product_id: z.string().optional(),
     optional_item: z.string().optional().nullable(),
     quantity: z.coerce.number().min(1),
     price: z.coerce.number().min(1),
@@ -67,8 +69,9 @@ export default function InvoiceForm({
       invoice_items:
         initialData?.invoice_items?.map((item) => ({
           ...item,
-          type: item.product_code ? 'product' : 'optional',
-          product: undefined // will be loaded later
+          // determine type: optional_item present = optional, else product
+          type: item.optional_item ? 'optional' : 'product',
+          product: undefined // loaded async below
         })) || []
     }
   });
@@ -107,7 +110,7 @@ export default function InvoiceForm({
       const finalData = {
         ...values,
         total_price: totalPrice,
-        ...(newInvoiceNumber && { invoice_number: newInvoiceNumber }) // include only if defined
+        ...(newInvoiceNumber && { invoice_number: newInvoiceNumber })
       };
 
       const res = await invoiceSubmit(finalData, initialData);
@@ -139,14 +142,20 @@ export default function InvoiceForm({
     form.setValue(`invoice_items.${index}.product`, product);
   };
 
-  //! no use now
+  // Load products for existing invoice items using product_id
   useEffect(() => {
     const loadProductsForInitialData = async () => {
-      if (initialData && initialData.invoice_items) {
+      if (initialData?.invoice_items) {
         for (let i = 0; i < initialData.invoice_items.length; i++) {
-          const code = initialData.invoice_items[i].product_code;
-          if (!code) continue;
-          const product = await getProductByCode(code);
+          const item = initialData.invoice_items[i];
+
+          // Prefer product_id, fall back to product_code for legacy data
+          const product = item.product_id
+            ? await getProductById(item.product_id)
+            : item.product_code
+              ? await getProductByCode(item.product_code)
+              : null;
+
           if (product) {
             form.setValue(`invoice_items.${i}.product`, product);
           }
@@ -168,7 +177,7 @@ export default function InvoiceForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
-            {/* Customer Information */}
+            {/* Customer Information — always editable */}
             <div>
               <h2 className='mb-4 text-xl font-semibold text-foreground'>
                 Customer Information
@@ -215,58 +224,59 @@ export default function InvoiceForm({
                 />
               </div>
             </div>
-            {/* Invoice Items */}
+
+            {/* Invoice Items — read-only when editing */}
             <div className='grid'>
               <div className='mb-4 flex items-center justify-between'>
                 <h2 className='text-xl font-semibold text-foreground'>
                   Invoice Items
                 </h2>
 
-                <div className='flex flex-col gap-2 md:flex-row'>
-                  {/* Add Optional Item */}
-                  <Button
-                    type='button'
-                    disabled={!!initialData}
-                    onClick={() =>
-                      append({
-                        type: 'optional',
-                        optional_item: '',
-                        quantity: 1,
-                        price: 0
-                      })
-                    }
-                    variant='outline'
-                    className='gap-2'
-                  >
-                    <Plus className='h-4 w-4' />
-                    Add Optional Item
-                  </Button>
-                  {/* Add Product Item */}
-                  <Button
-                    type='button'
-                    disabled={!!initialData}
-                    onClick={() =>
-                      append({
-                        type: 'product',
-                        product_code: '',
-                        quantity: 0,
-                        price: 0
-                      })
-                    }
-                    className='gap-2'
-                  >
-                    <Plus className='h-4 w-4' />
-                    Add Item
-                  </Button>
-                </div>
+                {/* Only show add buttons when creating a new invoice */}
+                {!initialData && (
+                  <div className='flex flex-col gap-2 md:flex-row'>
+                    <Button
+                      type='button'
+                      onClick={() =>
+                        append({
+                          type: 'optional',
+                          optional_item: '',
+                          quantity: 1,
+                          price: 0
+                        })
+                      }
+                      variant='outline'
+                      className='gap-2'
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Optional Item
+                    </Button>
+                    <Button
+                      type='button'
+                      onClick={() =>
+                        append({
+                          type: 'product',
+                          product_code: '',
+                          quantity: 0,
+                          price: 0
+                        })
+                      }
+                      className='gap-2'
+                    >
+                      <Plus className='h-4 w-4' />
+                      Add Item
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className='overflow-x-auto rounded-lg border'>
+                {/* fieldset disabled locks all inputs inside when editing */}
                 <fieldset disabled={!!initialData}>
                   <table className='w-max lg:w-full'>
                     <thead>
                       <tr className='border-b bg-muted'>
-                        <th className='w-[20%]i px-4 py-3 text-left text-sm font-semibold'>
+                        <th className='px-4 py-3 text-left text-sm font-semibold'>
                           Product
                         </th>
                         <th className='px-4 py-3 text-center text-sm font-semibold'>
@@ -278,225 +288,203 @@ export default function InvoiceForm({
                         <th className='px-4 py-3 text-right text-sm font-semibold'>
                           Total
                         </th>
-                        <th className='px-4 py-3 text-center text-sm font-semibold'>
-                          Action
-                        </th>
+                        {!initialData && (
+                          <th className='px-4 py-3 text-center text-sm font-semibold'>
+                            Action
+                          </th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
-                      {fields.map((field, index) => (
-                        <tr
-                          key={field.id}
-                          className='border-b hover:bg-muted/50'
-                        >
-                          <td className={`flex gap-2 px-4 py-3`}>
-                            {items[index].type === 'product' && (
-                              <FormField
-                                control={control}
-                                name={`invoice_items.${index}.product_code`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        placeholder='Product Code'
-                                        {...field}
-                                        value={field.value ?? ''}
-                                        disabled={items[index].product}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleGetProduct(index);
-                                          }
-                                        }}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            )}
-                            {/* optional item field */}
-                            {items[index].type === 'optional' && (
-                              <FormField
-                                control={control}
-                                name={`invoice_items.${index}.optional_item`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormControl>
-                                      <Input
-                                        placeholder='Optional Item'
-                                        {...field}
-                                        value={field.value ?? ''}
-                                      />
-                                    </FormControl>
-                                  </FormItem>
-                                )}
-                              />
-                            )}
+                      {fields.map((field, index) => {
+                        const item = items[index];
+                        const isProductReady =
+                          item.type === 'product' &&
+                          (item.product || initialData);
+                        const isOptional = item.type === 'optional';
 
-                            {items[index].type === 'product' &&
-                              !items[index].product &&
-                              !initialData && (
-                                <Button
-                                  type='button'
-                                  onClick={() => handleGetProduct(index)}
-                                  className='px-2'
-                                >
-                                  GET
-                                </Button>
+                        return (
+                          <tr
+                            key={field.id}
+                            className='border-b hover:bg-muted/50'
+                          >
+                            {/* Product name / code cell */}
+                            <td className='flex gap-2 px-4 py-3'>
+                              {item.type === 'product' && (
+                                <>
+                                  {initialData ? (
+                                    // When editing: show description or product name read-only
+                                    <span className='py-1 text-sm'>
+                                      {item.product?.name ??
+                                        (
+                                          initialData.invoice_items[
+                                            index
+                                          ] as any
+                                        )?.description ??
+                                        item.product_code ??
+                                        '—'}
+                                    </span>
+                                  ) : (
+                                    <FormField
+                                      control={control}
+                                      name={`invoice_items.${index}.product_code`}
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormControl>
+                                            <Input
+                                              placeholder='Product Code'
+                                              {...field}
+                                              value={field.value ?? ''}
+                                              disabled={!!item.product}
+                                              onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                  e.preventDefault();
+                                                  handleGetProduct(index);
+                                                }
+                                              }}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  )}
+
+                                  {!initialData && !item.product && (
+                                    <Button
+                                      type='button'
+                                      onClick={() => handleGetProduct(index)}
+                                      className='px-2'
+                                    >
+                                      GET
+                                    </Button>
+                                  )}
+                                </>
                               )}
-                          </td>
 
-                          {(items[index].type === 'product' &&
-                            items[index].product) ||
-                          (initialData && items[index].type === 'product') ? (
-                            <>
-                              <td className='px-4 py-3'>
+                              {isOptional && (
                                 <FormField
                                   control={control}
-                                  name={`invoice_items.${index}.quantity`}
+                                  name={`invoice_items.${index}.optional_item`}
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormControl>
                                         <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-center'
+                                          placeholder='Optional Item'
                                           {...field}
-                                          value={
-                                            field.value === 0 ? '' : field.value
-                                          }
-                                          placeholder='Number of Pieces'
+                                          value={field.value ?? ''}
                                         />
                                       </FormControl>
                                     </FormItem>
                                   )}
                                 />
-                              </td>
-                              <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.price`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-right'
-                                          {...field}
-                                          value={
-                                            field.value === 0 ? '' : field.value
-                                          }
-                                          placeholder='Add Price'
-                                          onChange={(e) => {
-                                            const value = Number(
-                                              e.target.value
-                                            );
+                              )}
+                            </td>
 
-                                            if (
-                                              items[index].type === 'product'
-                                            ) {
-                                              const minPrice =
-                                                items[index].product
-                                                  ?.cost_price ?? 0;
-                                              field.onChange(
-                                                Math.max(value, minPrice)
-                                              );
-                                            } else {
-                                              field.onChange(value);
+                            {/* Quantity / Price / Total cells */}
+                            {isProductReady || isOptional ? (
+                              <>
+                                <td className='px-4 py-3'>
+                                  <FormField
+                                    control={control}
+                                    name={`invoice_items.${index}.quantity`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            type='number'
+                                            min='0'
+                                            className='text-center'
+                                            {...field}
+                                            value={
+                                              field.value === 0
+                                                ? ''
+                                                : field.value
                                             }
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </FormItem>
+                                            placeholder='Pieces'
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </td>
+                                <td className='px-4 py-3'>
+                                  <FormField
+                                    control={control}
+                                    name={`invoice_items.${index}.price`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormControl>
+                                          <Input
+                                            type='number'
+                                            min='0'
+                                            className='text-right'
+                                            {...field}
+                                            value={
+                                              field.value === 0
+                                                ? ''
+                                                : field.value
+                                            }
+                                            placeholder='Price'
+                                            onChange={(e) => {
+                                              const value = Number(
+                                                e.target.value
+                                              );
+                                              if (item.type === 'product') {
+                                                const minPrice =
+                                                  item.product?.cost_price ?? 0;
+                                                field.onChange(
+                                                  Math.max(value, minPrice)
+                                                );
+                                              } else {
+                                                field.onChange(value);
+                                              }
+                                            }}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </td>
+                                <td className='px-4 py-3 text-right font-semibold'>
+                                  {(item.quantity * item.price).toLocaleString(
+                                    undefined,
+                                    {
+                                      minimumFractionDigits: 0,
+                                      maximumFractionDigits: 2
+                                    }
                                   )}
-                                />
-                              </td>
-                              <td className='px-4 py-3 text-right font-semibold'>
-                                {/* $ */}
-                                {(
-                                  items[index].quantity * items[index].price
-                                ).toLocaleString(undefined, {
-                                  minimumFractionDigits: 0,
-                                  maximumFractionDigits: 2
-                                })}
-                              </td>
-                            </>
-                          ) : items[index].type === 'optional' ? (
-                            <>
-                              {/* OPTIONAL ITEM UI */}
-                              <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.quantity`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-center'
-                                          {...field}
-                                          placeholder='Quantity'
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
-                              </td>
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td />
+                                <td />
+                                <td />
+                              </>
+                            )}
 
-                              <td className='px-4 py-3'>
-                                <FormField
-                                  control={control}
-                                  name={`invoice_items.${index}.price`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormControl>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          className='text-right'
-                                          {...field}
-                                          placeholder='Price'
-                                        />
-                                      </FormControl>
-                                    </FormItem>
-                                  )}
-                                />
+                            {/* Action column — hidden when editing */}
+                            {!initialData && (
+                              <td className='px-4 py-3 text-center'>
+                                <button
+                                  type='button'
+                                  onClick={() => remove(index)}
+                                  className='cursor-pointer rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
+                                >
+                                  <Trash2 className='h-4 w-4' />
+                                </button>
                               </td>
-
-                              <td className='px-4 py-3 text-right font-semibold'>
-                                {(
-                                  items[index].quantity * items[index].price
-                                ).toLocaleString()}
-                              </td>
-                            </>
-                          ) : (
-                            <>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                            </>
-                          )}
-
-                          <td className='px-4 py-3 text-center'>
-                            <button
-                              type='button'
-                              onClick={() => remove(index)}
-                              // disabled={items.length === 1}
-                              className='cursor-pointer rounded p-2 text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50'
-                            >
-                              <Trash2 className='h-4 w-4' />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                            )}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </fieldset>
               </div>
             </div>
 
+            {/* Payment Status — always editable */}
             <FormField
               control={form.control}
               name='payment'
@@ -522,13 +510,12 @@ export default function InvoiceForm({
               )}
             />
 
-            {/* Summary Section */}
+            {/* Summary */}
             <div className='flex flex-col justify-end gap-4'>
               <div className='w-full space-y-4 rounded-lg bg-muted p-6 md:w-80'>
                 <div className='flex items-center justify-between'>
                   <span className='font-medium'>Subtotal:</span>
                   <span className='font-semibold'>
-                    {/* $ */}
                     {calculateTotal().toLocaleString(undefined, {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 2
@@ -539,7 +526,6 @@ export default function InvoiceForm({
                   <div className='flex items-center justify-between'>
                     <span className='text-lg font-bold'>Total:</span>
                     <span className='text-lg font-bold text-primary'>
-                      {/* $*/}
                       {calculateTotal().toLocaleString(undefined, {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 2
@@ -572,6 +558,7 @@ export default function InvoiceForm({
                   'Add Invoice'
                 )}
               </Button>
+
               {initialData && (
                 <Button
                   type='button'

@@ -79,7 +79,7 @@ export async function getUserSession() {
 export async function productSubmit(
   values: {
     productTitle: string;
-    productCode: string;
+    productCode?: string;
     category: string | null;
     brand: string | null;
     costPrice: number;
@@ -100,7 +100,7 @@ export async function productSubmit(
       const { error } = await supabase
         .from('products')
         .update({
-          product_code: values.productCode,
+          // product_code: values.productCode,
           title: values.productTitle,
           cost_price: values.costPrice,
           selling_price: values.sellingPrice,
@@ -125,7 +125,7 @@ export async function productSubmit(
         .from('products')
         .insert([
           {
-            product_code: values.productCode,
+            // product_code: values.productCode,
             title: values.productTitle,
             cost_price: values.costPrice,
             selling_price: values.sellingPrice,
@@ -226,6 +226,18 @@ export const getProductByCode = async (code: string) => {
     .from('products')
     .select('*')
     .eq('product_code', code)
+    .single();
+
+  if (error) return null;
+  return data;
+};
+
+export const getProductById = async (id: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
     .single();
 
   if (error) return null;
