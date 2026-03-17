@@ -18,8 +18,34 @@ export async function fetchListingDataShared(
   id?: string,
   filters?: ListingFilters
 ) {
+  const normalizeArray = (value?: string | null) =>
+    value
+      ? value
+          .split('.')
+          .map((v) => v.trim().toLowerCase())
+          .filter(Boolean)
+      : [];
+
+  const applyRelationFilter = (
+    query: any,
+    table: string,
+    column: string,
+    values: string[]
+  ) => {
+    if (!values.length) return query;
+
+    const conditions = values.map((v) => `${column}.ilike.${v}*`).join(',');
+
+    return query.or(conditions, { foreignTable: table });
+  };
+
+  const categories = normalizeArray(filters?.categories);
+  const brands = normalizeArray(filters?.brands);
+  const warehouses = normalizeArray(filters?.warehouses);
+
   let selectStr = '*';
-  if (type === 'products') selectStr = '*, categories (title), brands (title)';
+  if (type === 'products')
+    selectStr = '*, categories!inner (title), brands!inner (title)';
   else if (type === 'invoices') selectStr = '*, references (name)';
   else if (type === 'purchasing_invoices') selectStr = '*, suppliers (name)';
 
@@ -35,15 +61,7 @@ export async function fetchListingDataShared(
   if (id && type === 'suppliers_ledger') query = query.eq('supplier_id', id);
 
   const search = filters?.q?.trim() ?? '';
-  const categories = filters?.categories
-    ? filters.categories.split('.').filter(Boolean)
-    : [];
-  const brands = filters?.brands
-    ? filters.brands.split('.').filter(Boolean)
-    : [];
-  const warehouses = filters?.warehouses
-    ? filters.warehouses.split('.').filter(Boolean)
-    : [];
+
   const from = filters?.from?.trim() ?? '';
   const to = filters?.to?.trim() ?? '';
 
@@ -90,10 +108,10 @@ export async function fetchListingDataShared(
       : '';
 
     if (categories.length) {
-      query = query.in('categories.title', categories);
+      query = applyRelationFilter(query, 'categories', 'title', categories);
     }
     if (brands.length) {
-      query = query.in('brands.title', brands);
+      query = applyRelationFilter(query, 'brands', 'title', brands);
     }
 
     let warehouseOr = '';
