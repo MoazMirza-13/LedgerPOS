@@ -117,12 +117,12 @@ export async function fetchListingDataShared(
     let warehouseOr = '';
     if (warehouses.length) {
       const warehouseColumnMap: Record<string, string> = {
-        Zafarwal: 'quantity_in_zafarwal',
-        Ghaziwal: 'quantity_in_ghaziwal',
-        LhrRoad: 'quantity_in_lhr_road',
-        EidgahRoad: 'quantity_in_eidgah_road',
-        MandiTile: 'quantity_in_mandi_tile',
-        MandiBond: 'quantity_in_mandi_bond'
+        zafarwal: 'quantity_in_zafarwal',
+        ghaziwal: 'quantity_in_ghaziwal',
+        lhrroad: 'quantity_in_lhr_road',
+        eidgahroad: 'quantity_in_eidgah_road',
+        manditile: 'quantity_in_mandi_tile',
+        mandibond: 'quantity_in_mandi_bond'
       };
 
       const warehouseConditions = warehouses
