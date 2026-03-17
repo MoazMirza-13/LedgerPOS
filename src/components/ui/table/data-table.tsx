@@ -16,8 +16,9 @@ import {
 } from '@tanstack/react-table';
 import { usePathname } from 'next/navigation';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { cn } from '@/utils/utils';
+import { createClient } from '@/utils/supabase/client';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,15 +41,8 @@ export function DataTable<TData, TValue>({
 
   const pathname = usePathname();
   const productsRoute = pathname.includes('/products');
-
   const currentRole = useRole();
-
-  // show all warehouses total sum here i.e all six warehouses total stock prices
-  // const totalSum = productsRoute
-  //   ? table
-  //       .getRowModel()
-  //       .rows.reduce((acc, row) => acc + Number(row.getValue('TOTAL') || 0), 0)
-  //   : 0;
+  const supabase = createClient();
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +61,27 @@ export function DataTable<TData, TValue>({
     viewport.addEventListener('scroll', handleScroll);
     return () => viewport.removeEventListener('scroll', handleScroll);
   }, [onLoadMore]);
+
+  const [warehouseTotals, setWarehouseTotals] = useState<any[]>([]);
+  const [loadingTotals, setLoadingTotals] = useState(true);
+
+  useEffect(() => {
+    const fetchTotals = async () => {
+      const { data, error } = await supabase.rpc(
+        'get_total_cost_per_warehouse'
+      );
+
+      if (!error) {
+        setWarehouseTotals(data || []);
+      }
+
+      setLoadingTotals(false);
+    };
+
+    if (productsRoute) {
+      fetchTotals();
+    }
+  }, [productsRoute]);
 
   return (
     <>
@@ -174,10 +189,28 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
       </div>
-      {/* show all warehouses total sum here i.e all six warehouses total stock prices */}
-      {/* {productsRoute && (
-        <div className='text-right text-lg font-bold'>Total: {totalSum}</div>
-      )} */}
+
+      {productsRoute && currentRole === 'super_admin' && (
+        <div className='hidden flex-wrap gap-4 lg:flex'>
+          {loadingTotals ? (
+            // loading text if needed
+            <div></div>
+          ) : (
+            warehouseTotals.map((w, i) => (
+              <div
+                key={w.warehouse}
+                className={`text-right text-lg font-bold ${
+                  i < warehouseTotals.length - 1
+                    ? 'border-r border-gray-300 pr-4'
+                    : ''
+                }`}
+              >
+                {w.warehouse}: {w.total}
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </>
   );
 }
