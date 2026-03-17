@@ -10,12 +10,12 @@ export const navItems: NavItem[] = [
     isActive: false,
     group: 'Overview',
     items: [
-      {
-        title: 'Low Stock Products',
-        url: '/dashboard/overview/low-stock-products',
-        isActive: false,
-        group: 'Overview'
-      },
+      // {
+      //   title: 'Low Stock Products',
+      //   url: '/dashboard/overview/low-stock-products',
+      //   isActive: false,
+      //   group: 'Overview'
+      // },
       {
         title: 'Unpaid Invoices',
         url: '/dashboard/overview/unpaid-invoices',

@@ -517,7 +517,7 @@ export default function ProductForm({
               />
             </div>
             <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name='quantity'
                 disabled={currentRole !== 'super_admin'}
@@ -560,7 +560,7 @@ export default function ProductForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               {/* <FormField
                 control={form.control}
                 name='productVariants'

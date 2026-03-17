@@ -19,9 +19,9 @@ export default function page() {
             </div>
 
             <div className='flex min-h-[50vh] flex-col items-center justify-center gap-4'>
-              <Link href={`/dashboard/overview/low-stock-products`}>
+              {/* <Link href={`/dashboard/overview/low-stock-products`}>
                 <Button>View Low Stock Products</Button>
-              </Link>
+              </Link> */}
               <Link href={`/dashboard/overview/unpaid-invoices`}>
                 <Button>View Unpaid Invoices</Button>
               </Link>
