@@ -3,6 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import {
   Form,
   FormControl,
   FormField,
@@ -23,7 +30,13 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { productSubmit } from '@/lib/actions';
-import { LoaderCircle, X, Upload } from 'lucide-react';
+import {
+  Camera,
+  Image as ImageIcon,
+  LoaderCircle,
+  Upload,
+  X
+} from 'lucide-react';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { imageUpload, toastMsg } from '@/utils/utils';
 import { toast } from 'sonner';
@@ -33,8 +46,6 @@ import { useRef } from 'react';
 import RoleGate from '@/components/role-gate/RoleGateClient';
 import { useRole } from '@/context/RoleContext';
 import { Textarea } from '@/components/ui/textarea';
-import { ProductVariants } from './product-variants';
-import { Switch } from '@/components/ui/switch';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -168,7 +179,11 @@ export default function ProductForm({
     return slots;
   });
 
-  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const cameraInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const galleryInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [imageSourcePickerIndex, setImageSourcePickerIndex] = useState<
+    number | null
+  >(null);
 
   const handleIndividualImageUpload = (index: number, file: File) => {
     if (file && file.type.startsWith('image/')) {
@@ -196,8 +211,21 @@ export default function ProductForm({
     form.setValue('image', currentFiles, { shouldDirty: true });
   };
 
-  const handleIndividualImageReplace = (index: number) => {
-    fileInputRefs.current[index]?.click();
+  const handleImageSourceSelection = (
+    index: number,
+    source: 'camera' | 'gallery'
+  ) => {
+    const targetInput =
+      source === 'camera'
+        ? cameraInputRefs.current[index]
+        : galleryInputRefs.current[index];
+
+    setImageSourcePickerIndex(null);
+    targetInput?.click();
+  };
+
+  const openImageSourcePicker = (index: number) => {
+    setImageSourcePickerIndex(index);
   };
 
   const getImagePreviewUrl = (slot: string | File | null): string => {
@@ -242,6 +270,7 @@ export default function ProductForm({
 
       // submit fn
       const { image, ...cleanValues } = values; // not using `image` in submit fn anymore
+
       const res = await productSubmit(cleanValues, initialData, imgPaths);
       const entity = 'Product';
 
@@ -283,7 +312,22 @@ export default function ProductForm({
                             <Card key={index} className='relative aspect-[1.5]'>
                               <input
                                 ref={(el) => {
-                                  fileInputRefs.current[index] = el;
+                                  galleryInputRefs.current[index] = el;
+                                }}
+                                type='file'
+                                accept='image/*'
+                                className='hidden'
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleIndividualImageUpload(index, file);
+                                  e.target.value = '';
+                                }}
+                              />
+
+                              <input
+                                ref={(el) => {
+                                  cameraInputRefs.current[index] = el;
                                 }}
                                 type='file'
                                 accept='image/*'
@@ -293,6 +337,7 @@ export default function ProductForm({
                                   const file = e.target.files?.[0];
                                   if (file)
                                     handleIndividualImageUpload(index, file);
+                                  e.target.value = '';
                                 }}
                               />
 
@@ -316,7 +361,7 @@ export default function ProductForm({
                                         size='sm'
                                         variant='secondary'
                                         onClick={() =>
-                                          handleIndividualImageReplace(index)
+                                          openImageSourcePicker(index)
                                         }
                                       >
                                         <Upload className='h-4 w-4' />
@@ -352,7 +397,7 @@ export default function ProductForm({
                                   className='flex h-full cursor-pointer flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-gray-300 p-4 transition-colors hover:border-gray-400'
                                   onClick={() => {
                                     if (currentRole === 'super_admin')
-                                      fileInputRefs.current[index]?.click();
+                                      openImageSourcePicker(index);
                                   }}
                                 >
                                   <Upload className='mb-2 h-8 w-8 text-gray-400' />
@@ -371,6 +416,59 @@ export default function ProductForm({
                     </FormControl>
                     <FormMessage />
                   </FormItem>
+
+                  <Dialog
+                    open={imageSourcePickerIndex !== null}
+                    onOpenChange={(open) => {
+                      if (!open) setImageSourcePickerIndex(null);
+                    }}
+                  >
+                    <DialogContent className='sm:max-w-sm'>
+                      <DialogHeader>
+                        <DialogTitle>Select image source</DialogTitle>
+                        <DialogDescription>
+                          Choose whether you want to take a photo or pick one
+                          from the gallery.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className='grid gap-3'>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          className='h-auto justify-start gap-3 py-4'
+                          onClick={() => {
+                            if (imageSourcePickerIndex !== null) {
+                              handleImageSourceSelection(
+                                imageSourcePickerIndex,
+                                'camera'
+                              );
+                            }
+                          }}
+                        >
+                          <Camera className='h-5 w-5' />
+                          <span>Take photo</span>
+                        </Button>
+
+                        <Button
+                          type='button'
+                          variant='outline'
+                          className='h-auto justify-start gap-3 py-4'
+                          onClick={() => {
+                            if (imageSourcePickerIndex !== null) {
+                              handleImageSourceSelection(
+                                imageSourcePickerIndex,
+                                'gallery'
+                              );
+                            }
+                          }}
+                        >
+                          <ImageIcon className='h-5 w-5' />
+                          <span>Choose from gallery</span>
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
             />
