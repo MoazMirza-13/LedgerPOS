@@ -2,6 +2,14 @@ import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const updateSession = async (request: NextRequest) => {
+  const url = request.nextUrl;
+  if (
+    url.pathname === '/dashboard/products' &&
+    url.searchParams.get('updated') === 'true'
+  ) {
+    return NextResponse.next(); // skip middleware
+  }
+
   try {
     let response = NextResponse.next({
       request: {
