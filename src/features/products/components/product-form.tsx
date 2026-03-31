@@ -290,6 +290,7 @@ export default function ProductForm({
                                 type='file'
                                 accept='image/*'
                                 className='hidden'
+                                capture='environment'
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file)
