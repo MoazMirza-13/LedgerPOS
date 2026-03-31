@@ -210,29 +210,27 @@ export default function ProductForm({
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
       // Handle images - only upload new files, keep existing URLs
-      const imgPaths: string[] = [];
-      let hasImgError = false;
+      let imgPaths: string[] = [];
 
-      for (let i = 0; i < imageSlots.length; i++) {
-        const slot = imageSlots[i];
-        if (!slot) continue; // skip empty slots
+      try {
+        const results = await Promise.all(
+          imageSlots.map(async (slot) => {
+            if (!slot) return null; // skip empty slots
 
-        if (typeof slot === 'string') {
-          // Existing image URL, keep as is
-          imgPaths.push(slot);
-        } else if (slot instanceof File) {
-          // New file, upload it
-          const result = await imageUpload(slot, 'product_imgs');
-          if (typeof result === 'string') {
-            imgPaths.push(result);
-          } else {
-            hasImgError = true;
-            break;
-          }
-        }
-      }
+            if (typeof slot === 'string') return slot; // keep existing URL
 
-      if (hasImgError) {
+            if (slot instanceof File) {
+              const result = await imageUpload(slot, 'product_imgs');
+              if (typeof result === 'string') return result;
+              else throw new Error('Image upload failed');
+            }
+
+            return null;
+          })
+        );
+
+        imgPaths = results.filter((r): r is string => !!r); // remove nulls
+      } catch (err) {
         toast.error(toastMsg.imageUploadError);
         return;
       }
