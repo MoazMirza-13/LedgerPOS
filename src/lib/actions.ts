@@ -25,24 +25,6 @@ export async function signIn(credentials: { email: string; password: string }) {
     const { error } = await supabase.auth.signInWithPassword(credentials);
     if (error) throw error;
 
-    const { data, error: rpcError } = await supabase.rpc(
-      'current_user_role_and_tenant'
-    );
-    if (rpcError) throw rpcError;
-    if (!data || data.length === 0) {
-      throw new Error('data not found');
-    }
-
-    const { role, tenant_name } = data[0];
-
-    const cookieStore = await cookies();
-    cookieStore.set('currentRole', role ?? '', {
-      maxAge: 60 * 60 * 24 * 30 * 13
-    });
-    cookieStore.set('currentStore', tenant_name ?? '', {
-      maxAge: 60 * 60 * 24 * 30 * 13
-    });
-
     return { success: true };
   } catch (error: any) {
     return { error: error.message };

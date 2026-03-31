@@ -35,14 +35,29 @@ export const updateSession = async (request: NextRequest) => {
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
-    const currentRole = request.cookies.get('currentRole')?.value;
-    const currentStore = request.cookies.get('currentStore')?.value;
+    let currentRole = request.cookies.get('currentRole')?.value;
+    let currentStore = request.cookies.get('currentStore')?.value;
 
-    // invalid / missing role
     if (!user.error) {
       const { data } = await supabase.rpc('current_user_role_and_tenant');
       const userRole = data?.[0]?.role;
       const userStore = data?.[0]?.tenant_name;
+
+      if (!currentRole || !currentStore) {
+        // if its a first time req
+        response.cookies.set('currentRole', userRole, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30 * 13
+        });
+        response.cookies.set('currentStore', userStore, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 30 * 13
+        });
+
+        // Update local variables
+        currentRole = userRole;
+        currentStore = userStore;
+      }
 
       if (currentRole !== userRole) {
         await supabase.auth.signOut();
