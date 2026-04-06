@@ -1,51 +1,50 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { Check, X } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
 
-export function MinOrderAmountInput() {
-  const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
-  const [tempAmount, setTempAmount] = useState<string>(''); // need string state
+type AmountField = 'min_order' | 'delivery';
+
+interface TenantAmountInputProps {
+  field: AmountField;
+  label: string;
+  description: string;
+  initialValue: number;
+}
+
+const RPC_MAP: Record<AmountField, string> = {
+  min_order: 'update_tenant_min_order',
+  delivery: 'update_tenant_delivery'
+};
+
+const RPC_PARAM_MAP: Record<AmountField, string> = {
+  min_order: 'p_min_order',
+  delivery: 'p_delivery'
+};
+
+export function TenantAmountInput({
+  field,
+  label,
+  description,
+  initialValue
+}: TenantAmountInputProps) {
+  const [savedAmount, setSavedAmount] = useState<number>(initialValue);
+  const [tempAmount, setTempAmount] = useState<string>(String(initialValue));
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const currentRole = useRole();
 
-  // Fetch min_order on load
+  // Sync when parent finishes fetching (initialValue starts as 0, then updates)
   useEffect(() => {
-    fetchStoreMinOrder();
-  }, []);
-
-  const fetchStoreMinOrder = async () => {
-    try {
-      const supabase = createClient();
-
-      // Get tenant name from cookie using js-cookie
-      const encodedStoreName = Cookies.get('currentStore');
-      if (!encodedStoreName) throw new Error('Store cookie not found');
-
-      const storeName = decodeURIComponent(encodedStoreName);
-
-      // Query tenants table
-      const { data, error } = await supabase
-        .from('tenants')
-        .select('min_order')
-        .eq('name', storeName)
-        .single(); // only one row expected
-
-      if (error) throw error;
-
-      setMinOrderAmount(Number(data.min_order) || 0);
-      setTempAmount(String(data.min_order || 0));
-    } catch (error) {
-      toast.error('Failed to fetch store minimum order');
-    }
-  };
+    setSavedAmount(initialValue);
+    setTempAmount(String(initialValue));
+  }, [initialValue]);
 
   const handleCancel = () => {
-    setTempAmount(minOrderAmount.toString());
+    setTempAmount(savedAmount.toString());
     setEditing(false);
   };
 
@@ -65,33 +64,27 @@ export function MinOrderAmountInput() {
       setSaving(true);
       const supabase = createClient();
 
-      const { error } = await supabase.rpc('update_tenant_min_order', {
-        p_min_order: amountNumber
+      const { error } = await supabase.rpc(RPC_MAP[field], {
+        [RPC_PARAM_MAP[field]]: amountNumber
       });
 
       if (error) throw error;
 
-      setMinOrderAmount(amountNumber);
+      setSavedAmount(amountNumber);
       setEditing(false);
-      toast.success('Minimum order amount updated');
-    } catch (error) {
-      toast.error('Failed to update minimum order');
+      toast.success(`${label} updated`);
+    } catch {
+      toast.error(`Failed to update ${label.toLowerCase()}`);
     } finally {
       setSaving(false);
     }
   };
 
-  const currentRole = useRole();
-
   return (
     <div className='mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center'>
       <div className='flex-1'>
-        <label className='text-sm font-medium'>
-          Minimum Store Order Amount
-        </label>
-        <p className='mb-1 text-xs text-muted-foreground'>
-          The amount added here will be shown to users on mobile app
-        </p>
+        <label className='text-sm font-medium'>{label}</label>
+        <p className='mb-1 text-xs text-muted-foreground'>{description}</p>
 
         <div className='flex items-center gap-1'>
           <span className='font-medium'>Rs</span>
