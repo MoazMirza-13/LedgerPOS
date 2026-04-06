@@ -115,10 +115,10 @@ export const useColumns = <T extends Entity>(
       }
     );
     // if (currentRole === 'super_admin') {
-    baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
+    // baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
     // }
     baseColumns.push(
-      { accessorKey: 'selling_price', header: 'SELLING' }
+      { accessorKey: 'selling_price', header: 'PRICE' }
       // {
       //   header: 'QUANTITY',
       //   accessorKey: 'quantity'

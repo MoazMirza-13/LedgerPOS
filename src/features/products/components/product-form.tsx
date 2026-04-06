@@ -502,7 +502,7 @@ export default function ProductForm({
                   </FormItem>
                 )}
               /> */}
-              <RoleGate allow='super_admin'>
+              {/* <RoleGate allow='super_admin'>
                 <FormField
                   control={form.control}
                   name='costPrice'
@@ -525,14 +525,14 @@ export default function ProductForm({
                     </FormItem>
                   )}
                 />
-              </RoleGate>
+              </RoleGate> */}
               <FormField
                 control={form.control}
                 name='sellingPrice'
                 disabled={currentRole !== 'super_admin'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Selling Price</FormLabel>
+                    <FormLabel>Price</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
