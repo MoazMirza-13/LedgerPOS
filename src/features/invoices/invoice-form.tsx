@@ -485,7 +485,7 @@ export default function InvoiceForm({
             </div>
 
             {/* Payment Status — always editable */}
-            <FormField
+            {/* <FormField
               control={form.control}
               name='payment'
               render={({ field }) => (
@@ -508,7 +508,7 @@ export default function InvoiceForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             {/* Summary */}
             <div className='flex flex-col justify-end gap-4'>

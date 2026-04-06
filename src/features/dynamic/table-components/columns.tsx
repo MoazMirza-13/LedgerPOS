@@ -118,13 +118,13 @@ export const useColumns = <T extends Entity>(
     baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
     // }
     baseColumns.push(
-      { accessorKey: 'selling_price', header: 'SELLING' },
+      { accessorKey: 'selling_price', header: 'SELLING' }
       // {
       //   header: 'QUANTITY',
       //   accessorKey: 'quantity'
       // },
 
-//! old stock feature
+      //! old stock feature
       // {
       //   header: 'Stock',
       //   accessorFn: (row) => {
@@ -176,15 +176,15 @@ export const useColumns = <T extends Entity>(
       { accessorKey: 'customer_name', header: 'CUSTOMER NAME' },
       { accessorKey: 'customer_number', header: 'CUSTOMER PH. NO.' },
       { accessorKey: 'customer_address', header: 'CUSTOMER ADDRESS' },
-      { accessorKey: 'total_price', header: 'TOTAL' },
-      {
-        accessorKey: 'payment',
-        header: 'PAYMENT',
-        cell: ({ row }) => {
-          const invoice = row.original as Invoice;
-          return invoice.payment ? '✅' : '❌';
-        }
-      }
+      { accessorKey: 'total_price', header: 'TOTAL' }
+      // {
+      //   accessorKey: 'payment',
+      //   header: 'PAYMENT',
+      //   cell: ({ row }) => {
+      //     const invoice = row.original as Invoice;
+      //     return invoice.payment ? '✅' : '❌';
+      //   }
+      // }
     );
   }
 

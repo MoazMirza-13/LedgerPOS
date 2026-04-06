@@ -93,7 +93,8 @@ export const updateSession = async (request: NextRequest) => {
       currentRole === 'super_owner'
         ? 'super-user'
         : currentRole === 'super_admin'
-          ? 'overview'
+          ? // ? 'overview'
+            'products'
           : 'products';
 
     if (request.nextUrl.pathname === '/' && !user.error) {

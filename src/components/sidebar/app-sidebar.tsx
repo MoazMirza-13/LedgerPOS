@@ -38,12 +38,12 @@ export default function AppSidebar({ currentStore }: AppSidebarProps) {
         </div>
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
-        <RoleGate allow='super_admin'>
+        {/* <RoleGate allow='super_admin'>
           <SidebarGroupSection
             title='Overview'
             items={navItems.filter((item) => item.group === 'Overview')}
           />
-        </RoleGate>
+        </RoleGate> */}
         <RoleGate allow={['super_admin', 'admin']}>
           <SidebarGroupSection
             title='Stock Management'
