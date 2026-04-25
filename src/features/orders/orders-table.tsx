@@ -116,7 +116,7 @@ export function OrdersTable({
       <div className='flex flex-1 flex-col space-y-4'>
         <div className='relative flex flex-1 flex-col'>
           {/* add flex-col */}
-          <div className='flex h-[60vh] overflow-scroll rounded-md border md:overflow-auto'>
+          <div className='flex h-[55vh] max-w-[92vw] overflow-scroll rounded-md border md:overflow-auto lg:max-w-[100vw]'>
             {/* remove absolute left-0 right-0 */}
             <ScrollArea className='flex-1'>
               <Table className='relative'>
@@ -126,7 +126,7 @@ export function OrdersTable({
                     <TableHead>Order #</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className='text-center'>Status</TableHead>
                     <TableHead>Message</TableHead>
                   </TableRow>
                 </TableHeader>
