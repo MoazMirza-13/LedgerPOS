@@ -118,27 +118,27 @@ export const useColumns = <T extends Entity>(
     // baseColumns.push({ accessorKey: 'cost_price', header: 'COST' });
     // }
     baseColumns.push(
-      { accessorKey: 'selling_price', header: 'PRICE' }
+      { accessorKey: 'selling_price', header: 'PRICE' },
       // {
       //   header: 'QUANTITY',
       //   accessorKey: 'quantity'
       // },
 
-      //! old stock feature
-      // {
-      //   header: 'Stock',
-      //   accessorFn: (row) => {
-      //     const product = row as Product;
-      //     return product.in_stock ? '✅' : '❌';
-      //   }
+      {
+        header: 'Stock',
+        accessorFn: (row) => {
+          const product = row as Product;
+          return product.in_stock ? '✅' : '❌';
+        }
 
-      // {
-      //   header: 'Stock',
-      //   accessorFn: (row) => {
-      //     const product = row as Product;
-      //     return product.quantity > 0 ? '✅' : '❌';
-      //   }
-      // }
+        // stock using quantity
+        // {
+        //   header: 'Stock',
+        //   accessorFn: (row) => {
+        //     const product = row as Product;
+        //     return product.quantity > 0 ? '✅' : '❌';
+        //   }
+      }
     );
   }
 
