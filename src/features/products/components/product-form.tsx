@@ -46,7 +46,7 @@ import { useRef } from 'react';
 import RoleGate from '@/components/role-gate/RoleGateClient';
 import { useRole } from '@/context/RoleContext';
 import { Textarea } from '@/components/ui/textarea';
-import { ProductVariants } from './product-variants';
+import { Switch } from '@/components/ui/switch';
 
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [
@@ -671,7 +671,7 @@ export default function ProductForm({
                 )}
               /> */}
             </div>
-            {/* <FormField
+            <FormField
               control={form.control}
               name='inStock'
               render={({ field }) => (
@@ -695,7 +695,7 @@ export default function ProductForm({
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            />
             <FormField
               control={form.control}
               name='description'

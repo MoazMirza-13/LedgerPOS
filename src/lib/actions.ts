@@ -92,8 +92,7 @@ export async function productSubmit(
           quantity: values.quantity,
           img_url: imgPaths,
           variants: values.productVariants,
-          // in_stock: values.inStock,
-          in_stock: true,
+          in_stock: values.inStock,
           description: values.description
         })
         .eq('id', initialData.id)
@@ -117,8 +116,7 @@ export async function productSubmit(
             min_quantity: values.minQuantity,
             quantity: values.quantity,
             variants: values.productVariants,
-            // in_stock: values.inStock,
-            in_stock: true,
+            in_stock: values.inStock,
             description: values.description
           }
         ])
