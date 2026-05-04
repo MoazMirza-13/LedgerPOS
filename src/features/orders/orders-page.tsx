@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
@@ -12,7 +12,25 @@ import { Order } from 'types';
 
 const POLL_INTERVAL = 1 * 60 * 1000;
 
-export default function OrdersPage() {
+interface OrdersPageProps {
+  title: string;
+  description: string;
+  statuses: string[];
+  showTenantSettings: boolean;
+  emptyMessage: string;
+  showStatusColumn: boolean;
+  showMessageColumn: boolean;
+}
+
+export default function OrdersPage({
+  title,
+  description,
+  statuses,
+  showTenantSettings,
+  emptyMessage,
+  showStatusColumn,
+  showMessageColumn
+}: OrdersPageProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -20,17 +38,18 @@ export default function OrdersPage() {
   const [minOrder, setMinOrder] = useState<number>(0);
   const [delivery, setDelivery] = useState<number>(0);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('orders')
       .select('*')
+      .in('status', statuses)
       .order('created_at', { ascending: false });
 
     if (error) toast.error('Failed to fetch orders.');
     setOrders((data as Order[]) || []);
     setLoading(false);
-  };
+  }, [statuses]);
 
   const fetchTenantAmounts = async () => {
     try {
@@ -56,38 +75,45 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-    fetchTenantAmounts();
-  }, []);
+    if (showTenantSettings) fetchTenantAmounts();
+  }, [fetchOrders, showTenantSettings]);
 
   // Polling — only for keeping the UI table fresh
   useEffect(() => {
     const interval = setInterval(fetchOrders, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchOrders]);
 
   return (
     <main className='min-h-screen w-full'>
       <div className='py-4'>
         <div className='mb-8'>
-          <h1 className='text-3xl font-bold tracking-tight'>Orders</h1>
-          <p className='mb-4 text-sm text-muted-foreground'>Manage orders</p>
+          <h1 className='text-3xl font-bold tracking-tight'>{title}</h1>
+          <p className='mb-4 text-sm text-muted-foreground'>{description}</p>
           <Separator />
         </div>
-        <TenantAmountInput
-          field='min_order'
-          label='Minimum Store Order Amount'
-          description='The amount added here will be shown to users on mobile app'
-          initialValue={minOrder}
-        />
-        <TenantAmountInput
-          field='delivery'
-          label='Delivery Charge'
-          description='The delivery fee shown to users on the mobile app'
-          initialValue={delivery}
-        />
+        {showTenantSettings && (
+          <>
+            <TenantAmountInput
+              field='min_order'
+              label='Minimum Store Order Amount'
+              description='The amount added here will be shown to users on mobile app'
+              initialValue={minOrder}
+            />
+            <TenantAmountInput
+              field='delivery'
+              label='Delivery Charge'
+              description='The delivery fee shown to users on the mobile app'
+              initialValue={delivery}
+            />
+          </>
+        )}
         <OrdersTable
           orders={orders}
           loading={loading}
+          emptyMessage={emptyMessage}
+          showStatusColumn={showStatusColumn}
+          showMessageColumn={showMessageColumn}
           onOrderClick={(order) => {
             setSelectedOrder(order);
             setModalOpen(true);

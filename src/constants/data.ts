@@ -68,6 +68,15 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Orders History',
+    url: '/dashboard/orders-history',
+    icon: 'history',
+    shortcut: ['g', 'h'],
+    isActive: false,
+    group: 'Billing',
+    items: [] // No child items
+  },
+  {
     title: 'Invoices',
     url: '/dashboard/invoices',
     icon: 'invoice',
@@ -86,6 +95,16 @@ export const navItems: NavItem[] = [
     group: 'admin Billing',
     items: [] // No child items
   },
+  {
+    title: 'Orders History',
+    url: '/dashboard/orders-history',
+    icon: 'order',
+    shortcut: ['g', 'h'],
+    isActive: false,
+    group: 'admin Billing',
+    items: [] // No child items
+  },
+  // super user group
   {
     title: 'Super Dashboard',
     url: '/dashboard/super-user',

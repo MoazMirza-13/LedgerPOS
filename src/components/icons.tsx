@@ -35,7 +35,8 @@ import {
   BookOpenText,
   ReceiptText,
   ClipboardMinus,
-  Package
+  Package,
+  History
 } from 'lucide-react';
 
 export type Icon = LucideIcon;
@@ -50,6 +51,7 @@ export const Icons = {
   category: BookOpenText,
   invoice: ReceiptText,
   order: Package,
+  history: History,
   referenceBills: ClipboardMinus,
   spinner: Loader2,
   kanban: CircuitBoardIcon,

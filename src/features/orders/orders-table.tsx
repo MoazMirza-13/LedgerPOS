@@ -29,6 +29,9 @@ const STATUS_OPTIONS = ['pending', 'processing', 'delivered', 'confirmed'];
 interface OrdersTableProps {
   orders: Order[];
   loading: boolean;
+  emptyMessage?: string;
+  showStatusColumn?: boolean;
+  showMessageColumn?: boolean;
   onOrderClick: (order: Order) => void;
   onOrdersUpdated: () => void;
 }
@@ -37,6 +40,9 @@ export function OrdersTable({
   orders,
   onOrderClick,
   onOrdersUpdated,
+  emptyMessage = 'You Have No New Orders',
+  showStatusColumn = true,
+  showMessageColumn = true,
   loading
 }: OrdersTableProps) {
   const [localOrders, setLocalOrders] = useState<Order[]>([]);
@@ -106,7 +112,7 @@ export function OrdersTable({
   if (!loading && localOrders.length === 0) {
     return (
       <div className='flex items-center justify-center py-8'>
-        <p className='text-gray-600'>You Have No New Orders</p>
+        <p className='text-gray-600'>{emptyMessage}</p>
       </div>
     );
   }
@@ -126,8 +132,10 @@ export function OrdersTable({
                     <TableHead>Order #</TableHead>
                     <TableHead>Customer</TableHead>
                     <TableHead>Total</TableHead>
-                    <TableHead className='text-center'>Status</TableHead>
-                    <TableHead>Message</TableHead>
+                    {showStatusColumn && (
+                      <TableHead className='text-center'>Status</TableHead>
+                    )}
+                    {showMessageColumn && <TableHead>Message</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -146,42 +154,46 @@ export function OrdersTable({
                       </TableCell>
                       <TableCell>{order.customer_name}</TableCell>
                       <TableCell>Rs {order.total_price}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={order.status}
-                          disabled={saving}
-                          onValueChange={(value) =>
-                            handleStatusChange(order.id, value)
-                          }
-                        >
-                          <SelectTrigger className='w-32'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {STATUS_OPTIONS.map((status) => (
-                              <SelectItem key={status} value={status}>
-                                <span className='capitalize'>{status}</span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        {order.message ? (
-                          <Button
-                            variant='ghost'
-                            size='sm'
-                            onClick={() =>
-                              handleCopyMessage(order.message || '')
+                      {showStatusColumn && (
+                        <TableCell>
+                          <Select
+                            value={order.status}
+                            disabled={saving}
+                            onValueChange={(value) =>
+                              handleStatusChange(order.id, value)
                             }
-                            className='h-auto p-1'
                           >
-                            <Copy className='h-4 w-4' />
-                          </Button>
-                        ) : (
-                          <span className='text-gray-400'>No message</span>
-                        )}
-                      </TableCell>
+                            <SelectTrigger className='w-32'>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {STATUS_OPTIONS.map((status) => (
+                                <SelectItem key={status} value={status}>
+                                  <span className='capitalize'>{status}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      )}
+                      {showMessageColumn && (
+                        <TableCell>
+                          {order.message ? (
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              onClick={() =>
+                                handleCopyMessage(order.message || '')
+                              }
+                              className='h-auto p-1'
+                            >
+                              <Copy className='h-4 w-4' />
+                            </Button>
+                          ) : (
+                            <span className='text-gray-400'>No message</span>
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

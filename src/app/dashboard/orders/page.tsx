@@ -8,10 +8,20 @@ export const metadata: Metadata = {
   description: 'Admin panel for NS.'
 };
 
+const ACTIVE_ORDER_STATUSES = ['pending', 'processing'];
+
 export default async function Page() {
   return (
     <PageContainer>
-      <OrdersPage />
+      <OrdersPage
+        title='Orders'
+        description='Manage orders'
+        statuses={ACTIVE_ORDER_STATUSES}
+        showTenantSettings={true}
+        emptyMessage='You Have No New Orders'
+        showStatusColumn={true}
+        showMessageColumn={true}
+      />
     </PageContainer>
   );
 }
