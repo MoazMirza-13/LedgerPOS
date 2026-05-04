@@ -98,7 +98,7 @@ export default function ProductForm({
     minQuantity: initialData?.min_quantity || 0,
     quantity: initialData?.quantity || 0,
     productVariants: initialData?.variants || [],
-    inStock: initialData?.in_stock || false,
+    inStock: initialData?.in_stock || true,
     description: initialData?.description || ''
   };
 
