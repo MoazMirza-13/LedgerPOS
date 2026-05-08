@@ -2,8 +2,6 @@
 
 A modern, full-featured Point of Sale (POS) system built with cutting-edge web technologies. LedgerPOS is designed to streamline sales management, inventory tracking, and business operations with an intuitive and responsive interface.
 
-🌐 **Live Demo**: [https://ledgerpos.vercel.app](https://ledgerpos.vercel.app)
-
 ---
 
 ## Tech Stack
@@ -24,26 +22,9 @@ A modern, full-featured Point of Sale (POS) system built with cutting-edge web t
 - **React Dropzone** - File upload handling
 - **HTML2Canvas & jsPDF** - Document generation and export
 
-### Data Management & State
-- **Zustand** - Lightweight state management
-- **TanStack React Query** - Powerful server state management
-- **TanStack React Table** - Headless table library for data displays
-- **Zod** - TypeScript-first schema validation
-
 ### Backend & Database
 - **Supabase** - Open-source Firebase alternative with PostgreSQL
 - **Supabase-js SDK** - JavaScript client for Supabase
-
-### AI Integration
-- **OpenAI API** - Intelligent features powered by AI
-
-### Utilities & Tools
-- **date-fns & date-fns-tz** - Date manipulation and timezone handling
-- **Nuqs** - Next.js URL query state management
-- **kbar** - Command palette interface
-- **match-sorter** - Filtering and sorting library
-- **UUID** - Unique identifier generation
-- **next-themes** - Dark mode and theme management
 
 ### Development Tools
 - **ESLint** - Code linting and quality
@@ -58,24 +39,19 @@ A modern, full-featured Point of Sale (POS) system built with cutting-edge web t
 ✨ **Modern POS Dashboard**
 - Real-time sales tracking and analytics
 - Comprehensive dashboard with key business metrics
-- Interactive charts and visualizations with Recharts
 
 📊 **Inventory Management**
 - Track products and stock levels
-- Drag-and-drop interface for organizing items
-- Bulk operations and import/export capabilities
+- Manage your prodects by adding them in brands and categories
 
 💳 **Sales & Transactions**
 - Quick checkout process
-- Multiple payment method support
 - Receipt generation and printing (PDF export)
 - Transaction history and detailed receipts
 
 📈 **Analytics & Reporting**
 - Sales reports and insights
 - Revenue tracking and performance metrics
-- Data visualization and trend analysis
-- Export reports to PDF
 
 🔐 **User Authentication**
 - Secure authentication with Supabase
@@ -89,18 +65,28 @@ A modern, full-featured Point of Sale (POS) system built with cutting-edge web t
 - Smooth animations and transitions
 - Command palette for power users (Kbar)
 
-🤖 **AI-Powered Features**
-- Intelligent insights and recommendations
-- OpenAI integration for smart analytics
-
-🔄 **Drag & Drop Interface**
-- Intuitive drag-and-drop functionality using dnd-kit
-- Sortable lists and customizable layouts
-
 📱 **Mobile Responsive**
 - Works seamlessly on all devices
 - Touch-friendly interface
 - Optimized performance for mobile networks
+
+---
+
+## Project Screenshots
+**Inventory Managament**
+
+<img width="1800" height="999" alt="Screenshot 2026-05-08 at 11 25 34 PM" src="https://github.com/user-attachments/assets/2cafb982-b7b3-4948-8e92-e539701a08fa" />
+<br><br>
+
+**Create Invoice** 
+
+<img width="1800" height="999" alt="Screenshot 2026-05-08 at 11 25 42 PM" src="https://github.com/user-attachments/assets/b98abbf2-c448-48de-a394-3f7f006c4a8d" />
+<br><br>
+
+**Ledger Management**
+
+<img width="1800" height="999" alt="Screenshot 2026-05-08 at 11 25 53 PM" src="https://github.com/user-attachments/assets/76bb25b5-9c38-4bba-961b-97de79087b31" />
+
 
 ---
 
@@ -130,7 +116,6 @@ A modern, full-featured Point of Sale (POS) system built with cutting-edge web t
    ```bash
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   OPENAI_API_KEY=your_openai_api_key
    ```
 
 4. **Run the development server**
@@ -213,22 +198,6 @@ This project follows strict code quality standards:
 
 ---
 
-## License
-
-This project is private. All rights reserved.
-
----
-
-## Author
-
-**Moaz Mirza** - [@MoazMirza-13](https://github.com/MoazMirza-13)
-
----
-
 ## Support & Feedback
 
 For issues, feature requests, or questions, please open an issue on GitHub.
-
----
-
-**Built with ❤️ using modern web technologies**
