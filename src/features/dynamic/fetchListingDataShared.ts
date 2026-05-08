@@ -44,8 +44,7 @@ export async function fetchListingDataShared(
   const warehouses = normalizeArray(filters?.warehouses);
 
   let selectStr = '*';
-  if (type === 'products')
-    selectStr = '*, categories!inner (title), brands!inner (title)';
+  if (type === 'products') selectStr = '*, categories (title), brands (title)';
   else if (type === 'invoices') selectStr = '*, references (name)';
   else if (type === 'purchasing_invoices') selectStr = '*, suppliers (name)';
 
@@ -96,7 +95,7 @@ export async function fetchListingDataShared(
     } else if (type === 'references' || type === 'suppliers') {
       query = query.ilike('name', `%${search}%`);
     } else if (type === 'products') {
-      query = query.ilike('product_code', `%${search}%`);
+      // query = query.ilike('product_code', `%${search}%`);
     } else {
       query = query.ilike('title', `%${search}%`);
     }
