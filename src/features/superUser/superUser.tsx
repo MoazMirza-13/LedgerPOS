@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
 import { Plus, Search, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import { isValidPhone, toastMsg } from '@/utils/utils';
@@ -45,6 +46,7 @@ interface Store {
   phone_no: string;
   address: string;
   min_order: number;
+  active: boolean;
 }
 
 interface User {
@@ -59,13 +61,15 @@ interface StoreFormData {
   phone: string;
   address: string;
   minOrder: number | null;
+  active: boolean;
 }
 
 const INITIAL_STORE_FORM: StoreFormData = {
   name: '',
   phone: '',
   address: '',
-  minOrder: null
+  minOrder: null,
+  active: true
 };
 
 const INITIAL_USER_FORM = {
@@ -185,7 +189,8 @@ export default function SuperUserDashboard() {
       name: storeFormData.name.trim(),
       phone_no: storeFormData.phone.trim(),
       address: storeFormData.address.trim(),
-      min_order: storeFormData.minOrder
+      min_order: storeFormData.minOrder,
+      active: storeFormData.active
     };
 
     let error;
@@ -297,7 +302,8 @@ export default function SuperUserDashboard() {
       name: store.name,
       phone: store.phone_no,
       address: store.address,
-      minOrder: store.min_order
+      minOrder: store.min_order,
+      active: store.active
     });
     setOpenStoreDialog(true);
   };
@@ -420,6 +426,25 @@ export default function SuperUserDashboard() {
                         />
                       </div>
 
+                      <div className='flex items-center space-x-2'>
+                        <Switch
+                          id='active'
+                          checked={storeFormData.active}
+                          onCheckedChange={(checked) =>
+                            setStoreFormData({
+                              ...storeFormData,
+                              active: checked
+                            })
+                          }
+                        />
+                        <label
+                          htmlFor='active'
+                          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                        >
+                          Active Store
+                        </label>
+                      </div>
+
                       <div className='flex justify-end gap-2'>
                         <Button variant='outline' onClick={resetStoreDialog}>
                           Cancel
@@ -463,6 +488,7 @@ export default function SuperUserDashboard() {
                       <TableHead>Name</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Min Order</TableHead>
+                      <TableHead>Active</TableHead>
                       <TableHead>Address</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -470,7 +496,7 @@ export default function SuperUserDashboard() {
                     {filteredStores.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={4}
+                          colSpan={5}
                           className='py-6 text-center text-muted-foreground'
                         >
                           No stores found
@@ -493,6 +519,8 @@ export default function SuperUserDashboard() {
                           <TableCell className='font-medium'>
                             {store.min_order}
                           </TableCell>
+
+                          <TableCell>{store.active ? '✅' : '❌'}</TableCell>
 
                           <TableCell className='text-sm'>
                             {store.address}
