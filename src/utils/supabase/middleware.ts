@@ -50,6 +50,15 @@ export const updateSession = async (request: NextRequest) => {
       const { data } = await supabase.rpc('current_user_role_and_tenant');
       const userRole = data?.[0]?.role;
       const userStore = data?.[0]?.tenant_name;
+      const tenantStatus = data?.[0]?.tenant_active;
+
+      if (userRole !== 'super_owner' && tenantStatus === false) {
+        await supabase.auth.signOut();
+        const redirect = NextResponse.redirect(new URL('/', request.url));
+        redirect.cookies.delete('currentRole');
+        redirect.cookies.delete('currentStore');
+        return redirect;
+      }
 
       if (!currentRole || !currentStore) {
         // if its a first time req
