@@ -66,6 +66,7 @@ export async function productSubmit(
     brand: string | null;
     costPrice: number;
     sellingPrice: number;
+    discount: number;
     minQuantity: number;
     quantity: number;
     productVariants?: string[];
@@ -86,6 +87,7 @@ export async function productSubmit(
           title: values.productTitle,
           cost_price: values.costPrice,
           selling_price: values.sellingPrice,
+          discount: values.discount,
           category_id: values.category ? values.category : null,
           brand_id: values.brand ? values.brand : null,
           min_quantity: values.minQuantity,
@@ -110,6 +112,7 @@ export async function productSubmit(
             title: values.productTitle,
             cost_price: values.costPrice,
             selling_price: values.sellingPrice,
+            discount: values.discount,
             img_url: imgPaths,
             category_id: values.category ? values.category : null,
             brand_id: values.brand ? values.brand : null,

@@ -33,6 +33,7 @@ export type Product = {
   created_at: string;
   cost_price: number;
   selling_price: number;
+  discount: number;
   id: string;
   category_id: string;
   brand_id: string;

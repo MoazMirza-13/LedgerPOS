@@ -93,6 +93,7 @@ export default function ProductForm({
     brand: brand ? String(brandIdFromURL) : initialData?.brand_id || '',
     costPrice: initialData?.cost_price || 0,
     sellingPrice: initialData?.selling_price || 0,
+    discount: initialData?.discount || 0,
     // productCode: initialData?.product_code || '',
     productTitle: initialData?.title || '',
     minQuantity: initialData?.min_quantity || 0,
@@ -147,6 +148,7 @@ export default function ProductForm({
     brand: z.string().nullable(),
     costPrice: z.coerce.number(),
     sellingPrice: z.coerce.number(),
+    discount: z.coerce.number(),
     productTitle: z.string().min(1, {
       message: 'Product Title is required'
     }),
@@ -265,6 +267,11 @@ export default function ProductForm({
       }
 
       if (values.costPrice > values.sellingPrice) {
+        toast.error(toastMsg.error);
+        return;
+      }
+
+      if (values.discount > values.sellingPrice) {
         toast.error(toastMsg.error);
         return;
       }
@@ -539,6 +546,28 @@ export default function ProductForm({
                         type='number'
                         step='0'
                         placeholder='Enter selling price'
+                        {...field}
+                        value={
+                          field.value === 0 && !initialData ? '' : field.value
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name='discount'
+                disabled={currentRole !== 'super_admin'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{`Discounted Price (optional)`}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        step='0'
+                        placeholder='Enter discounted price'
                         {...field}
                         value={
                           field.value === 0 && !initialData ? '' : field.value
