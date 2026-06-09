@@ -90,6 +90,20 @@ A modern, full-featured Point of Sale (POS) system built with cutting-edge web t
 
 ---
 
+## Demo Credentials
+
+Use the following account to test the application:
+
+**Email:** `moazmirza13@gmail.com`
+
+**Password:** `asdasd`
+
+> ⚠️ Note:
+> * This is a shared test account.
+> * Data may change or be deleted at any time.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
