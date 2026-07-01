@@ -1,20 +1,12 @@
 'use client';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { Invoice } from 'types';
 import { formatToPKTDate } from '@/utils/utils';
+import { toast } from 'sonner';
 
 export async function printInvoice(finalData: Invoice, date?: string) {
-  let invoiceDate = '';
-  if (date) {
-    invoiceDate = formatToPKTDate(date);
-  } else {
-    invoiceDate = formatToPKTDate(new Date());
-  }
+  let invoiceDate = date ? formatToPKTDate(date) : formatToPKTDate(new Date());
 
-  const container = document.createElement('div');
-  container.className = 'w-full max-w-4xl mx-auto bg-white text-[12px]';
-  container.innerHTML = `
+  const printContent = `
   <div class="min-h-[1123px] flex flex-col justify-between bg-white text-[12px]">
 
     <!-- HEADER -->
@@ -87,7 +79,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
                 }
 
                 return `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50">
+                  <tr class="border-b border-gray-200">
                     <td class="px-4 py-3 text-sm font-medium text-gray-900">
                       ${item.product_code ? item.product_code : item.optional_item}
                     </td>
@@ -103,7 +95,6 @@ export async function printInvoice(finalData: Invoice, date?: string) {
               })
               .join('')}
           </tbody>
-
         </table>
       </div>
 
@@ -126,20 +117,64 @@ export async function printInvoice(finalData: Invoice, date?: string) {
     </div>
 
   </div>
-`;
+  `;
 
-  document.body.appendChild(container);
+  // Hidden iframe for printing
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.style.width = '0px';
+  iframe.style.height = '0px';
+  iframe.style.position = 'absolute';
+  document.body.appendChild(iframe);
 
-  // Convert to PDF
-  const canvas = await html2canvas(container, { scale: 2 });
-  const imgData = canvas.toDataURL('image/png');
-  const pdf = new jsPDF('p', 'pt', 'a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  const doc = iframe.contentWindow?.document;
+  if (!doc) {
+    toast.error('Failed to initialize print');
+    return;
+  }
 
-  pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
-  // pdf.autoPrint();
-  window.open(pdf.output('bloburl'), '_blank');
+  doc.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Invoice #${finalData.invoice_number}</title>
+      <style>
+        @media print {
+          @page { size: A4; margin: 0; }
+          body { margin: 0; padding: 0; }
+        }
+        body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+      </style>
+      <!-- Tailwind CDN -->
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script>
+        tailwind.config = {
+          content: [],
+          theme: { extend: {} }
+        }
+      </script>
+    </head>
+    <body>
+      ${printContent}
+      <script>
+        window.onload = () => {
+          setTimeout(() => window.print(), 500);
+        };
+      </script>
+    </body>
+    </html>
+  `);
 
-  document.body.removeChild(container);
+  doc.close();
+
+  // Cleanup
+  const cleanup = () => {
+    setTimeout(() => {
+      if (iframe.parentNode) document.body.removeChild(iframe);
+    }, 1500);
+  };
+
+  iframe.contentWindow?.addEventListener('afterprint', cleanup);
 }
