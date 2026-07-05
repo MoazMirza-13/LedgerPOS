@@ -34,7 +34,7 @@ export async function printInvoice(finalData: Invoice, date?: string) {
       </div>
 
       <!-- BILL TO -->
-      <div class="p-8 bg-gray-50 border-b border-gray-200">
+      <div class="p-4 bg-gray-50 border-b border-gray-200">
         <div>
           <h3 class="text-xs font-bold text-gray-600 tracking-widest mb-2">BILL TO</h3>
           <p class="text-sm text-gray-700 m-0"><strong>Customer Name:</strong> ${finalData.customer_name}</p>
@@ -44,17 +44,17 @@ export async function printInvoice(finalData: Invoice, date?: string) {
       </div>
 
       <!-- TABLE -->
-      <div class="p-8">
+      <div class="p-4">
         <table class="w-full">
           <thead>
             <tr class="bg-gray-100 border-b-2 border-gray-400">
-              <th class="px-4 py-4 text-left text-xs font-bold text-gray-900 tracking-wider">Product</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-gray-900 tracking-wider">Box</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-gray-900 tracking-wider">Piece</th>
-              <th class="px-4 py-4 text-center text-xs font-bold text-gray-900 tracking-wider">Total Quantity</th>
-              <th class="px-4 py-4 text-left text-xs font-bold text-gray-900 tracking-wider">Warehouse</th>
-              <th class="px-4 py-4 text-right text-xs font-bold text-gray-900 tracking-wider">Price</th>
-              <th class="px-4 py-4 text-right text-xs font-bold text-gray-900 tracking-wider">Total</th>
+              <th class="px-4 py-1 text-left text-xs font-bold text-gray-900 tracking-wider">Product</th>
+              <th class="px-4 py-1 text-center text-xs font-bold text-gray-900 tracking-wider">Box</th>
+              <th class="px-4 py-1 text-center text-xs font-bold text-gray-900 tracking-wider">Piece</th>
+              <th class="px-4 py-1 text-center text-xs font-bold text-gray-900 tracking-wider">Total Quantity</th>
+              <th class="px-4 py-1 text-left text-xs font-bold text-gray-900 tracking-wider">Warehouse</th>
+              <th class="px-4 py-1 text-right text-xs font-bold text-gray-900 tracking-wider">Price</th>
+              <th class="px-4 py-1 text-right text-xs font-bold text-gray-900 tracking-wider">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -80,17 +80,17 @@ export async function printInvoice(finalData: Invoice, date?: string) {
 
                 return `
                   <tr class="border-b border-gray-200">
-                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                    <td class="px-4 py-1 text-sm font-medium text-gray-900">
                       ${item.product_code ? item.product_code : item.optional_item}
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-700 text-center">
+                    <td class="px-4 py-1 text-sm text-gray-700 text-center">
                       ${item.product?.optional ? '' : item.boxes || ''}
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-700 text-center">${totalPieces}</td>
-                    <td class="px-4 py-3 text-sm text-gray-700 text-center">${totalQuantityDisplay}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${item.product_code ? item.warehouse : ''}</td>
-                    <td class="px-4 py-3 text-sm text-gray-700 text-right">Rs. ${item.price}</td>
-                    <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-right">Rs. ${totalPieces * item.price}</td>
+                    <td class="px-4 py-1 text-sm text-gray-700 text-center">${totalPieces}</td>
+                    <td class="px-4 py-1 text-sm text-gray-700 text-center">${totalQuantityDisplay}</td>
+                    <td class="px-4 py-1 text-sm text-gray-600">${item.product_code ? item.warehouse : ''}</td>
+                    <td class="px-4 py-1 text-sm text-gray-700 text-right">Rs. ${item.price}</td>
+                    <td class="px-4 py-1 text-sm font-semibold text-gray-900 text-right">Rs. ${totalPieces * item.price}</td>
                   </tr>`;
               })
               .join('')}
