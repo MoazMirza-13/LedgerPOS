@@ -845,6 +845,7 @@ export default function InvoiceForm({
                                       <FormControl>
                                         <Input
                                           type='number'
+                                          step='0.01'
                                           min='0'
                                           className='text-right'
                                           {...field}
