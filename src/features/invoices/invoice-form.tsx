@@ -119,55 +119,58 @@ export default function InvoiceForm({
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(async () => {
-      const seen = new Set<string>();
-      const duplicates: { code: string; warehouse: string }[] = [];
+      // key: `${product_code}_${warehouse}` -> item number of first occurrence
+      const seen = new Map<string, number>();
+      const errors: string[] = [];
 
-      for (const item of values.invoice_items) {
-        if (item.type === 'product') {
-          if (item.price < item.product?.cost_price) {
-            toast.error(toastMsg.error);
-            return;
-          }
+      values.invoice_items.forEach((item, index) => {
+        if (item.type !== 'product') return;
 
-          const key = `${item.product_code}_${item.warehouse}`;
-          if (seen.has(key)) {
-            duplicates.push({
-              code: item.product_code!,
-              warehouse: item.warehouse!
-            });
-          } else {
-            seen.add(key);
-          }
+        const itemNo = index + 1;
+        const code = item.product_code || '(no code)';
+
+        if (item.price < item.product?.cost_price) {
+          errors.push(
+            `Item #${itemNo} (${code}): price ${item.price} is less than cost price ${item.product.cost_price}`
+          );
         }
-      }
 
-      if (duplicates.length > 0) {
-        toast.error(toastMsg.error);
+        const key = `${item.product_code}_${item.warehouse}`;
+        const firstItemNo = seen.get(key);
+        if (firstItemNo) {
+          errors.push(
+            `Item #${itemNo} (${code}): duplicate of item #${firstItemNo} in warehouse "${item.warehouse}"`
+          );
+        } else {
+          seen.set(key, itemNo);
+        }
+      });
 
-        // console.log(
-        //   `Duplicate entries found:\n${duplicates
-        //     .map((d) => `Code "${d.code}" in Warehouse "${d.warehouse}"`)
-        //     .join('\n')}`
-        // );
+      if (errors.length > 0) {
+        errors.forEach((msg) => toast.error(msg));
         return;
       }
 
       const totalPrice = calculateTotal();
 
+      const maxInvoiceNumber = await getMaxInvoiceNumber('invoices');
+      if (maxInvoiceNumber === undefined) {
+        toast.error('Could not fetch the latest invoice number from server');
+        return;
+      }
+
       let newInvoiceNumber;
       if (initialData) {
-        // Editing existing invoice
-        const maxInvoiceNumber = await getMaxInvoiceNumber('invoices');
-
-        if (initialData.invoice_number !== maxInvoiceNumber) {
-          //only recent invoice is editable
-          toast.error(toastMsg.error);
+        // Editing existing invoice — only recent invoice is editable
+        if (Number(initialData.invoice_number) !== Number(maxInvoiceNumber)) {
+          toast.error(
+            `Invoice #${initialData.invoice_number} is not the latest invoice (latest is #${maxInvoiceNumber}). Only the latest invoice can be edited`
+          );
           return;
         }
       } else {
         // Creating new invoice
-        const maxInvoiceNumber = await getMaxInvoiceNumber('invoices');
-        newInvoiceNumber = maxInvoiceNumber + 1;
+        newInvoiceNumber = (maxInvoiceNumber ?? 0) + 1;
       }
 
       const finalData = {
@@ -184,7 +187,7 @@ export default function InvoiceForm({
         await printInvoice(finalData);
       } else if (res?.successUpdate)
         toast.success(toastMsg.dynamicUpdate(entity));
-      else if (res?.error) toast.error(toastMsg.error);
+      else if (res?.error) toast.error(res.error);
 
       if (!res?.error) {
         router.push(`/dashboard/invoices`);
@@ -252,7 +255,7 @@ export default function InvoiceForm({
                     setShowPasswordPopup(false);
                     handleSubmit(onSubmit)();
                   } else {
-                    toast.error(toastMsg.error);
+                    toast.error('Incorrect super admin password');
                   }
                 }}
               >

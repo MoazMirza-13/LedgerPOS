@@ -303,7 +303,13 @@ export const invoiceSubmit = async (
       return { successUpdate: true };
     }
   } catch (error: any) {
-    return { error };
+    // return the raw server message as a string so it survives serialization
+    return {
+      error:
+        [error?.message, error?.details, error?.hint]
+          .filter(Boolean)
+          .join(' — ') || 'Unknown server error'
+    };
   }
 };
 
